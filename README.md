@@ -52,7 +52,6 @@ $$
     \hat{P}(t) = \prod_{r: t_r \leq t \text{ and } L_r > t} \frac{N - r}{N - r + 1}.
 $$
 
-
 ### Hazard Function
 
 See https://en.wikipedia.org/wiki/Failure_rate.
@@ -102,7 +101,6 @@ where $t_i$ is the time when the event occurs for sample $X_i$. For censored sam
 
 One can procede as above, or use a refined maximum likelihood estimator, see https://en.wikipedia.org/wiki/Proportional_hazards_model#Likelihood_when_there_exist_tied_times. Do we need this in our case? Depends on how detailed deaths are reported in the data. So have a look at the data.
 
-
 ### LASSO Regularization
 
 Since we have much more values per sample (roughly 20000) than samples, ordinary linear model would exploit their freedom to run into overfitting. We will therefore add another cost term to the loss function, namely the $\ell_1$ norm of the model coefficients via $\lambda |\beta|_1$ for a shrinkage parameter $\lambda > 0$. For the Cox Proportional Hazards Model this leads to the loss function
@@ -134,15 +132,19 @@ $$
 $$
 for some shrinkage paramter $\lambda > 0$, the loss function for model 1.
 
-### Data preparation
+## Data Generation
 
-"Regression models, including the Cox model, generally give more reliable results with normally-distributed variables." Hence, transform data to normally distributed data in adavance if necessary.
+### Schmitz et al. (2021)
+
+Normalized FPKM RNAseq values in $\log_2$ scale on https://gdc.cancer.gov/about-data/publications/DLBCL-2018.
+
+Info on RPKM/FPKM vs. TPM vs. count normalization methods on https://translational-medicine.biomedcentral.com/articles/10.1186/s12967-021-02936-w.
 
 ## Coding
 
 ### Model 1
 
-R package `zerosum` by Thorsten Rehberg probably implements all we need for model 1.
+R package `zerosum` by Thorsten Rehberg implements all we need for model 1.
 
 ## Data
 Data is about to be generated for the MMML project, it's not done, yet. 
