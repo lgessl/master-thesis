@@ -1,0 +1,24 @@
+{
+    "publication": {
+        "title": "Genetics and Pathogenesis of Diffuse Large B-Cell Lymphoma",
+        "author": "Schmitz et al.",
+        "year": 2018,
+        "doi": "10.1056/NEJMoa1801445",
+        "pubmed id": 29641966
+    },
+    "data": {
+        "website": "https://gdc.cancer.gov/about-data/publications/DLBCL-2018",
+        "disease type": "DLBCL",
+        "number of samples": 562,
+        "pheno data": {
+            "included in survival analysis": "234 of 562"
+        },
+        "expression data": {
+            "technology": "bulk RNAseq",
+            "number of genes": 25066,
+            "gene symbols": "HGNC",
+            "primary processing": "see Supplementary Appendix 1 @ https://api.gdc.cancer.gov/data/288619d2-a7b6-4ee3-aa27-ae2c77887b31, p. 6",
+            "normalization": "fpkm values in log2 scale"
+        }
+    }
+}
