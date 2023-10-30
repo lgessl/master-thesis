@@ -7,6 +7,8 @@ import pandas as pd
 import json
 import urllib.request
 import re
+import sys
+from ..split import split
 
 # where to store the data
 data_dir = "data/schmitz"
@@ -15,6 +17,8 @@ pheno_fname = os.path.join(data_dir, "pheno.csv")
 info_fname = os.path.join(data_dir, "info.json")
 
 clean = True # remove (raw) downloaded files
+training_prop = 0.66 # proportion of samples that will go into training data
+# set to None if you want no splitting into training and test at all
 
 # where to find the data
 expr_url = "https://api.gdc.cancer.gov/data/894155a9-b039-4d50-966c-997b0e2efbc2"
@@ -57,14 +61,15 @@ def main():
 
     # aesthetics
     pheno_df = pheno_df.rename(columns = lambda cname: re.sub(r"\s", "_", cname).lower())
+    pheno_df.set_index("dbgap_submitted_subject_id", inplace = True) # subject id as row names
+    expr_df.set_index("Gene", inplace = True) # hgnc gene ids as row names (index)
+    expr_df = expr_df.iloc[:, 2:] # remove other gene id rows
 
     print("\nChecking if expression and pheno data match")
     print("expression shape before harmonizing:", expr_df.shape)
     print("pheno shape before harmonizing:", pheno_df.shape)
-    pheno_in_expr_bool = pheno_df["dbgap_submitted_subject_id"].isin(expr_df.columns)
-    expr_in_pheno_bool = expr_df.columns.isin(pheno_df["dbgap_submitted_subject_id"])
-    pheno_df = pheno_df.loc[pheno_in_expr_bool]
-    expr_df.iloc[:, 3:] = expr_df.loc[:, expr_in_pheno_bool]
+    pheno_df = pheno_df.loc[expr_df.columns]
+    expr_df = expr_df.loc[:, pheno_df.index]
     print("expression shape after harmonizing:", expr_df.shape)
     print("pheno shape after harmonizing:", pheno_df.shape)
 
@@ -108,8 +113,20 @@ def main():
         os.remove(pheno_download_fname)
         os.remove(expr_download_fname)
 
+    if training_prop is not None:
+        split(
+            expr_fname = expr_fname,
+            pheno_fname = pheno_fname,
+            training_prop = training_prop
+        )
+
     print("\nDone!")
 
 
 if __name__ == "__main__":
-    main()
+    # main()
+    split.split(
+        expr_fname = expr_fname,
+        pheno_fname = pheno_fname,
+        training_prop = training_prop
+    )
