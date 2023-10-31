@@ -8,7 +8,9 @@ import json
 import urllib.request
 import re
 import sys
-from ..split import split
+import numpy as np
+
+from split import split
 
 # where to store the data
 data_dir = "data/schmitz"
@@ -19,6 +21,7 @@ info_fname = os.path.join(data_dir, "info.json")
 clean = True # remove (raw) downloaded files
 training_prop = 0.66 # proportion of samples that will go into training data
 # set to None if you want no splitting into training and test at all
+np.random.seed(489572934)
 
 # where to find the data
 expr_url = "https://api.gdc.cancer.gov/data/894155a9-b039-4d50-966c-997b0e2efbc2"
@@ -113,7 +116,8 @@ def main():
         os.remove(pheno_download_fname)
         os.remove(expr_download_fname)
 
-    if training_prop is not None:
+    if training_prop:
+        print("\nSplitting into test and pheno data")
         split(
             expr_fname = expr_fname,
             pheno_fname = pheno_fname,
@@ -124,9 +128,4 @@ def main():
 
 
 if __name__ == "__main__":
-    # main()
-    split.split(
-        expr_fname = expr_fname,
-        pheno_fname = pheno_fname,
-        training_prop = training_prop
-    )
+    main()
