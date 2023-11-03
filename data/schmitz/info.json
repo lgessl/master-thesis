@@ -9,9 +9,9 @@
     "data": {
         "website": "https://gdc.cancer.gov/about-data/publications/DLBCL-2018",
         "disease type": "DLBCL",
-        "number of samples": 562,
+        "number of samples": 229,
         "pheno data": {
-            "included in survival analysis": "234 of 562"
+            "included in survival analysis": "229 of 229"
         },
         "expression data": {
             "technology": "bulk RNAseq",

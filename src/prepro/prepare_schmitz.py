@@ -18,9 +18,13 @@ expr_fname = os.path.join(data_dir, "expr.csv")
 pheno_fname = os.path.join(data_dir, "pheno.csv")
 info_fname = os.path.join(data_dir, "info.json")
 
-clean = True # remove (raw) downloaded files
-training_prop = 0.66 # proportion of samples that will go into training data
+# remove (raw) downloaded files
+clean = False
+# proportion of samples that will go into training data
 # set to None if you want no splitting into training and test at all
+training_prop = 0.66
+# Only retain patients with survival analysis
+only_with_survival_analysis = True
 np.random.seed(489572934)
 
 # where to find the data
@@ -62,8 +66,16 @@ def main():
         sheet_name = pheno_sheet_no
     )
 
-    # aesthetics
-    pheno_df = pheno_df.rename(columns = lambda cname: re.sub(r"\s", "_", cname).lower())
+    # Aesthetics
+    pheno_df.rename(columns = lambda cname: re.sub(r"\s", "_", cname).lower(), inplace = True)
+    # Rename the columns I need
+    pheno_df.rename(
+        columns = {
+            "progression_free_survival__pfs__status__0_no_progressoin__1_progression": "progression",
+            "progression_free_survival__pfs__time__yrs": "pfs_yrs"
+            },
+        inplace = True
+    )
     pheno_df.set_index("dbgap_submitted_subject_id", inplace = True) # subject id as row names
     expr_df.set_index("Gene", inplace = True) # hgnc gene ids as row names (index)
     expr_df = expr_df.iloc[:, 2:] # remove other gene id rows
@@ -72,9 +84,20 @@ def main():
     print("expression shape before harmonizing:", expr_df.shape)
     print("pheno shape before harmonizing:", pheno_df.shape)
     pheno_df = pheno_df.loc[expr_df.columns]
+    pheno_df.index.name = "patient_id"
     expr_df = expr_df.loc[:, pheno_df.index]
     print("expression shape after harmonizing:", expr_df.shape)
     print("pheno shape after harmonizing:", pheno_df.shape)
+
+    if only_with_survival_analysis:
+        print("\nRemoving samples without survival analyis")
+        pheno_df = pheno_df.loc[
+            (pheno_df["included_in_survival_analysis"] == "Yes") &
+            pheno_df["pfs_yrs"].notna()
+        ]
+        expr_df = expr_df.loc[:, pheno_df.index]
+        print("expression shape after removal:", expr_df.shape)
+        print("pheno shape after removal:", pheno_df.shape)
 
     print("\nGenerating info")
     info_dict = {
@@ -110,11 +133,6 @@ def main():
     expr_df.to_csv(expr_fname)
     print("...pheno data into " + pheno_fname)
     pheno_df.to_csv(pheno_fname)
-    
-    if clean:
-        print("\nRemoving downloaded raw files")
-        os.remove(pheno_download_fname)
-        os.remove(expr_download_fname)
 
     if training_prop:
         print("\nSplitting into test and pheno data")
@@ -123,6 +141,11 @@ def main():
             pheno_fname = pheno_fname,
             training_prop = training_prop
         )
+
+    if clean:
+        print("\nRemoving downloaded raw files")
+        os.remove(pheno_download_fname)
+        os.remove(expr_download_fname)
 
     print("\nDone!")
 

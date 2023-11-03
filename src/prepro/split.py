@@ -53,7 +53,8 @@ def split(
     # divide ...
     shuffle = np.random.choice(
         pheno_df.index, 
-        size = len(pheno_df.index)
+        size = len(pheno_df.index),
+        replace = False
         )
     div_idx = np.ceil(len(pheno_df.index) * training_prop).astype(int)
 
