@@ -72,7 +72,8 @@ def main():
     pheno_df.rename(
         columns = {
             "progression_free_survival__pfs__status__0_no_progressoin__1_progression": "progression",
-            "progression_free_survival__pfs__time__yrs": "pfs_yrs"
+            "progression_free_survival__pfs__time__yrs": "pfs_yrs",
+            "follow_up_time__yrs": "follow_up_yrs"
             },
         inplace = True
     )
