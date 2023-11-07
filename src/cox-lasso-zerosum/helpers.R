@@ -1,7 +1,7 @@
 # Some commonly used functions when fitting Cox proportional-hazards models
 # with LASSO and zero-sum constraint
 
-library(tidyverse)
+export("read_data", "prepare_data")
 
 read_data <- function(
     data_path,
@@ -9,8 +9,8 @@ read_data <- function(
 ){
     res <- list()
     for (expr_pheno in c("expr", "pheno")){
-        full_path <- file.path(data_path, dir, str_c(expr_pheno, ".csv"))
-        res[[expr_pheno]] <- read_csv(full_path)
+        full_path <- file.path(data_path, dir, stringr::str_c(expr_pheno, ".csv"))
+        res[[expr_pheno]] <- readr::read_csv(full_path)
     }
     return(res)
 }
@@ -22,12 +22,12 @@ prepare_data <- function(
     ){
     keep_idx <- which(pheno_df$follow_up_yrs >= 2)
     x <- expr_df %>% 
-        column_to_rownames(var = "Gene") %>% 
+        tibble::column_to_rownames(var = "Gene") %>% 
         as.matrix() %>% 
         t()
     y <- pheno_df %>%
-        column_to_rownames(var = "patient_id") %>%
-        select(
+        tibble::column_to_rownames(var = "patient_id") %>%
+        dplyr::select(
             pfs_yrs, 
             progression
             ) %>%
