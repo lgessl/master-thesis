@@ -1,6 +1,7 @@
 # Some commonly used functions when fitting Cox proportional-hazards models
 # with LASSO and zero-sum constraint
 
+import("dplyr") # for %>%
 export("read_data", "prepare_data")
 
 read_data <- function(
@@ -20,7 +21,7 @@ prepare_data <- function(
     pheno_df,
     follow_up = FALSE
     ){
-    keep_idx <- which(pheno_df$follow_up_yrs >= 2)
+    remove_idx <- which(pheno_df$follow_up_yrs <= 2 & (pheno_df$progression == 0))
     x <- expr_df %>% 
         tibble::column_to_rownames(var = "Gene") %>% 
         as.matrix() %>% 
@@ -35,10 +36,10 @@ prepare_data <- function(
     if (!all((rownames(x) == rownames(y))))
         stop("Sample names in expression and pheno data do not match!")
     if(follow_up){
-        cat("Removing patients with follow-up time <= 2 yrs.\n")
+        cat("Removing patients censored at less than 2 years.\n")
         cat("Number of patients before:", nrow(y), "\n")
-        y <- y[keep_idx,]
-        x <- x[keep_idx,]
+        y <- y[-remove_idx,]
+        x <- x[-remove_idx,]
         cat("Number of patients after removal:", nrow(y), "\n")
     }
     res <- list(
