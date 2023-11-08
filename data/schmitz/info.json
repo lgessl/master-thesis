@@ -11,7 +11,8 @@
         "disease type": "DLBCL",
         "number of samples": 229,
         "pheno data": {
-            "included in survival analysis": "229 of 229"
+            "included in survival analysis": 229,
+            "pfs_2.0yrs_known": 213
         },
         "expression data": {
             "technology": "bulk RNAseq",

@@ -71,7 +71,7 @@ def split(
     # craft new file names and write into file
     for tr_te in ["train", "test"]:
         target_dir = os.path.join(data_dir, tr_te)
-        print("Writing " + tr_te + "data into " + target_dir)
+        print(f"Writing {tr_te} data into {target_dir}")
         if not os.path.exists(target_dir):
             os.mkdir(target_dir)
         for ph_expr in ["pheno", "expr"]:

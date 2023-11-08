@@ -23,8 +23,11 @@ clean = False
 # proportion of samples that will go into training data
 # set to None if you want no splitting into training and test at all
 training_prop = 0.66
+# For how many patients can we determine pfs < pfs_cutoff? -> info.json
+pfs_cutoff = 2.
 # Only retain patients with survival analysis
 only_with_survival_analysis = True
+
 np.random.seed(489572934)
 
 # where to find the data
@@ -101,6 +104,9 @@ def main():
         print("pheno shape after removal:", pheno_df.shape)
 
     print("\nGenerating info")
+    # Do code-heavy stuff outside of dict
+    pfs_yrs_known = (pheno_df["pfs_yrs"] >= pfs_cutoff).sum() +\
+        ((pheno_df["pfs_yrs"] < pfs_cutoff) & (pheno_df["progression"] == 1.)).sum()
     info_dict = {
         "publication": {
             "title": "Genetics and Pathogenesis of Diffuse Large B-Cell Lymphoma",
@@ -114,7 +120,8 @@ def main():
             "disease type": "DLBCL",
             "number of samples": pheno_df.shape[0],
             "pheno data": {
-                "included in survival analysis": str((pheno_df["included_in_survival_analysis"] == "Yes").sum()) + " of " + str(pheno_df.shape[0])
+                "included in survival analysis": int((pheno_df["included_in_survival_analysis"] == "Yes").sum()),
+                f"pfs_{ pfs_cutoff }yrs_known": int(pfs_yrs_known)
             },
             "expression data": {
                 "technology": "bulk RNAseq",
