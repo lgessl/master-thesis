@@ -84,6 +84,15 @@ def main():
     expr_df.set_index("Gene", inplace = True) # hgnc gene ids as row names (index)
     expr_df = expr_df.iloc[:, 2:] # remove other gene id rows
 
+    # Bring IPI groups into numeric representation
+    ipi_mapper = {
+        "Low": 0,
+        "Intermediate": 1,
+        "High": 2,
+        "nan": np.nan
+    }
+    pheno_df["ipi_group"] = [ipi_mapper[level] for level in pheno_df["ipi_group"].astype(str)]
+
     print("\nChecking if expression and pheno data match")
     print("expression shape before harmonizing:", expr_df.shape)
     print("pheno shape before harmonizing:", pheno_df.shape)
