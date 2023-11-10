@@ -1,6 +1,8 @@
 # Apply zero-sum regression for LASSO-regularized Cox proportional hazards model 
 # on Schmitz DLBCL bulk RNAseq data
 
+library(zeroSum)
+
 io <- modules::use("src/helpers/io.R")
 assess <- modules::use("src/helpers/assess_model.R")
 
@@ -40,7 +42,7 @@ if(!file.exists(model_file)){
 te <- io$read_data(data_path, test_dir)
 te <- io$prepare_data(te$expr, te$pheno, with_follow_up = TRUE)
 # Positive class (pfs <= 2 yrs) belongs to high scores
-predicted <- stats::predict(fit, te$x)
+predicted <- predict(fit, te$x)
 # Higher labels belong to positive class (TRUE > FALSE)
 labels <- te$y[, "pfs_yrs"] <= 2
 assess$assess_model(
