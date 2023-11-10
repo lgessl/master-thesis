@@ -46,24 +46,26 @@ prepare_data <- function(
 
     # Removals
     # Prepare for loop
-    rm <- !logical(nrow(y))
-    for(i in 1:length(rm))
-    rm_bool <- c(with_follow_up, with_ipi)
-    rm_idx <- list(no_follow_up_idx, ipi_na_idx)
+    rm_what <- c(with_follow_up, with_ipi)
+    rm <- logical(nrow(y))
+    rm_bool <- list(no_follow_up_idx, ipi_na_idx)
     info <- c(
-        stringr::str_c("Removing patients censored at less than ", pfs_cutoff, " years.\n"),
-        "Removing patients with IPI group not available.\n"
+        stringr::str_c("Removing patients censored at less than ", pfs_cutoff, " years"),
+        "Removing patients with IPI group not available"
     )
-    for(i in 1:length(rm_bool)){
-        if(rm_bool[i]){
-            cat(info[i])
-            cat("Number of patients before removal:", nrow(y), "\n")
-            y <- y[-rm_idx[[i]],]
-            x <- x[-rm_idx[[i]],]
-            cat("Number of patients after removal:", nrow(y), "\n")
-            if(i < length(rm_bool)) cat("\n")
-        }
+    if(sum(rm_what) > 0){
+        cat("Removing samples with incomplete data\n")
+        cat("Starting with", sum(!rm), "samples\n")
     }
+    for(i in 1:length(rm_what)){
+        if(rm_what[i]){
+            cat(info[i], "\n")
+            rm <- rm | rm_bool[[i]]  
+            cat(sum(!rm), "samples remaining\n")
+        }    
+    }
+    x <- x[!rm,]
+    y <- y[!rm,]
 
     res <- list(
         "x" = x,
