@@ -71,10 +71,12 @@ def split(
     # craft new file names and write into file
     for tr_te in ["train", "test"]:
         target_dir = os.path.join(data_dir, tr_te)
-        print(f"Writing {tr_te} data into {target_dir}")
+        print(f"Writing {tr_te} data with shape into {target_dir}...")
         if not os.path.exists(target_dir):
             os.mkdir(target_dir)
         for ph_expr in ["pheno", "expr"]:
+            df = data[tr_te][ph_expr] 
             first, last = os.path.split(fnames[ph_expr])
             fname = os.path.join(first, tr_te, last)
-            data[tr_te][ph_expr].to_csv(fname)    
+            df.to_csv(fname)
+            print(f"...as {last} (shape {df.shape})")
