@@ -62,7 +62,7 @@ def split(
     data["train"] = dict()
     data["test"] = dict()
     training_samples = shuffle[:div_idx]
-    test_samples = shuffle[:div_idx]
+    test_samples = shuffle[div_idx:]
     data["train"]["expr"] = expr_df.loc[:, training_samples]
     data["train"]["pheno"] = pheno_df.loc[training_samples]
     data["test"]["expr"] = expr_df.loc[:, test_samples]
