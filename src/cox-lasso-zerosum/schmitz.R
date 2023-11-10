@@ -28,7 +28,7 @@ tr <- io$prepare_data(tr$expr, tr$pheno)
 if(!file.exists(model_file)){
     fit <- zeroSum::zeroSum(
         x = tr$x,
-        y = tr$y,
+        y = tr$y[, 1:2],
         family = "cox",
         alpha = 1
     )
