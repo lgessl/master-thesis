@@ -4,7 +4,7 @@
 library(zeroSum)
 
 io <- modules::use("src/helpers/io.R")
-assess <- modules::use("src/helpers/assess_model.R")
+assess <- modules::use("src/assess/assess_model.R")
 
 
 data_path <- "data/schmitz"
