@@ -5,13 +5,15 @@ import("dplyr") # for %>%
 export("read_data", "prepare_data")
 
 read_data <- function(
-    data_path,
-    dir
+    data_dir,
+    expr_fname = "expr.csv",
+    pheno_fname = "pheno.csv"
 ){
-    res <- list()
-    for (expr_pheno in c("expr", "pheno")){
-        full_path <- file.path(data_path, dir, stringr::str_c(expr_pheno, ".csv"))
-        res[[expr_pheno]] <- readr::read_csv(full_path)
+    fnames = c(expr_fname, pheno_fname)
+    res <- list("expr" = NULL, "pheno" = NULL)
+    for (i in 1:length(fnames)){
+        full_path <- file.path(data_dir, fnames[i])
+        res[[i]] <- readr::read_csv(full_path)
     }
     return(res)
 }

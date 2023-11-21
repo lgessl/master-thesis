@@ -82,6 +82,7 @@ def main():
     )
     pheno_df.set_index("dbgap_submitted_subject_id", inplace = True) # subject id as row names
     expr_df.set_index("Gene", inplace = True) # hgnc gene ids as row names (index)
+    expr_df.index.rename("gene_id", inplace = True)
     expr_df = expr_df.iloc[:, 2:] # remove other gene id rows
 
     # Bring IPI groups into numeric representation
