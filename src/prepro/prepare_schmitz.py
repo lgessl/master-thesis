@@ -75,7 +75,7 @@ def main():
     pheno_df.rename(
         columns = {
             "progression_free_survival__pfs__status__0_no_progressoin__1_progression": "progression",
-            "progression_free_survival__pfs__time__yrs": "pfs_yrs",
+            "progression_free_survival__pfs__time__yrs": "pfs_years",
             "follow_up_time__yrs": "follow_up_yrs"
             },
         inplace = True
@@ -107,7 +107,7 @@ def main():
         print("\nRemoving samples without survival analyis")
         pheno_df = pheno_df.loc[
             (pheno_df["included_in_survival_analysis"] == "Yes") &
-            pheno_df["pfs_yrs"].notna()
+            pheno_df["pfs_years"].notna()
         ]
         expr_df = expr_df.loc[:, pheno_df.index]
         print("expression shape after removal:", expr_df.shape)
@@ -115,8 +115,8 @@ def main():
 
     print("\nGenerating info")
     # Do code-heavy stuff outside of dict
-    pfs_yrs_known = (pheno_df["pfs_yrs"] >= pfs_cutoff).sum() +\
-        ((pheno_df["pfs_yrs"] < pfs_cutoff) & (pheno_df["progression"] == 1.)).sum()
+    pfs_years_known = (pheno_df["pfs_years"] >= pfs_cutoff).sum() +\
+        ((pheno_df["pfs_years"] < pfs_cutoff) & (pheno_df["progression"] == 1.)).sum()
     info_dict = {
         "publication": {
             "title": "Genetics and Pathogenesis of Diffuse Large B-Cell Lymphoma",
@@ -131,7 +131,7 @@ def main():
             "number of samples": pheno_df.shape[0],
             "pheno data": {
                 "included in survival analysis": int((pheno_df["included_in_survival_analysis"] == "Yes").sum()),
-                f"pfs_{ pfs_cutoff }yrs_known": int(pfs_yrs_known)
+                f"pfs_{ pfs_cutoff }years_known": int(pfs_years_known)
             },
             "expression data": {
                 "technology": "bulk RNAseq",
