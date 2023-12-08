@@ -128,7 +128,6 @@ readr::write_csv(expr_tbl, file.path(data_dir, "expr.csv"))
 saveRDS(data_spec, file.path(data_dir, "data_spec.rds"))
 jsonlite::write_json(info_list, file.path(data_dir, "info.json"), auto_unbox = TRUE, pretty = TRUE)
 
-cat("Splitting data\n")
 split_dataset(
     expr_tbl = expr_tbl,
     pheno_tbl = pheno_tbl,
