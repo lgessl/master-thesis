@@ -1,25 +1,30 @@
 {
-    "publication": {
-        "title": "Genetics and Pathogenesis of Diffuse Large B-Cell Lymphoma",
-        "author": "Schmitz et al.",
-        "year": 2018,
-        "doi": "10.1056/NEJMoa1801445",
-        "pubmed id": 29641966
+  "publication": {
+    "title": "Genetics and Pathogenesis of Diffuse Large B-Cell Lymphoma",
+    "author": "Schmitz et al.",
+    "year": 2018,
+    "doi": "10.1056/NEJMoa1801445",
+    "pubmed id": 29641966
+  },
+  "data": {
+    "website": "https://gdc.cancer.gov/about-data/publications/DLBCL-2018",
+    "disease type": "DLBCL",
+    "number of samples": 229,
+    "pheno data": {
+      "included in survival analysis": 229,
+      "pfs cutoff": 2,
+      "number high risk": 78,
+      "number low risk": 135,
+      "unknown": 16
     },
-    "data": {
-        "website": "https://gdc.cancer.gov/about-data/publications/DLBCL-2018",
-        "disease type": "DLBCL",
-        "number of samples": 229,
-        "pheno data": {
-            "included in survival analysis": 229,
-            "pfs_2.0yrs_known": 213
-        },
-        "expression data": {
-            "technology": "bulk RNAseq",
-            "number of genes": 25066,
-            "gene symbols": "HGNC",
-            "primary processing": "see Supplementary Appendix 1 @ https://api.gdc.cancer.gov/data/288619d2-a7b6-4ee3-aa27-ae2c77887b31, p. 6",
-            "normalization": "fpkm values in log2 scale"
-        }
+    "expression data": {
+      "technology": "bulk RNA-seq",
+      "platform": "Illumina HiSeq 2500|3000",
+      "read length": "100|150 paired-end",
+      "number of genes": 25066,
+      "gene symbols": "HGNC",
+      "primary processing": "see Supplementary Appendix 1 @ https://api.gdc.cancer.gov/data/288619d2-a7b6-4ee3-aa27-ae2c77887b31, p. 6",
+      "normalization": "fpkm values in log2 scale"
     }
+  }
 }
