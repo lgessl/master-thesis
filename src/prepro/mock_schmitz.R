@@ -5,10 +5,10 @@ library(lymphomaSurvivalPipeline)
 set.seed(48975)
 
 directory <- "data/schmitz"
-n_samples <- 50
+n_samples <- 30
 n_genes <- 10
-expr_fname <- "expr.csv"
-pheno_fname <- "pheno.csv"
+expr_fname <- "expr1.csv"
+pheno_fname <- "pheno1.csv"
 save_suffix <- "mock"
 directory_lsp <- "../lymphomaSurvivalPipeline/tests/testthat/data/schmitz"
 
