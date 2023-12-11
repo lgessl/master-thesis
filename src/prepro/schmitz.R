@@ -6,6 +6,8 @@
 
 library(lymphomaSurvivalPipeline)
 
+set.seed(234)
+
 data_dir <- "data/schmitz"
 clean <- FALSE
 only_with_survival_analyis <- TRUE
