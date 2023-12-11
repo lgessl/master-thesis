@@ -1,39 +1,24 @@
-# Prevalence versus precision for all models in one plot
+# Assess the models trained on Schmitz training data on the Schmitz test data
 
-cm <- modules::use("src/assess/compare_models.R")
+library(lymphomaSurvivalPipeline)
 
+source("src/train/model_spec.R") # model_spec_list
+source("src/assess/perf_plot_spec.R") # std_pps
 
-result_dir <- "results" # top-level result directory
-all_dir <- "all" # where to store results on all models in the above dir
-models <- c(
-    "cox-lasso-zerosum",
-    "ipi"
+model_spec_list <- prepend_to_save_dir(model_spec_list, "models/schmitz")
+data_spec <- readRDS("data/schmitz/test/data_spec.rds")
+
+compare_models(
+    model_spec_list = model_spec_list,
+    data_spec_list = list(data_spec),
+    perf_plot_spec = std_pps
 )
-dataset <- "schmitz"
-csv_fname <- "prev_vs_prec.csv"
-x_label <- "prevalence"
-y_label <- "precision"
-plt_title <- NULL
-show_plt <- TRUE
 
-plt_title <- cap
-plt_fname <- file.path(
-    result_dir,
-    all_dir,
-    stringr::str_replace(csv_fname, "csv", "pdf")
-    )
-# Generate all csv file names
-files <- character(length(models))
-names(files) <- models
-for(model in models){
-    files[model] <- file.path(result_dir, model, dataset, csv_fname)
-}
+data_spec <- readRDS("data/schmitz/train/data_spec.rds")
 
-cm$compare_models(
-    files,
-    plt_fname,
-    x_label = x_label,
-    y_label = y_label,
-    plt_title = plt_title,
-    show_plt = show_plt
+compare_models(
+    model_spec_list = model_spec_list,
+    data_spec_list = list(data_spec),
+    perf_plot_spec = std_pps,
+    model_tree_mirror = c("models", "models")
 )
