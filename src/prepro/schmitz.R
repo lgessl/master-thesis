@@ -25,7 +25,8 @@ expr_coltypes <- stringr::str_c("ccc", stringr::str_dup("d", 562))
 pheno_colnames_mapper <- c(
     patient_id = "dbGaP submitted subject ID",
     progression = "Progression_Free Survival _PFS_ Status_ 0 No Progressoin_ 1 Progression",
-    pfs_years = "Progression_Free Survival _PFS_ Time _yrs"
+    pfs_years = "Progression_Free Survival _PFS_ Time _yrs",
+    n_extranodal_sites = "Number of Extranodal Sites"
 )
 expr_colnames_mapper <- c(gene_id = "Gene")
 
@@ -73,11 +74,12 @@ data <- ensure_patients_match(expr_tbl, pheno_tbl)
 expr_tbl <- data$expr_tbl
 pheno_tbl <- data$pheno_tbl
 
-
 data_spec <- DataSpec(
     name = "Schmitz et al. (2018)",
     directory = data_dir
 )
+
+pheno_tbl <- discretize_ipi_features(pheno_tbl, data_spec)
 
 qc_preprocess(
     expr_tbl = expr_tbl,

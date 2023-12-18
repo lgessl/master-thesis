@@ -24,7 +24,7 @@ It incorporates
 
 as features.
 
-"These five features were used to design a model to predict an individual patient's risk of death -- the international index. Since the relative risks associated with each of the independently significant risk factors were comparable (Table 3), the relative risk of death could be characterized by summing the number of risk factors present at diagnosis. Risk groups were defined by comparing the relative risk of death in patients with each possible number of presenting risk factors (0, 1, 2, 3, 4, or 5) and combining categories with similar relative risks (e.g., 0 with 1 or 4 with 5). Patients were then assigned to one of four risk groups on the basis of their number of presenting risk factors: 0 or 1, low risk; 2, low intermediate risk; 3, high intermediate risk; or 4 or 5, high risk."
+"These five features were used to design a model to predict an individual patient's risk of death -- the international index. Since the relative risks associated with each of the independently significant risk factors were comparable (Table 3), the relative risk of death could be characterized by summing the number of risk factors present at diagnosis. Risk groups were defined by comparing the relative risk of death in patients with each possible number of presenting risk factors (0, 1, 2, 3, 4, or 5) and combining categories with similar relative risks (e.g., 0 with 1 or 4 with 5). Patients were then assigned to one of four risk groups on the basis of their number of presenting risk factors: 0 or 1, low risk; 2, low intermediate risk; 3, high intermediate risk; or 4 or 5, high risk."hhggGGG
 
 ##### [Revised International Prognostic Index (R-IPI)](https://www.sciencedirect.com/science/article/pii/S0006497120419056?via%3Dihub)
 
@@ -91,8 +91,6 @@ Given the probability space $(\mathbb{R}, \mathcal{L}(\mathbb{R}), \lambda_f)$ w
 - $\lambda$ being the Lebesgue measure on $\mathbb{R}$
 
 i.e. a density-defined real probability distribution, we define the hazard function of $f$ to be
-
-One can choose the intervals so small that there is at most one death event in every interval. In this case
 $$
     h(t) = \frac{f(t)}{1 - F(t)} = \frac{f(t)}{R(t)} \quad \text{for all } t \in \mathbb{R},
 $$
@@ -130,26 +128,24 @@ One can procede as above, or use a refined maximum likelihood estimator, see htt
 
 ### LASSO Regularization
 
-Since we have much more values per sample (roughly 20000) than samples, ordinary linear model would exploit their freedom to run into overfitting. We will therefore add another cost term to the loss function, namely the $\ell_1$ norm of the model coefficients via $\lambda |\beta|_1$ for a shrinkage parameter $\lambda > 0$. For the Cox Proportional Hazards Model this leads to the loss function
+Since we have much more values per sample (roughly 25000) than samples, ordinary linear model would exploit their vast freedom to run into overfitting. We will therefore add another cost term to the loss function, namely the $\ell_1$ norm of the model coefficients via $\lambda |\beta|_1$ for a shrinkage parameter $\lambda > 0$. For the Cox Proportional Hazards Model this leads to the loss function
 $$
     L(\beta) = \prod_{i: C_i = 1} \frac{\exp(X_i \beta)}{\sum_{t_j \geq t_i} \exp(X_j \beta)} + \lambda |\beta|_1.
 $$
 
 #### How to choose $\lambda$?
 
-1. We infer an optimal choice for the shrinkage parameter $\lambda$ with a cross validation on our training data. But: For every fold, we need some metric reflecting the goodness of the fit. ROC-AUC for pfs < 2 yrs? 
-2. Bayesian information criterion?
+We infer an optimal choice for the shrinkage parameter $\lambda$ with a cross validation on our training data. But: For every fold, we need some metric reflecting the goodness of the fit: partial deviance.
 
 ### Zero-Sum Regression
 
 The proportion of tumor RNA sequenced varies from bulk to bulk. Given a (non-logarithmized) bulk expression profile $\hat{X}_i$, the actual tumor bulk expression profile is $\gamma_i \hat{X}_i$ for some unknown $\gamma_i \in [0, 1]$. For a (now logarithmized) bulk expression profile $X_i = \log(\hat{X}_i)$, we have $\log(\gamma_i) + X_i$ for the tumor expression. To achieve $\gamma_i$-insensitivity, we modify the objective function into
 $$
     L(\beta) = \prod_{i: C_i = 1} \frac{\exp(X_i \beta)}{\sum_{t_j \geq t_i} \exp(X_j \beta)} \quad \text{subject to } \sum_i \beta_i = 0.
-$$   
+$$
 More in 
 - [Thorsten Rehberg's PhD thesis](documents/zerosum/thesis_thorsten.pdf),
-- [Rainer's lecture](documents/zerosum/lecture_rainer.pdf),
-- 
+- [Rainer's lecture](documents/zerosum/lecture_rainer.pdf).
 
 ### Loss Function for Model 1
 
@@ -177,6 +173,12 @@ R package `zerosum` by Thorsten Rehberg implements all we need for model 1.
 Data is about to be generated for the MMML project, it's not done, yet. 
 
 For now, we use available bulk RNAseq data by [Schmitz et al. (2018)](https://pubmed.ncbi.nlm.nih.gov/29641966/).
+
+# EGA
+
+- in negotiations
+
+# GEO
 
 ## Literature and links
 
