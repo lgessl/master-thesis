@@ -1,189 +1,130 @@
-# Machine-learning based identification of high-risk DLBCL patients
+# Beating the IPI for high-risk DLBCL patients
 
 Master thesis by Luks Gessl
 
 Kick-off for MMML predict project
 
-## Outline
+## Introduction: Setting the scene
 
-### Overall Project
+See [introduction](documents/writing/introduction.md).
 
-See [project slides](documents/project/slides.pdf). 
+## What this master thesis wants to do
 
-#### Benchmark
+We want to lay the groundwork for building a classifier that detects a group of high-risk DLBCL patients, i.e., progression-free survival (PFS) < 2 years, with 
 
-##### [International prognostic index (IPI) for non-Hodgkins lymphoma patients](https://www.nejm.org/doi/full/10.1056/NEJM199309303291402)
+1. PFS significantly differing from that of patients not in the group according to a logrank test,
+2. a precision whose 95% confidence interval excludes the IPI's precision of 65% (for PFS >= 2).
 
-It incorporates 
+Calculations on the sample-size scenarios of MMML-Predict, i.e.,
 
-- age (≤ 60 vs. >60 years), 
-- tumor stage (stage I or II [localized disease] vs. stage III or IV [advanced disease]), 
-- the number of extranodal sites of disease (≤ 1 vs. >1), 
-- performance status (0 or 1 vs. ≥ 2), 
-- and serum LDH level (≤ 1 times normal vs. >1 times normal)
+- n = 200 samples for training cohort,
+- n = 100 samples for the test cohort,
 
-as features.
+suggest that a proportion of 15% for the high-risk group with a PFS>=2 rate of less than 50%
 
-"These five features were used to design a model to predict an individual patient's risk of death -- the international index. Since the relative risks associated with each of the independently significant risk factors were comparable (Table 3), the relative risk of death could be characterized by summing the number of risk factors present at diagnosis. Risk groups were defined by comparing the relative risk of death in patients with each possible number of presenting risk factors (0, 1, 2, 3, 4, or 5) and combining categories with similar relative risks (e.g., 0 with 1 or 4 with 5). Patients were then assigned to one of four risk groups on the basis of their number of presenting risk factors: 0 or 1, low risk; 2, low intermediate risk; 3, high intermediate risk; or 4 or 5, high risk."hhggGGG
+1. boasts the desired power of at least 80% (namely even 94%) for the above logrank test,
+2. ensures the 95% CI for the precision does not include the IPI's 65% precision.
 
-##### [Revised International Prognostic Index (R-IPI)](https://www.sciencedirect.com/science/article/pii/S0006497120419056?via%3Dihub)
+## Methods
 
-Assign the above stages 0-5 into the three groups
+For an introduction into survival analysis and the basic machine-learning models we use see [general methods](documents/writing/general_methods.md).
 
-- very good (0),
-- good (1, 2) and
-- poor (3, 4, 5).
+### Choosing a classifier
 
-For DLBCL treated with R-CHOP chemotherapy, this gives three well separated groups for survival analyis (progression-free survival and overall survival).
+We split the data into a training and validation data set in the very beginning. 
 
+We fit models on the training data, 
 
-### My Contribution
+- including tuning the regularization parameter 
+- in a k-fold cross validation (usually k = 10)
+- according to the loss function we also use for fitting (e.g., binomial deviance, partial likelihood deviance), 
 
-Late integration, i.e. build some models first, possibly crunch them together in the end with a linear model.
-Rainer proposes to empower ever more-difficult classifiers, namely:
+and assess them on the validation data, including plotting
 
-1. Model 1. The Cox (proportional hazards) model with regularization (LASSO) and zero-sum regression fitted to maximum partial likelihood. This is actually more sophisticated than 2.
-2. Model 2. A generalized linear model with regularization for discretized outcomes (pfs <= 2 years), e.g. zero-sum regression, standard LASSO.
-3. Model 3. A classifier with an own objective function (and a suitable optimization algorithm).
+- precision versus rate of positive predictions in terms of 2-years-PFS,
+- p-values according to a logrank test for being in the detected high-risk group versus being not,
+- 95% CI for the precision
 
-## Theory
+for every possible cut-off value (all classifiers output scores we need to threshold). In the end, we choose the model together with a cut-off value that boasts "best overall performance" in the two above categories (logrank test, CI).  
 
-### Loss of follow-up
+### Building promising classifiers
 
-We want to get a hand on the distribution $F$ of survival times after treatment. The practical problem: Patients get lost in studies because, e.g.,
+We tend to integrate late.
 
-- the patient withdraws from the study,
-- the study ends before the patient dies,
-- the patient disappears.
+#### First-stage models
 
-Hence, in general we don't know an individual's survival time $T_i$, but only *observed* survival times $t_i = \min (T_i, L_i)$, where $L_i$ is the time when the follow-up was lost, called limit of observation. At least we know whether a patient was knocked out due to death or loss of follow-up.
+One the one hand, this includes fitting
 
-Let $t$ be fixed.
+- Cox proportional-hazards regression models,
+- binomial regression (preferred) models
 
-A simple approach to estimate $P(t) = 1 - F(t)$ would be a binomial estimate for those samples with $L_i \geq t$. Especially for large $t$ this would amount to discarding a large fraction of our valuable data. We can do better.
+both *with LASSO regularization and zero-sum constraint*, applied on bulk RNA-seq data (raw molecular data). Another exotic idea: first deconvolve the bulk expression profiles into cell-type proportions, then use them as input for one of the above models.
 
-[Kaplan and Meier (1958)](https://www.jstor.org/stable/pdf/2281868.pdf?refreqid=fastly-default%3A3fde7b928c0b03b03f90e2e83f39b4d9&ab_segments=&origin=&initiator=&acceptTC=1) did the following: Split up the time frame into intervals in such a way that
+On the other hand, we want to incorporate well-established molecular signatures such as 
 
-- either only death events
-- or only loss of follow-up events lie within one interval.
+- [Rosenwald et al. The use of molecular profiling to predict survival after chemotherapy for diffuse large-B-cell lymphoma (2002).](ttps://www.nejm.org/doi/full/10.1056/NEJMoa012914),
+- [Rosenwald et al. Prognostic Significance of MYC Rearrangement and Translocation Partner in Diffuse Large B-Cell Lymphoma: A Study by the Lunenburg Lymphoma Biomarker Consortium (2019)](https://ascopubs.org/doi/full/10.1200/JCO.19.00743),
+- [Schmitz et al. Genetics and Pathogenesis of Diffuse Large B-Cell Lymphoma (2018)](https://www.nejm.org/doi/10.1056/NEJMoa1801445),
+- [Chapuy et al. Molecular subtypes of diffuse large B cell lymphoma are associated with distinct pathogenic mechanisms and outcomes (2018)](https://www.nature.com/articles/s41591-018-0016-8),
+- [Staiger et al. A novel lymphoma-associated macrophage interaction signature (LAMIS) provides robust risk prognostication in diffuse large B-cell lymphoma clinical trial cohorts of the DSHNHL (2020)](https://www.nature.com/articles/s41375-019-0573-y),
+- [Masque-Soler et al. Molecular classification of mature aggressive B-cell lymphoma using digital multiplexed gene expression on formalin-fixed paraffin-embedded biopsy specimens (2013)](https://ashpublications.org/blood/article/122/11/1985/31885/Molecular-classification-of-mature-aggressive-B).
 
-For every interval $(u_{j-1}, u_j)$, we can now calculate the (conditional) probability $p_j$ that, given a patient has survived time $u_{j-1}$, they will also survive $u_j$ via
-$$
-    \hat{p}_j = \frac{n_j - \delta_j}{n_j} = \frac{n_j'}{n_j},
-$$
-where $n_j$ is the number of patients alive and under observation at time $u_{j-1}$ and $\delta_j$ is the number of death events in $(u_{j-1}, j)$. Exploiting the chain rule for conditional probabilities, this yields the estimate for $P(t)$
-$$
-    \hat{P}(t) = \prod_{j: u_j \leq t} \hat{p}_j = \prod_{j: u_j \leq t} \frac{n_j'}{n_j}.
-$$
-$$
-    \hat{P}(t) = \prod_{r: t_r \leq t \text{ and } L_r > t} \frac{N - r}{N - r + 1}.
-$$
+Other MMML-Predict contributors might deliver these signatures.
 
-### Hazard Function
+#### Second-stage models
 
-See https://en.wikipedia.org/wiki/Failure_rate.
+All of the above models yield a score, i.e., a continuous random variable we can again use as a predictor variable for another model. Moreover we can add features from the pheno data (such as the IPI features) and those features delivered by other MMML-Predict members to the predictor variables. Since now the number of features should be less than the number of samples, we no longer need to resort to regularization like with LASSO. Also, if existent, we should have addressed scaling problems in first-stage models, so we no longer need scale-invariance enforcing constraints like zero sum. Therefore, candidate models include
 
-Given the probability space $(\mathbb{R}, \mathcal{L}(\mathbb{R}), \lambda_f)$ with 
+- binomial regression (with no further constraints) as the most natural choice,
+- neural networks,
+- many more.
 
-- $\lambda_f(A) = \int_A f d\lambda$ 
-- for some Lebesgue-integrable $f: \mathbb{R} \to \mathbb{R}_{\geq 0}$ 
-- with $\int_\mathbb{R} f d\lambda = 1$ and
-- $\lambda$ being the Lebesgue measure on $\mathbb{R}$
+In the long term, we consider modifying the cost function to prefer potentially larger groups and restricting the parameter search during coordiante-descent optimization to implement the trade-off between a sufficiently-high risk and a sufficiently large group with this risk. 
 
-i.e. a density-defined real probability distribution, we define the hazard function of $f$ to be
-$$
-    h(t) = \frac{f(t)}{1 - F(t)} = \frac{f(t)}{R(t)} \quad \text{for all } t \in \mathbb{R},
-$$
-where $F: \mathbb{R} \to \mathbb{R}, t \mapsto \int_{-\infty}^t f(\tau) d\tau$, is the cumulative distribution function belonging to $f$ and $R(t) = 1 - F(t)$ for all $t \in \mathbb{R}$ is called the reliability function.
+## Data
 
-If $\lambda_f$ defines a discrete distribution with only finitely many outcomes, i.e., $f$ is a step function, then one often uses the letter $\lambda$ instead of $h$ for the hazard function. (But — at least here — we already need it for the Lebesgue measure.)
+The data gathered for the MMML-Predict project won't be available until 2025, so we need other sources.
 
-### How We Use Hazard Functions
+### Available at the moment
 
-$\lambda_f$ is the probability distribution of the **failure** of a **system** over **time**; a failure can only occur once over time. In our case, the system is a lymphoma patient and its failure is death. We're not interested in the distribution itself, but in the ratio of hazard functions between patients. Assuming proportional hazards, these ratios are constant.
+- Freely downloadable bulk RNA-seq data from [Schmitz et al. Genetics and Pathogenesis of Diffuse Large B-Cell Lymphoma (2018)](https://www.nejm.org/doi/10.1056/NEJMoa1801445), n = 229. For details see [info](data/schmitz/info.json).
 
-### The Cox Proportional Hazards Model
+### Wanted
 
-Original paper: https://www.jstor.org/stable/pdf/2985181.pdf?refreqid=fastly-default%3A5d5834de4e320736013b2ed1ab5b2297&ab_segments=&origin=&initiator=&acceptTC=1.
-
-See https://en.wikipedia.org/wiki/Survival_analysis, https://en.wikipedia.org/wiki/Proportional_hazards_model.
-
-Assume proportional hazards
-$$
-    \lambda(t|X_i) = \lambda_0(t) \exp\left( \beta X_i \right)
-$$
-for the covariates $X_i$ of sample $i$.
-
-#### Estimating $\beta$ for unique **times**
-
-Determine $\beta$ with the maximum-likelihood estimation
-$$
-    L(\beta) = \prod_{i: C_i = 1} \frac{\lambda(t_i|X_i)}{\sum_{t_j \geq t_i} \lambda(t_j|X_j)} = \prod_{i: C_i = 1} \frac{\exp(X_i \beta)}{\sum_{t_j \geq t_i} \exp(X_j \beta)} = \prod_{i: C_i = 1} \frac{\theta_i}{\sum_{t_j \geq t_i} \theta_j},
-$$
-where $t_i$ is the time when the event occurs for sample $X_i$. For censored samples, we formally set $t_i = \infty$. With this notation, $C_i = 1$ iff $t_i < \infty$. That means: When the event occurs for a sample, we want the hazard for this sample to be as high as possible compared to the other samples still in the race.
-
-#### Estimating $\beta$ for tied times
-
-One can procede as above, or use a refined maximum likelihood estimator, see https://en.wikipedia.org/wiki/Proportional_hazards_model#Likelihood_when_there_exist_tied_times. Do we need this in our case? Depends on how detailed deaths are reported in the data. So have a look at the data.
-
-### LASSO Regularization
-
-Since we have much more values per sample (roughly 25000) than samples, ordinary linear model would exploit their vast freedom to run into overfitting. We will therefore add another cost term to the loss function, namely the $\ell_1$ norm of the model coefficients via $\lambda |\beta|_1$ for a shrinkage parameter $\lambda > 0$. For the Cox Proportional Hazards Model this leads to the loss function
-$$
-    L(\beta) = \prod_{i: C_i = 1} \frac{\exp(X_i \beta)}{\sum_{t_j \geq t_i} \exp(X_j \beta)} + \lambda |\beta|_1.
-$$
-
-#### How to choose $\lambda$?
-
-We infer an optimal choice for the shrinkage parameter $\lambda$ with a cross validation on our training data. But: For every fold, we need some metric reflecting the goodness of the fit: partial deviance.
-
-### Zero-Sum Regression
-
-The proportion of tumor RNA sequenced varies from bulk to bulk. Given a (non-logarithmized) bulk expression profile $\hat{X}_i$, the actual tumor bulk expression profile is $\gamma_i \hat{X}_i$ for some unknown $\gamma_i \in [0, 1]$. For a (now logarithmized) bulk expression profile $X_i = \log(\hat{X}_i)$, we have $\log(\gamma_i) + X_i$ for the tumor expression. To achieve $\gamma_i$-insensitivity, we modify the objective function into
-$$
-    L(\beta) = \prod_{i: C_i = 1} \frac{\exp(X_i \beta)}{\sum_{t_j \geq t_i} \exp(X_j \beta)} \quad \text{subject to } \sum_i \beta_i = 0.
-$$
-More in 
-- [Thorsten Rehberg's PhD thesis](documents/zerosum/thesis_thorsten.pdf),
-- [Rainer's lecture](documents/zerosum/lecture_rainer.pdf).
-
-### Loss Function for Model 1
-
-Combining all of this yields
-$$
-    L(\beta) = \prod_{i: C_i = 1} \frac{\exp(X_i \beta)}{\sum_{t_j \geq t_i} \exp(X_j \beta)} + \lambda |\beta|_1 \quad \text{subject to } \sum_i \beta_i = 0
-$$
-for some shrinkage paramter $\lambda > 0$, the loss function for model 1.
-
-## Data Generation
-
-### Schmitz et al. (2021)
-
-Normalized FPKM RNAseq values in $\log_2$ scale on https://gdc.cancer.gov/about-data/publications/DLBCL-2018.
-
-Info on RPKM/FPKM vs. TPM vs. count normalization methods on https://translational-medicine.biomedcentral.com/articles/10.1186/s12967-021-02936-w.
+- Bulk RNA-seq data [EGAC00000000011](https://ega-archive.org/datasets/EGAD00001003783), n = 376. Access requested, need to submit more authentification data.
+- Bulk RNA-seq data [EGAD00001003600](https://ega-archive.org/datasets/EGAD00001003600), n = 775. Used by [Reddy et al. Genetic and Functional Drivers of Diffuse Large B Cell Lymphoma (2017)](https://www.sciencedirect.com/science/article/pii/S0092867417311212?via%3Dihub). Access requested, no answer yet. 
 
 ## Coding
 
-### Model 1
+### [`lymphomSurvivalPipeline`](https://github.com/lgessl/lymphomaSurvivalPipeline)
 
-R package `zerosum` by Thorsten Rehberg implements all we need for model 1.
+I outsourced all the reused and reusable code for
 
-## Data
-Data is about to be generated for the MMML project, it's not done, yet. 
+- preprocessing data (including splitting it into train and validation samples),
+- bringing it in shape for a certain model (for fitting as well as predicting, this includes adding pheno variables to the predictor matrix),
+- fitting models (including late integration by nesting multiple models) and
+- assessing models in plots and tables
 
-For now, we use available bulk RNAseq data by [Schmitz et al. (2018)](https://pubmed.ncbi.nlm.nih.gov/29641966/).
+into an R package called `lymphomaSurvivalPipeline` you can find on GitHub. Most importantly, the `lymphomaSurvivalPipeline` makes integrating new data and models into a running project easy.
 
-# EGA
+### This repo...
 
-- in negotiations
+... brings the `lymphomaSurvivalPipeline` into action.
 
-# GEO
+## Results
 
-## Literature and links
+### On Schmitz et al. (2018) data
 
-### Cox model
-- Proportional hazards model on Wikipedia: https://en.wikipedia.org/wiki/Proportional_hazards_model
-- YouTube
+IPI-defined high-risk group heavily depends on how we split data into training and validation samples. Study distrubtion of IPI scores in more detail. Strive for bigger data sets.
 
-### Similar publications
+#### Only Cox and binomial regression
+
+with LASSO and zero sum on RNA-seq data 
+
+1. is okay (AUC = 72%), but we need more. And, yet, there is a link between gene expression profile and survival outcome.
+2. Discretizing and training a binomial model always performs slightly better than Cox.
+3. Plenty of overfitting, model performance on left-out fold already fluctuates heavily.
+
+#### Cox and binomial regression on gene expression *and* pheno data
+
+This leads to even more overfitting. Therefore: discard and do late integration.
