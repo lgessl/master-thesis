@@ -30,7 +30,6 @@ pheno_colnames_mapper <- c(
 )
 expr_colnames_mapper <- c(gene_id = "Gene")
 
-
 expr_fname <- file.path(data_dir, "expr.tsv")
 pheno_fname <- file.path(data_dir, "pheno.xlsx")
 
@@ -76,7 +75,8 @@ pheno_tbl <- data$pheno_tbl
 
 data_spec <- DataSpec(
     name = "Schmitz et al. (2018)",
-    directory = data_dir
+    directory = data_dir,
+    train_prop = training_prop
 )
 
 pheno_tbl <- discretize_ipi_features(pheno_tbl, data_spec)
@@ -131,15 +131,6 @@ readr::write_csv(pheno_tbl, file.path(data_dir, "pheno.csv"))
 readr::write_csv(expr_tbl, file.path(data_dir, "expr.csv"))
 saveRDS(data_spec, file.path(data_dir, "data_spec.rds"))
 jsonlite::write_json(info_list, file.path(data_dir, "info.json"), auto_unbox = TRUE, pretty = TRUE)
-
-split_dataset(
-    expr_tbl = expr_tbl,
-    pheno_tbl = pheno_tbl,
-    data_spec = data_spec,
-    train_prop = .66,
-    pfs_cut = pfs_cut,
-    based_on_pfs_cut = TRUE
-)
 
 if(clean){
     cat("Removing downloaded files\n")

@@ -2,13 +2,14 @@
 
 std_pps <- PerfPlotSpec(
     fname = "the_best.pdf",
-    x_metric <- "rpp",
-    y_metric <- "prec",
-    pfs_leq <- 2.,
+    x_metric = "rpp",
+    y_metric = "prec",
+    pivot_time_cutoff = 2.,
+    xlim = c(0, .5),
     x_lab = "rate of positive predictions",
     y_lab = "precision",
     smooth_method = "loess",
-    smooth_benchmark = FALSE,
+    smooth_benchmark = TRUE,
     alpha = .25,
     colors = unicol::uni_regensburg_2[c(
         "glutrot",
@@ -16,6 +17,9 @@ std_pps <- PerfPlotSpec(
         "capriblau",
         "laerchennadelgruen",
         "eisvogelblau",
-        "blattgruen"
+        "blattgruen",
+        "spektralblau",
+        "urangelb",
+        "heucherarot"
     )] |> unname()
 )
