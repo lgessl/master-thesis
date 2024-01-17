@@ -5,15 +5,21 @@ library(lymphomaSurvivalPipeline)
 source("src/train/model_spec.R") # model_spec_list
 source("src/assess/perf_plot_spec.R") # std_pps
 
-model_spec_list <- prepend_to_save_dir(model_spec_list, "models/schmitz")
-std_pps$fname <- file.path("models/schmitz", std_pps$fname)
-
-ds_train <- readRDS("data/schmitz/train/data_spec.rds")
-ds_test <- readRDS("data/schmitz/test/data_spec.rds")
-
-assess_train_and_test(
-    model_spec_list = model_spec_list,
-    data_spec_train = ds_train,
-    data_spec_test = ds_test,
-    perf_plot_spec_train = std_pps
+msl_index <- list(1, 2)
+pps_fnames <- c(
+    "cox/0-vanilla/the_best.pdf",
+    "logistic/0-vanilla/the_best.pdf"
 )
+
+data_spec <- readRDS("data/schmitz/data_spec.rds")
+
+for(i in seq_along(msl_index)){
+    std_pps$fname <- file.path("models/schmitz", pps_fnames[i])
+    msl <- model_spec_list[msl_index[[i]]]
+    msl <- prepend_to_directory(msl, "models/schmitz")
+    assessment_center(
+        model_spec_list = msl,
+        data_spec = data_spec,
+        perf_plot_spec = std_pps
+    )
+}
