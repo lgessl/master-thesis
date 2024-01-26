@@ -9,17 +9,27 @@ cox_vanilla_zerosum = ModelSpec(
     name = "cox vanilla zerosum",
     directory = "cox/0-vanilla/zerosum",
     fitter = zeroSum::zeroSum,
-    split_index = 1:20,
-    time_cutoffs = seq(1, 2, .25),
+    split_index = 1:15, # 1:20
+    time_cutoffs = seq(1, 2, .25), # seq(1.5, 2, .25)
     optional_fitter_args = list(family = "cox", alpha = 1, zeroSum = FALSE),
+    response_type = "survival_censored"
+)
+cox_vanilla_std = ModelSpec(
+    name = "cox vanilla std",
+    directory = "cox/0-vanilla/std",
+    fitter = zeroSum::zeroSum,
+    split_index = 1:15,
+    time_cutoffs = seq(1, 2, .25),
+    optional_fitter_args = list(family = "cox", alpha = 1, zeroSum = FALSE,
+        standardize = TRUE),
     response_type = "survival_censored"
 )
 cox_vanilla_glmnet = ModelSpec(
     name = "cox vanilla glmnet",
     directory = "cox/0-vanilla/glmnet",
     fitter = glmnet::cv.glmnet,
-    split_index = 1:5,
-    time_cutoffs = seq(1.5, 2, .25),
+    split_index = 1:15,
+    time_cutoffs = seq(1.25, 2, .25),
     optional_fitter_args = list(family = "cox", alpha = 1),
     response_type = "survival_censored"
 )
@@ -28,8 +38,8 @@ cox_zerosum = ModelSpec(
     name = "cox zerosum",
     fitter = zeroSum::zeroSum,
     directory = "cox/1-zerosum",
-    split_index = 1:5,
-    time_cutoffs = seq(1.5, 2, .25),
+    split_index = 1:15,
+    time_cutoffs = seq(1, 2, .25), # seq(1.5, 2, .25)
     optional_fitter_args = list(family = "cox", alpha = 1),
     response_type = "survival_censored"
 )
@@ -39,17 +49,27 @@ logistic_vanilla_zerosum = ModelSpec(
     name = "logistic vanilla zerosum",
     directory = "logistic/0-vanilla/zerosum",
     fitter = zeroSum::zeroSum,
-    split_index = 1:20,
-    time_cutoffs = seq(1, 2, .25),
+    split_index = 1:15, # 1:20
+    time_cutoffs = seq(1, 2, .25), # seq(1.5, 2, .25)
     optional_fitter_args = list(family = "binomial", alpha = 1, zeroSum = FALSE),
+    response_type = "binary"
+)
+logistic_vanilla_std = ModelSpec(
+    name = "logistic vanilla std",
+    directory = "logistic/0-vanilla/std",
+    fitter = zeroSum::zeroSum,
+    split_index = 1:15,
+    time_cutoffs = seq(1, 2, .25),
+    optional_fitter_args = list(family = "binomial", alpha = 1, zeroSum = FALSE,
+        standardize = TRUE),
     response_type = "binary"
 )
 logistic_vanilla_glmnet = ModelSpec(
     name = "logistic vanilla glmnet",
     directory = "logistic/0-vanilla/glmnet",
     fitter = zeroSum::zeroSum,
-    split_index = 1:5,
-    time_cutoffs = seq(1.5, 2, .25),
+    split_index = 1:15,
+    time_cutoffs = seq(1.25, 2, .25),
     optional_fitter_args = list(family = "binomial", alpha = 1),
     response_type = "binary"
 )
@@ -57,9 +77,9 @@ logistic_vanilla_glmnet = ModelSpec(
 logistic_zerosum = ModelSpec(
     name = "logistic zerosum",
     directory = "logistic/1-zerosum",
-    fitter = zeroSum::zeroSum,
-    split_index = 1:5,
-    time_cutoffs = seq(1.5, 2, .25),
+    fitter = glmnet::cv.glmnet,
+    split_index = 1:15,
+    time_cutoffs = seq(1, 2, .25), # seq(1.5, 2, .25)
     optional_fitter_args = list(family = "binomial", alpha = 1),
     response_type = "binary"
 )
@@ -67,16 +87,18 @@ logistic_zerosum = ModelSpec(
 model_spec_list <- list(
     # COX
     # vanilla
-    cox_vanilla_zerosum,
-    # cox_vanilla_glmnet,
-    # # zerosum
-    cox_zerosum,
-    # # LOGISTIC
-    # # vanilla
-    logistic_vanilla_zerosum,
-    # logistic_vanilla_glmnet,
-    logistic_zerosum
-    # logistic_zerosum
+    cox_vanilla_zerosum = cox_vanilla_zerosum,
+    cox_vanilla_std = cox_vanilla_std,
+    cox_vanilla_glmnet = cox_vanilla_glmnet,
+    # zerosum
+    cox_zerosum = cox_zerosum,
+    # LOGISTIC
+    # vanilla
+    logistic_vanilla_zerosum = logistic_vanilla_zerosum,
+    logistic_vanilla_std = logistic_vanilla_std,
+    logistic_vanilla_glmnet= logistic_vanilla_glmnet,
+    # zerosum
+    logistic_zerosum = logistic_zerosum
 )
 
 
