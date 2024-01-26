@@ -1,6 +1,8 @@
 *.DS_Store
 *.RData
 *.Rhistory
+*.rda
 *.rds
 *.pdf
 *.csv
+*.jpeg
