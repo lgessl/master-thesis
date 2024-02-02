@@ -92,9 +92,18 @@ The data gathered for the MMML-Predict project won't be available until 2025, so
 ### Wanted
 
 - Bulk RNA-seq data [EGAC00000000011](https://ega-archive.org/datasets/EGAD00001003783), n = 376. Access requested, need to submit more authentification data.
-- Bulk RNA-seq data [EGAD00001003600](https://ega-archive.org/datasets/EGAD00001003600), n = 775. Used by [Reddy et al. Genetic and Functional Drivers of Diffuse Large B Cell Lymphoma (2017)](https://www.sciencedirect.com/science/article/pii/S0092867417311212?via%3Dihub). Access requested, no answer yet. 
+
+### Received, but not what I wanted
+
+- Bulk RNA-seq data [EGAD00001003600](https://ega-archive.org/datasets/EGAD00001003600), n = 775. Used by [Reddy et al. Genetic and Functional Drivers of Diffuse Large B Cell Lymphoma (2017)](https://www.sciencedirect.com/science/article/pii/S0092867417311212?via%3Dihub). Got access via Peter Oefner, but the pheno data only includes overall survival, no progression-free survival.
 
 ## Coding
+
+### Already available software
+
+1. `zeroSum` is the working horse. Without the zero-sum constraint it is considerably faster than with, and the results are only slightly worse; hece, `zeroSum` without zero-sum constraint is a perfect to try a new things, we can then train the best models again with zero sum.
+2. `glmnet` can do everything `zeroSum` can, but without zero-sum constraint. The documentation for `zeroSum` promises equivalent results for the case `zeroSum::zeroSum()` with parameters `zeroSum = FALSE`, `standardize = TRUE` and `glmnet::cv.glmnet()`. This is not entirely true, so we keep `glmnet` here to check `zeroSum`.
+
 
 ### [`lymphomSurvivalPipeline`](https://github.com/lgessl/lymphomaSurvivalPipeline)
 
@@ -102,10 +111,15 @@ I outsourced all the reused and reusable code for
 
 - preprocessing data (including splitting it into train and validation samples),
 - bringing it in shape for a certain model (for fitting as well as predicting, this includes adding pheno variables to the predictor matrix),
-- fitting models (including late integration by nesting multiple models) and
+- fitting models (including late integration by nesting multiple models (t.b.d)) and
 - assessing models in plots and tables
 
 into an R package called `lymphomaSurvivalPipeline` you can find on GitHub. Most importantly, the `lymphomaSurvivalPipeline` makes integrating new data and models into a running project easy.
+
+Now, the `lymphomaSurvivalPipeline` also enables
+
+- splitting the data into a training and test set multiple times and averaging accordingly in the assessment step,
+- censoring samples with time to event greater than a certain value at this value (Cox) and thresholding PFS for training differently than for assessing the fits.
 
 ### This repo...
 
@@ -113,18 +127,24 @@ into an R package called `lymphomaSurvivalPipeline` you can find on GitHub. Most
 
 ## Results
 
-### On Schmitz et al. (2018) data
+### Predicting survival with binomial, Cox regression only with RNAseq data works well
 
-IPI-defined high-risk group heavily depends on how we split data into training and validation samples. Study distrubtion of IPI scores in more detail. Strive for bigger data sets.
+In the key prevalence area, [15%, 20%],
 
-#### Only Cox and binomial regression
+1. the precision is better than that of the IPI (close to 75% for the best models),
+2. the logrank test gives p-values below .05, for the best models we get to 0.1%, and 
+3. the precision 95% CI interval for the best models does not contain 35.1% (2-years PFS of IPI 4-5 in pooled DSHNHL trials, n = 2721).
 
-with LASSO and zero sum on RNA-seq data 
+Censoring samples with time to event greater than t for t = 1.5, 1.75 at t or thresholding it according to this cutoff for binomial regression gives best results (in particual better than t = 2).
 
-1. is okay (AUC = 72%), but we need more. And, yet, there is a link between gene expression profile and survival outcome.
-2. Discretizing and training a binomial model always performs slightly better than Cox.
-3. Plenty of overfitting, model performance on left-out fold already fluctuates heavily.
+### Early integration of pheno data leads to overfitting
 
-#### Cox and binomial regression on gene expression *and* pheno data
+Early integrating the IPI features from the pheno data causes more overfitting, worse results on the test data. Discard this idea for now.
 
-This leads to even more overfitting. Therefore: discard and do late integration.
+## To do
+
+### Use sample-wise weights in cost function
+
+### Late integration
+
+Fork `zeroSum` package so *all* models fit during the cross validation are returned by `zeroSum::zeroSum()`. Maybe issue a pull request.
