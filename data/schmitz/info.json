@@ -12,10 +12,11 @@
     "number of samples": 229,
     "pheno data": {
       "included in survival analysis": 229,
-      "pfs cutoff": 2,
+      "pivot time cutoff": 2,
       "number high risk": 78,
       "number low risk": 135,
-      "unknown": 16
+      "unknown": 16,
+      "proportion high risk": 0.3662
     },
     "expression data": {
       "technology": "bulk RNA-seq",
@@ -25,6 +26,15 @@
       "gene symbols": "HGNC",
       "primary processing": "see Supplementary Appendix 1 @ https://api.gdc.cancer.gov/data/288619d2-a7b6-4ee3-aa27-ae2c77887b31, p. 6",
       "normalization": "fpkm values in log2 scale"
+    },
+    "benchmark": {
+      "benchmark": "ipi",
+      "reference": "https://www.nejm.org/doi/full/10.1056/NEJM199309303291402",
+      "performance": {
+        "ipi >=": [5, 4, 3, 2, 1, 0],
+        "rpp": [0.0112, 0.1292, 0.3483, 0.5899, 0.8539, 1],
+        "prec": [1, 0.6522, 0.5484, 0.4762, 0.4145, 0.3652]
+      }
     }
   }
 }

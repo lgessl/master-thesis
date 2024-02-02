@@ -12,7 +12,14 @@ data_dir <- "data/schmitz"
 clean <- FALSE
 only_with_survival_analyis <- TRUE
 training_prop <- 0.66 
-pfs_cut <- 2.
+pivot_time_cutoff <- 2
+time_to_event_col <- "pfs_years"
+event_col <- "progression"
+benchmark_col <- "ipi"
+ipi_feat_cols <- c("age", "ann_arbor_stage", "ldh_ratio", "ecog_performance_status", 
+    "n_extranodal_sites")
+ipi_cutoffs <- c(60, 2, 1, 1, 1)
+gl <- rep(">", 5)
 
 expr_url <- "https://api.gdc.cancer.gov/data/894155a9-b039-4d50-966c-997b0e2efbc2"
 expr_download_fname <- "expr.tsv"
@@ -76,10 +83,17 @@ pheno_tbl <- data$pheno_tbl
 data_spec <- DataSpec(
     name = "Schmitz et al. (2018)",
     directory = data_dir,
-    train_prop = training_prop
+    train_prop = training_prop,
+    pivot_time_cutoff = pivot_time_cutoff,
+    benchmark_col = benchmark_col
 )
 
-pheno_tbl <- discretize_ipi_features(pheno_tbl, data_spec)
+pheno_tbl <- discretize_tbl_cols(
+    tbl = pheno_tbl, 
+    col_names = ipi_feat_cols,
+    cutoffs = ipi_cutoffs,
+    gl = gl
+)
 
 qc_preprocess(
     expr_tbl = expr_tbl,
@@ -88,49 +102,17 @@ qc_preprocess(
     check_default = TRUE
 )
 
-# Document
-n_included_in_survival_analysis <- (pheno_tbl[["pfs_years"]] > 0) |> 
-    sum(na.rm = TRUE)
-n_high_risk <- (pheno_tbl[["pfs_years"]] < pfs_cut & pheno_tbl[["progression"]] == 1) |> 
-    sum(na.rm = TRUE)
-n_low_risk <- (pheno_tbl[["pfs_years"]] >= pfs_cut) |> sum(na.rm = TRUE)
-
-info_list <- list(
-    "publication" = list(
-        "title" = "Genetics and Pathogenesis of Diffuse Large B-Cell Lymphoma",
-        "author" = "Schmitz et al.",
-        "year" = 2018,
-        "doi"= "10.1056/NEJMoa1801445",
-        "pubmed id" = 29641966
-    ),
-    "data" = list(
-        "website" = "https://gdc.cancer.gov/about-data/publications/DLBCL-2018",
-        "disease type" = "DLBCL",
-        "number of samples" = nrow(pheno_tbl),
-        "pheno data" = list(
-            "included in survival analysis" =  n_included_in_survival_analysis,
-            "pfs cutoff" = pfs_cut,
-            "number high risk" = n_high_risk,
-            "number low risk" = n_low_risk,
-            "unknown" = n_included_in_survival_analysis - n_high_risk - n_low_risk
-        ),
-        "expression data" = list(
-            "technology" = "bulk RNA-seq",
-            "platform" = "Illumina HiSeq 2500|3000",
-            "read length" = "100|150 paired-end",
-            "number of genes" = nrow(expr_tbl),
-            "gene symbols" = "HGNC",
-            "primary processing" = "see Supplementary Appendix 1 @ https://api.gdc.cancer.gov/data/288619d2-a7b6-4ee3-aa27-ae2c77887b31, p. 6",
-            "normalization" = "fpkm values in log2 scale"    
-        )
-    )
+write_data_info(
+    filename = file.path(data_dir, "info.json"),
+    expr_tbl = expr_tbl,
+    pheno_tbl = pheno_tbl,
+    data_spec = data_spec
 )
 
 cat("Writing preprocessed data to", data_dir, "\n")
-readr::write_csv(pheno_tbl, file.path(data_dir, "pheno.csv"))
-readr::write_csv(expr_tbl, file.path(data_dir, "expr.csv"))
+# readr::write_csv(pheno_tbl, file.path(data_dir, "pheno.csv"))
+# readr::write_csv(expr_tbl, file.path(data_dir, "expr.csv"))
 saveRDS(data_spec, file.path(data_dir, "data_spec.rds"))
-jsonlite::write_json(info_list, file.path(data_dir, "info.json"), auto_unbox = TRUE, pretty = TRUE)
 
 if(clean){
     cat("Removing downloaded files\n")
