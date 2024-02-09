@@ -10,7 +10,7 @@ cox_vanilla_zerosum = ModelSpec(
     directory = "cox/0-vanilla/zerosum",
     fitter = zeroSum::zeroSum,
     split_index = 1:15, # 1:20
-    time_cutoffs = seq(1, 2, .25), # seq(1.5, 2, .25)
+    time_cutoffs = c(seq(1, 2, .25), Inf), # seq(1.5, 2, .25)
     optional_fitter_args = list(family = "cox", alpha = 1, zeroSum = FALSE),
     response_type = "survival_censored"
 )
@@ -19,7 +19,7 @@ cox_vanilla_std = ModelSpec(
     directory = "cox/0-vanilla/std",
     fitter = zeroSum::zeroSum,
     split_index = 1:15,
-    time_cutoffs = seq(1, 2, .25),
+    time_cutoffs = c(seq(1, 2, .25), Inf),
     optional_fitter_args = list(family = "cox", alpha = 1, zeroSum = FALSE,
         standardize = TRUE),
     response_type = "survival_censored"
@@ -29,7 +29,7 @@ cox_vanilla_glmnet = ModelSpec(
     directory = "cox/0-vanilla/glmnet",
     fitter = glmnet::cv.glmnet,
     split_index = 1:15,
-    time_cutoffs = seq(1.25, 2, .25),
+    time_cutoffs = c(seq(1.25, 2, .25), Inf),
     optional_fitter_args = list(family = "cox", alpha = 1),
     response_type = "survival_censored"
 )
@@ -39,7 +39,7 @@ cox_zerosum = ModelSpec(
     fitter = zeroSum::zeroSum,
     directory = "cox/1-zerosum",
     split_index = 1:15,
-    time_cutoffs = seq(1, 2, .25), # seq(1.5, 2, .25)
+    time_cutoffs = c(seq(1, 2, .25), Inf), # seq(1.5, 2, .25)
     optional_fitter_args = list(family = "cox", alpha = 1),
     response_type = "survival_censored"
 )
@@ -84,6 +84,19 @@ logistic_zerosum = ModelSpec(
     response_type = "binary"
 )
 
+lv_disc_ipi_feat = ModelSpec(
+    name = "LV with disc IPI feat",
+    fitter = zeroSum::zeroSum,
+    directory = "logistic/3-early-int/vanilla-disc-ipi-feat",
+    split_index = 1:15,
+    time_cutoffs = c(1.5, 1.75),
+    optional_fitter_args = list(family = "binomial", alpha = 1, zeroSum = FALSE, 
+        standardize = TRUE),
+    include_from_discrete_pheno = c("age>60", "ldh_ratio>1", "ecog_performance_status>1", 
+        "n_extranodal_sites>1", "ann_arbor_stage>2"),
+    response_type = "binary"
+)
+
 model_spec_list <- list(
     # COX
     # vanilla
@@ -98,7 +111,9 @@ model_spec_list <- list(
     logistic_vanilla_std = logistic_vanilla_std,
     logistic_vanilla_glmnet= logistic_vanilla_glmnet,
     # zerosum
-    logistic_zerosum = logistic_zerosum
+    logistic_zerosum = logistic_zerosum,
+    # early IPI integration
+    lv_disc_ipi_feat = lv_disc_ipi_feat
 )
 
 
@@ -116,17 +131,6 @@ clz_disc_ipi_feat = ModelSpec(
     include_from_discrete_pheno = c("age>60", "ldh_ratio>1", "ecog_performance_status>1", 
         "n_extranodal_sites>1", "ann_arbor_stage>2"),
     response_type = "survival_censored"
-)
-llz_disc_ipi_feat = ModelSpec(
-    name = "LLZ with disc IPI feat",
-    fitter = zeroSumWithPheno,
-    directory = "logistic/3-early-int/llz-disc-ipi-feat",
-    split_index = 1,
-    time_cutoffs = 2.,
-    optional_fitter_args = list(family = "binomial", alpha = 1),
-    include_from_discrete_pheno = c("age>60", "ldh_ratio>1", "ecog_performance_status>1", 
-        "n_extranodal_sites>1", "ann_arbor_stage>2"),
-    response_type = "binary"
 )
 # just IPI as one feature
 clz_ipi = ModelSpec(
@@ -198,7 +202,7 @@ retired_models <- list(
     # early IPI integration
     # discretized IPI features (as in paper)
     clz_disc_ipi_feat,
-    llz_disc_ipi_feat,
+    lv_disc_ipi_feat,
     # just IPI as one feature
     clz_ipi,
     llz_ipi,
