@@ -1,4 +1,4 @@
-# General PerfPlotSpec you can use to assess the performance of any model
+# General AssSpec2d you can use to assess the performance of any model
 
 colors <- unicol::uni_regensburg_2[c(
         "glutrot",
@@ -12,8 +12,8 @@ colors <- unicol::uni_regensburg_2[c(
         "heucherarot"
     )] |> unname()
 
-rpp_prec_pps <- PerfPlotSpec(
-    fname = "precision.jpeg",
+rpp_prec_as2 <- AssSpec2d(
+    file = "precision.jpeg",
     x_metric = "rpp",
     y_metric = "prec",
     pivot_time_cutoff = 2.,
@@ -29,8 +29,8 @@ rpp_prec_pps <- PerfPlotSpec(
     colors = colors
 )
 
-logrank_pps <- PerfPlotSpec(
-    fname = "logrank.jpeg",
+logrank_as2 <- AssSpec2d(
+    file = "logrank.jpeg",
     x_metric = "rpp",
     y_metric = "logrank",
     pivot_time_cutoff = 2.,
@@ -51,8 +51,8 @@ logrank_pps <- PerfPlotSpec(
     colors = colors
 )
 
-prec_ci_pps <- PerfPlotSpec(
-    fname = "precision_ci.jpeg",
+prec_ci_as2 <- AssSpec2d(
+    file = "precision_ci.jpeg",
     x_metric = "rpp",
     y_metric = "precision_ci",
     pivot_time_cutoff = 2.,
@@ -71,8 +71,13 @@ prec_ci_pps <- PerfPlotSpec(
     colors = colors
 )
 
-pps_list <- list(
-    "rpp_prec" = rpp_prec_pps,
-    "logrank_pps" = logrank_pps,
-    "prec_ci_pps" = prec_ci_pps
+as2_list <- list(
+    "rpp_prec" = rpp_prec_as2,
+    "logrank_as2" = logrank_as2,
+    "prec_ci_as2" = prec_ci_as2
+)
+
+auc_as0 <- AssSpec0d(
+    metric = "get_auc",
+    pivot_time_cutoff = 2
 )

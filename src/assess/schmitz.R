@@ -3,9 +3,9 @@
 library(lymphomaSurvivalPipeline)
 
 source("src/train/model_spec.R") # model_spec_list
-source("src/assess/perf_plot_spec.R") # pps_list
+source("src/assess/ass_spec.R") # as2_list, auc_as0
 
-pps_list <- pps_list
+as2_list <- as2_list
 
 model_spec_list <- prepend_to_directory(model_spec_list, "models/schmitz")
 msl_name <- list(
@@ -18,10 +18,10 @@ msl_name <- list(
     "logistic_vanilla_glmnet",
     "logistic_zerosum"
 )
-pps_fnames_infix <- c(
+as2_fnames_infix <- c(
     "cox/0-vanilla/zerosum",
-    "cox/0-vanilla/glmnet",
     "cox/0-vanilla/std",
+    "cox/0-vanilla/glmnet",
     "cox/1-zerosum",
     "logistic/0-vanilla/zerosum",
     "logistic/0-vanilla/std",
@@ -31,16 +31,23 @@ pps_fnames_infix <- c(
 
 data_spec <- readRDS("data/schmitz/data_spec.rds")
 
-for(pps in pps_list){
-    top_fname <- pps$fname
-    for(i in c(2, 6)){ # seq_along(msl_name)){
-        pps$fname <- file.path("models/schmitz", pps_fnames_infix[i], top_fname)
+for(as2 in as2_list){
+    top_fname <- as2$fname
+    for(i in c(2, 3, 6, 7)){ # seq_along(msl_name)){
+        as2$fname <- file.path("models/schmitz", as2_fnames_infix[i], top_fname)
         msl_sub <- model_spec_list[msl_name[[i]]]
-        assessment_center(
+        assess_2d_center(
             model_spec_list = msl_sub,
             data_spec = data_spec,
-            perf_plot_spec = pps,
+            perf_plot_spec = as2,
             cohorts = c("train", "test")
         )
     }
 }
+
+auc_as0$file <- "models/schmitz/auc.csv"
+assess_0d_center(
+    ass_spec_0d = auc_as0,
+    data_spec = data_spec,
+    model_spec_list = model_spec_list
+)
