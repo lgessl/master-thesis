@@ -1,0 +1,285 @@
+\documentclass[10pt, aspectratio=169]{beamer}
+
+\usetheme{metropolis}
+\metroset{block=fill}
+\usepackage{appendixnumberbeamer}
+
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+
+
+\usepackage{siunitx}
+
+\usepackage{xspace}
+\newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
+
+\usepackage{tikz}
+\usetikzlibrary{positioning, arrows}
+\usetikzlibrary{calc}
+\usepackage{pgfplots}
+\usepgfplotslibrary{dateplot}
+\tikzset{
+  font=\small,
+  node distance=0.5cm and 0.2cm,
+  bdata/.style={draw, rectangle, text width=2.2cm, align=center},
+  sdata/.style={draw, rectangle, text width=1.75cm, align=center},
+  bmodel/.style={rectangle, fill=mLightBrown, text width=4cm, align=center, rounded corners},
+  smodel/.style={rectangle, fill=mLightBrown, text width=2.2cm, align=center, rounded corners},
+  pred/.style={draw, rectangle, text width=1cm, align=center}
+}
+
+\usepackage[style=numeric]{biblatex}
+\addbibresource{lit.bib}
+
+\usepackage{hyperref}
+
+\definecolor{mDarkTeal}{HTML}{23373b}
+\definecolor{mLightBrown}{HTML}{EB811B}
+\definecolor{mDarkBrown}{HTML}{B85002}
+\definecolor{mLightGreen}{HTML}{14B03D}
+
+\title{Beating the International Prognostic Index for high-risk DLBCL patients}
+\subtitle{Master thesis progress report}
+\date{March 12, 2024}
+\author{Lukas Geßl}
+\institute{Chair of Statistical Bioinformatics, Regensburg University}
+% \titlegraphic{\hfill\includegraphics[height=1.5cm]{logo.pdf}}
+
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Table of contents}
+  \setbeamertemplate{section in toc}[sections numbered]
+  \tableofcontents[hideallsubsections]
+\end{frame}
+
+\section{Setting the arena}
+
+\begin{frame}{DLBCL: a heterogeneous cancer with a homogeneous therapy}
+
+  Diffuse large B-cell lymphoma (DLBCL) is the most common type of B-cell lymphoma, 
+  accounting for 30\% of all diagnoses.
+
+  While DCBCL is a clinically very heterogeneous disease, there is only one treatment 
+  regimen: immunochemotherapy with R-CHOP. It cures two thirds of the patients.
+
+  Cure rates among relapsed or refractory patients are low, hence we should not send 
+  them through the standard therapy in the first place, but into alternative, more 
+  experimental treatments and trials instead. 
+  
+  We define relapsed or refractory patients or \alert{high-risk} patients as those with a 
+  \alert{progression-free survival (PFS) < 2 years}.
+
+\end{frame}
+
+\begin{frame}{The goal of this thesis and the MMML-Predict project is ...}
+
+  ... to develop a \alert{cost-efficent classifier filtering out high-risk DLBCL patients} before an R-CHOP 
+  treatment begins or at least at an early stage of it. 
+
+  Candidate input features are 
+
+  \begin{itemize}
+    \item clinical data (like the IPI, see next slide),
+    \item transcriptomic (RNA-seq, signatures like LAMIS, ABC vs. GCB),
+    \item proteomic signatures,
+    \item somatic genetic factors (translocations like MYC),
+  \end{itemize}
+
+  all of which are measured \alert{at diagnosis}, as well \alert{dynamic} features like 
+
+  \begin{itemize}
+    \item imaging (PET-CT) after 2 cycles of R-CHOP,
+    \item the tumor burden in the body determined via circulating tumor DNA (ctDNA) in a 
+    liquid biopsy after 2 and 4 cycles of R-CHOP. 
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}{To beat: the Internatinal Prognostic Index (IPI) for non-Hodgkin's lymphoma}
+
+  The IPI \autocite{ipi93} is a simple risk score ranging from 0 to 5 depending on how many of the following 
+  \alert{clinical} questions for a patient one can answer with "yes": 
+
+  \begin{itemize}
+    \item Age > 60?
+    \item Ann Arbor stage III or IV: is the cancer advanced?
+    \item Serum LDH (lactacte dehydrogenease) level: higher than normal?
+    \item Performance status: is the patient no longer ambulatory? 
+    \item Number of extranodal sites (like bone marrow, liver, lung) involved: more than one?
+  \end{itemize}
+
+  The lower the IPI, the better the patient's outlook: higher progression-free survival (PFS) and 
+  overall survival (OS).
+
+\end{frame}
+
+\begin{frame}{The IPI is a 30-year old dinosaur}
+
+  Yet, it's still state of the art in clinical practice when it comes to assessing a DLBCL 
+  patient's risk even in the age of multi-omics because it's \alert{simple}, \alert{cheap} and 
+  \alert{robust} (after all, it's based on a rigorous statistical analysis and Cox regression).
+
+  Still, just six values the IPI can attain mean it's very rough. In particular, it fails 
+  to identify a clinically relevant high-risk group:
+
+  \begin{itemize}
+    \item The cohort with IPI $\leq 5$ is \alert{too small} to significantly differ from the rest in terms 
+    of survival and to get attention from clincians.
+    \item The cohort with IPI $\leq 4$ \alert{lacks precision in identifying high-risk patients}: 16\% of
+    patients have an IPI $\leq 4$, but only 40\% of them are high-risk. This is too low to persuade 
+    a clinician to change the treatment plan.
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}{What does "beating the IPI" mean?}
+
+  We need \alert{data} to demonstrate the new classifier on. The MMML-Predict project is enrolling 200 DLBCL 
+  patients in a training cohort right now, 100 will follow for the validation cohort. For my thesis,
+  I need to use already existent data.
+
+  Being better than the IPI means, on the validation cohort the new classifier needs to 
+
+  \begin{itemize}
+    \item be \alert{more precise in identifying high-risk patients} than the IPI: the 95\% confidence interval (CI) 
+    of the precision (proportion of true positives among all positives; according to Clopper-Pearson) must 
+    not include 35\%, the precision of IPI $\geq 4$ on pooled data from DSNHNL trials ($\num{2721}$ samples),
+    \item yield \alert{two cohorts with significantly differing survival} (PFS): logrank test p-value < 0.05.
+  \end{itemize}
+
+  Calculations with the size of the validation cohort ($n = 100$) suggest that a precision $\geq 50\%$ is enough.
+\end{frame}
+
+\section{Meet the players}
+
+\begin{frame}{\alert{Early} versus late integration}
+  \begin{columns}
+    \column{0.5\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \node[bdata] (bigdata1) {big data 1};
+        \node[bdata, right=of bigdata1] (bigdata2) {big data 2};
+        \node[sdata, right=of bigdata2] (smalldata) {small data};
+        \node[bmodel, below=of bigdata2] (latemodel) {one single model};
+        \node[sdata, below=of latemodel] (latepred) {final prediction};
+        
+        \draw[->] (bigdata1) -- (latemodel);
+        \draw[->] (bigdata2) -- (latemodel);
+        \draw[->] (smalldata) -- (latemodel);
+        \draw[->] (latemodel) -- (latepred);
+      \end{tikzpicture}
+    \column{0.5\textwidth}
+      \begin{itemize}
+        \item Provide all data as input features to a single model.
+        \item Advantage: easy to implement, one algorithm fits and picks the model 
+          including cross validation.
+        \item Disadvantage: data on vastly different scales may confuse the model and 
+          its minimizer.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Early versus \alert{late} integration}
+  \begin{columns}
+    \column{0.5\textwidth}
+      \centering
+      \begin{tikzpicture}  
+        \node[bdata] (bigdata1) {big data 1};
+        \node[bdata, right=of bigdata1] (bigdata2) {big data 2};
+        \node[sdata, right=of bigdata2] (smalldata) {small data};
+        \node[smodel, below=of bigdata1] (earlymodel1) {early model 1};
+        \node[smodel, right=of earlymodel1] (earlymodel2) {early model 2};
+        \node[bdata, below=of earlymodel1] (earlypred1) {prediction 1};
+        \node[bdata, right=of earlypred1] (earlypred2) {prediction 2};
+        \node[sdata, right=of earlypred2] (esmalldata) {small data};
+        \node[bmodel, below=of earlypred2] (latemodel) {late model};
+        \node[sdata, below=of latemodel] (latepred) {final prediction};
+        
+        \draw[->] (bigdata1) -- (earlymodel1);
+        \draw[->] (earlymodel1) -- (earlypred1);
+        \draw[->] (bigdata2) -- (earlymodel2);
+        \draw[->] (earlymodel2) -- (earlypred2);
+        \draw[dashed] (smalldata) -- (esmalldata);
+        \draw[->] (earlypred1) -- (latemodel);
+        \draw[->] (earlypred2) -- (latemodel);
+        \draw[->] (esmalldata) -- (latemodel);
+        \draw[->] (latemodel) -- (latepred);
+      \end{tikzpicture}
+    \column{0.5\textwidth}
+      \begin{itemize}
+        \item Early models deal with high-throughput data and its problems: overfitting, 
+          systematic errors.
+        \item Advantage: modularizes the model selection process, allows for very
+          sophisticated late models.
+        \item Disadvantage: implementing the model selection process becomes more 
+          complicated, how to deal with cross validation in the early models?
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{The key player for early-stage models: the zeroSum package}
+  We feed high-troughput data into 
+
+  \begin{itemize}
+    \item \alert{Cox} proportional-hazards models and
+    \item \alert{logistic} models,
+  \end{itemize}
+
+  both endowd with \alert{LASSO} regularization and the \alert{zero-sum} constraint. More precisely, we 
+  aim to estimate the response $y_i$ of sample $i$ by a predictor $x_i \in \mathbb{R}^p$ via 
+  \begin{align}
+    y_i = f(\beta_0 + x_i^T \beta) + \varepsilon_i
+  \end{align}
+  for a link function $f: \mathbb{R} \to \mathbb{R}$, a set of coefficients $(\beta_0, 
+  \beta)$, and a residual $\varepsilon_i$.
+\end{frame}
+
+\begin{frame}{The zero-sum constraint}
+  We demand $\sum_{j=1}^p \beta_j = 0$, the zero-sum constraint. Why?
+
+  \begin{itemize}
+    \item Keep in mind: $x_i$ is usually the result of taking the logarithm of original 
+      observations $x_i'$, i.e. $x_{ij} = \log(x_{ij}')$ for all $j$.
+    \item If we rescale $x_i'$ by a factor $\gamma > 0$, then $x_i$ changes by an additive 
+      constant, $\log(\gamma)$: $\log(\gamma x_{ij}') = \log(\gamma) + \log(x_{ij}')$ for all j.
+    \item The zero-sum consraint ensures $\sum_{j=1}^p \beta_j (\log(\gamma) + \log(x_{ij}')) = 
+      \sum_{j=1}^p \beta_j \log(\gamma) + \sum_{j=1}^p \beta_j x_{ij} = 0 + \sum_{j=1}^p 
+      \beta_j x_i$. 
+  \end{itemize}
+  
+  In particular, $f(\beta_0 + \log(\gamma x_i')^T \beta) = f(\beta_0 + \log(x_i')^T \beta)$: the 
+  model is \alert{invariant under rescaling}.
+
+  This comes at a price: model training takes more computation time.
+\end{frame}
+
+\begin{frame}{Wrap it all up into a cost function}
+  Training such model comes down to minimizing a cost function of the form 
+  \begin{align}
+    \mathcal{L}_{X, y, \lambda, v, w}(\beta_0, \beta) = -\sum_{i=1}^n w_i \ell(y_i, \beta_0 + x_i^T \beta) + 
+    \lambda \sum_{j=1}^p v_j |\beta_j| \quad \text{subject to } \sum_{j=1}^p u_j \beta_j = 0
+  \end{align}
+  for hyperparameters 
+  \begin{itemize}
+    \item $\lambda > 0$, the LASSO penalty factor (tuned in a cross-validation),
+    \item $u \in \mathbb{R}^p$, the zero-sum weights (often $u = \mathbf{1}$),
+    \item $v \in \mathbb{R}^p_{\geq 0}$, the LASSO penalty weights (often $v = \mathbf{1}$), and
+    \item $w \in \mathbb{R}^n_{\geq 0}$, the sample weights (often $w = \frac{1}{N} \mathbf{1}$).
+  \end{itemize}
+
+  $\ell$ depends on the model and is a log-likelihood.
+\end{frame}
+
+\begin{frame}[standout]
+  Thank you for your attention! \par Questions?
+\end{frame}
+
+\appendix
+
+\begin{frame}[allowframebreaks]{References}
+  \printbibliography
+\end{frame}
+
+\end{document}

@@ -23,7 +23,7 @@ For every interval $(u_{j-1}, u_j)$, we can now calculate the (conditional) prob
 $$
     \hat{p}_j = \frac{n_j - \delta_j}{n_j} = \frac{n_j'}{n_j},
 $$
-where $n_j$ is the number of patients alive and under observation at time $u_{j-1}$ and $\delta_j$ is the number of death events in $(u_{j-1}, j)$. Exploiting the chain rule for conditional probabilities, this yields the estimate for $P(t)$
+where $n_j$ is the number of patients alive and under observation at time $u_{j-1}$ and $\delta_j$ is the number of death events in $(u_{j-1}, u_j)$. Exploiting the chain rule for conditional probabilities, this yields the estimate for $P(t)$
 $$
     \hat{P}(t) = \prod_{j: u_j \leq t} \hat{p}_j = \prod_{j: u_j \leq t} \frac{n_j'}{n_j}.
 $$
