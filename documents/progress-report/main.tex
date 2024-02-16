@@ -36,6 +36,7 @@
 \usepackage[style=numeric]{biblatex}
 \addbibresource{lit.bib}
 
+\usepackage{xcolor}
 \usepackage{hyperref}
 
 \definecolor{mDarkTeal}{HTML}{23373b}
@@ -318,29 +319,84 @@
 
 \section{Train the players and select the best}
 
-\begin{frame}{My train-test paradigm}
-  \begin{tikzpicture}[
-    node distance=1cm and 0.05cm,
-    trainn/.style={rectangle, text width=3cm, align=center, fill=mLightBrown, minimum height=1.5cm},
-    testn/.style={rectangle, text width=1.5cm, align=center, fill=mDarkTeal, text=white, minimum height=1.5cm},  
-    fixn/.style={rectangle, text width=4.7cm, align=center},
-    splitn/.style={rectangle, text width=4.5cm, align=center}
-    ]
-    \node[trainn] (traindata) {training\\ samples};
-    \node[testn, right=of traindata] (testdata) {test samples};
-    \node[splitn, above=0.7cm of $(traindata)!0.33!(testdata)$] (split) {(2) split into};
-    \node[fixn, above=0.15cm of split] (fixhyper) {(1) fix all hyperparameters\\ except $\lambda$};
-    \node[smodel, below=1.5cm of traindata] (model) {model};
-    
-    \draw[->] (traindata) -- node[midway, left, align=right] {(3) select\\ $\lambda$ in CV} (model);
-    \draw[->] (model) to[bend right] node[midway, right=4pt, align=left] {(4) assess\\ on} (testdata);
+\begin{frame}{Train-test paradigm}
+  \begin{columns}
+    \column{.5\textwidth}
+      \centering
+      \begin{tikzpicture}[
+        node distance=1cm and 0.05cm,
+        trainn/.style={rectangle, text width=3cm, align=center, fill=mLightBrown, minimum height=1.5cm},
+        testn/.style={rectangle, text width=1.5cm, align=center, fill=mDarkTeal, text=white, minimum height=1.5cm},  
+        fixn/.style={rectangle, text width=4.7cm, align=center},
+        splitn/.style={rectangle, text width=4.5cm, align=center}
+        ]
+        \node[trainn] (traindata) {training\\ samples};
+        \node[testn, right=of traindata] (testdata) {test samples};
+        \node[splitn, above=0.7cm of $(traindata)!0.33!(testdata)$] (split) {(2) split into};
+        \node[fixn, above=0.15cm of split] (fixhyper) {(1) fix all hyperparameters\\ except $\lambda$};
+        \node[smodel, below=1.5cm of traindata] (model) {model};
+        
+        \draw[->] (traindata) -- node[midway, left, align=right] {(3) select\\ $\lambda$ in CV} (model);
+        \draw[->] (model) to[bend right] node[midway, right=4pt, align=left] {(4) assess\\ on} (testdata);
 
-    \path let \p1 = (split.east) in \pgfextra{\xdef\bracex{\x1}};
-    \path let \p1 = (split.north) in \pgfextra{\xdef\braceuy{\y1}};
-    \path let \p1 = (model.south) in \pgfextra{\xdef\bracely{\y1}};
-    \draw[decorate,decoration={brace,amplitude=10pt,mirror,raise=4pt},xshift=8pt] 
-      (\bracex, \bracely) -- (\bracex, \braceuy) node[midway, right=14pt, align=left] {repeat\\ and\\ average};
-  \end{tikzpicture}
+        \path let \p1 = (split.east) in \pgfextra{\xdef\bracex{\x1}};
+        \path let \p1 = (split.north) in \pgfextra{\xdef\braceuy{\y1}};
+        \path let \p1 = (model.south) in \pgfextra{\xdef\bracely{\y1}};
+        \draw[decorate,decoration={brace,amplitude=10pt,mirror,raise=12pt}] 
+          (\bracex, \bracely) -- (\bracex, \braceuy) node[midway, right=22pt, align=left] {repeat\\ and\\ average};
+      \end{tikzpicture}
+    \column{.5\textwidth}
+      \alert{Hyperparameters} excluding $\lambda$ may be
+      \begin{itemize}
+        \item the model type,
+        \item zero-sum weights, regularization weights, sample weights,
+        \item the threshold $T$ for the logistic model\footnotemark{}.
+      \end{itemize}
+      We \alert{assess} the models
+      \begin{itemize}
+        \item with a scalar metric (like the ROC-AUC) to get a \alert{pre-selection},
+        \item in scatter plots (like prevalence versus precision) to \alert{threshold the scores} 
+          output by the pre-selected models.
+      \end{itemize}
+    \end{columns}
+    \footnotetext{Similarly for the Cox model, we can right-censor samples with time to event $> T$ at $T$.}
+\end{frame}
+
+\begin{frame}{Software}
+  To fit and cross-validate the logistic and Cox models I rely on the \alert{zeroSum R package} 
+  by Thorsten Rehberg \autocite{zerosumR}. It extends the glmnet package by the zero-sum constraint.
+
+  When integrating a model found in a cross validation into another model I want to continue the cross 
+  validation of the early model. zeroSum does not report enough details, so I added this functionality in 
+  a \alert{fork zeroSumLI} \autocite{zerosumliR}.
+
+  Training and assessing a bunch of models on several data sets means a lot of administrative, repetitive 
+  work. I automized and outsourced this part into an \alert{R package lymphomaSurvivalPipeline} \autocite{lspR}.
+\end{frame}
+
+\section{Watch the game}
+
+\begin{frame}{The data}
+  I trained models predicting progression-free survival $< 2$ years on data including bulk RNA-seq 
+  taken from Schmitz et al. \autocite{schmitz18}. 
+  \begin{columns}
+    \column{.6\textwidth}
+      \begin{itemize}
+        \item It has $n = \num{229}$ patients with survival information, $p = \num{25066}$ genes.
+        \item $\num{78}$ (34\%) of these are high risk.
+        \item $\num{135}$ (59\%) are low risk. 
+        \item $\num{16}$ (7\%) we cannot assign.
+        \item All IPI features are available in pheno data.
+        \item The IPI does a pretty good job on it, see Table \ref{fig:ipi-schmitz}.
+      \end{itemize}
+    \column{.4\textwidth}
+      \input{figs/ipi_schmitz.tex}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{The results}
+  \small
+  \input{figs/auc_table.tex}
 \end{frame}
 
 \begin{frame}[standout]
