@@ -7,7 +7,6 @@
 \usepackage{booktabs}
 \usepackage[scale=2]{ccicons}
 
-
 \usepackage{siunitx}
 
 \usepackage{xspace}
@@ -36,6 +35,7 @@
 \usepackage[style=numeric]{biblatex}
 \addbibresource{lit.bib}
 
+\usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{hyperref}
 
@@ -55,12 +55,7 @@
 
 \maketitle
 
-% \begin{frame}{Table of contents}
-%   \setbeamertemplate{section in toc}[sections numbered]
-%   \tableofcontents[hideallsubsections]
-% \end{frame}
-
-\section{Setting the arena}
+\section{Set the arena}
 
 \begin{frame}{DLBCL: a heterogeneous cancer with a homogeneous therapy}
 
@@ -155,7 +150,8 @@
     \item yield \alert{two cohorts with significantly differing survival} (PFS): logrank test p-value < 0.05.
   \end{itemize}
 
-  Calculations with the size of the validation cohort ($n = 100$) suggest that a precision $\geq 50\%$ is enough.
+  Calculations with the size of the validation cohort ($n = 100$) suggest that a precision $\geq 50\%$ with a 
+  prevalence $\geq 15\%$ is enough.
 \end{frame}
 
 \section{Meet the players}
@@ -262,9 +258,9 @@
 \end{frame}
 
 \begin{frame}{Wrap it all into a loss function}
-  Training such a models comes down to minimizing a loss function of the form 
+  Training such a model comes down to minimizing a loss function of the form 
   \begin{align}
-    \mathcal{L}_{X, y, \lambda, v, w}(\beta_0, \beta) = -\sum_{i=1}^n w_i 
+    \mathcal{L}_{X, y, \lambda, u, v, w}(\beta_0, \beta) = -\sum_{i=1}^n w_i 
     \ell(\tilde{y}_i, \beta_0 + x_i^T \beta) + \lambda \sum_{j=1}^p v_j |\beta_j| 
     \quad \text{subject to } \sum_{j=1}^p u_j \beta_j = 0
   \end{align}
@@ -394,9 +390,48 @@
     \end{columns}
 \end{frame}
 
-\begin{frame}{The results}
-  \small
-  \input{figs/auc_table.tex}
+\begin{frame}{The line-up: the models tried out}
+  \input{figs/hyperparams_schmitz.tex}
+\end{frame}
+
+\begin{frame}{Pre-selection via ROC-AUC}
+  \begin{columns}
+    \column{.5\textwidth}
+    {
+      \small
+      \input{figs/auc_table.tex}
+    }
+    \column{.5\textwidth}
+      What does this mean for choosing the hyperparameters?
+      \begin{itemize}
+        \item Logistic versus Cox regression not that important.
+        \item Early integrating IPI (features) does not work, yet.
+        \item With zero-sum constraint usually a bit worse than with.
+        \item Standardization via LASSO weights $w$ does not help.
+        \item Choose $T = 1.75$.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Is this enough to meet our initally stated goals?}
+  \begin{figure}[h]
+    \centering
+    \includegraphics[width=.9\textwidth]{figs/prev_vs_prec.jpeg}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{Is this enough to meet our initally stated goals?}
+  \begin{figure}[h]
+    \centering
+    \includegraphics[width=.9\textwidth]{figs/precision_ci.jpeg}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{Is this enough to meet our initally stated goals?}
+  \begin{figure}[h]
+    \centering
+    \includegraphics[width=.9\textwidth]{figs/logrank.jpeg}
+  \end{figure}
 \end{frame}
 
 \begin{frame}[standout]

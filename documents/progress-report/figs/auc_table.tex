@@ -1,0 +1,24 @@
+% latex table generated in R 4.3.2 by xtable 1.8-4 package
+% Mon Feb 19 15:25:19 2024
+\begin{table}[ht]
+\centering
+\begin{tabular}{rlrr}
+  \hline
+rank & model & $T$ & AUC \\ 
+  \hline
+   1 & logistic & 1.75 & 0.770 \\ 
+     2 & logistic zerosum & 1.75 & 0.769 \\ 
+     3 & cox & 1.75 & 0.762 \\ 
+     4 & cox zerosum & 1.75 & 0.761 \\ 
+     5 & cox & 2 & 0.755 \\ 
+     6 & logistic zerosum & 1.5 & 0.755 \\ 
+     7 & cox zerosum & 1.5 & 0.752 \\ 
+     8 & cox & 1.5 & 0.750 \\ 
+     9 & cox & Inf & 0.749 \\ 
+    10 & cox zerosum & Inf & 0.748 \\ 
+   \hline
+\end{tabular}
+\caption{Split into train and test cohort, train a model on train cohort, calculate ROC-AUC
+        on test cohort. Repeat this 15 times and average.} 
+\label{fig:top-auc-schmitz}
+\end{table}
