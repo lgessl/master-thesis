@@ -1,11 +1,11 @@
 # General AssSpec2d you can use to assess the performance of any model
 
 colors <- unicol::uni_regensburg_2[c(
+        "eisvogelblau",
         "glutrot",
         "tuerkisgruen",
         "capriblau",
         "laerchennadelgruen",
-        "eisvogelblau",
         "blattgruen",
         "spektralblau",
         "urangelb",
@@ -21,10 +21,10 @@ rpp_prec_as2 <- AssSpec2d(
     xlim = c(0, .5),
     x_lab = "rate of positive predictions",
     y_lab = "precision",
+    text_size = 3,
     fellow_csv = FALSE,
     scores_plot = FALSE,
     smooth_method = "loess",
-    smooth_benchmark = TRUE,
     alpha = .075,
     colors = colors
 )
@@ -42,7 +42,6 @@ logrank_as2 <- AssSpec2d(
     fellow_csv = FALSE,
     scores_plot = FALSE,
     smooth_method = "loess",
-    smooth_benchmark = TRUE,
     scale_y = "log10",
     hline = list(yintercept = .05, linetype = "dashed", color = "black"),
     text = list(ggplot2::aes(x = .48, y = .05, label = "p = 0.05"), 
@@ -63,7 +62,6 @@ prec_ci_as2 <- AssSpec2d(
     fellow_csv = FALSE,
     scores_plot = FALSE,
     smooth_method = "loess",
-    smooth_benchmark = TRUE,
     hline = list(yintercept = 0.351, linetype = "dashed", color = "black"),
     text = list(ggplot2::aes(x = .4, y = .351, label = "IPI-45 (DSNHNL)"),
         inherit.aes = FALSE, size = 3),
