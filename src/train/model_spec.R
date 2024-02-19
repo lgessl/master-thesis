@@ -8,7 +8,7 @@ n_genes <- 25066
 # COX
 # vanilla
 cox = ModelSpec(
-    name = "cox vanilla zerosum",
+    name = "cox",
     directory = "cox/0-vanilla/zerosum",
     fitter = zeroSum::zeroSum,
     split_index = 1:15, # 1:20
@@ -17,7 +17,7 @@ cox = ModelSpec(
     response_type = "survival_censored"
 )
 cox_std = ModelSpec(
-    name = "cox vanilla std",
+    name = "cox std",
     directory = "cox/0-vanilla/std",
     fitter = zeroSum::zeroSum,
     split_index = 1:15,
@@ -39,7 +39,7 @@ cox_zerosum = ModelSpec(
 # LOGISTIC
 # vanilla
 logistic = ModelSpec(
-    name = "logistic vanilla zerosum",
+    name = "logistic",
     directory = "logistic/0-vanilla/zerosum",
     fitter = zeroSum::zeroSum,
     split_index = 1:15, # 1:20
@@ -48,7 +48,7 @@ logistic = ModelSpec(
     response_type = "binary"
 )
 logistic_std = ModelSpec(
-    name = "logistic vanilla std",
+    name = "logistic std",
     directory = "logistic/0-vanilla/std",
     fitter = zeroSum::zeroSum,
     split_index = 1:15,
