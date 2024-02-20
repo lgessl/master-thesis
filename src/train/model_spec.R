@@ -61,7 +61,7 @@ logistic_std = ModelSpec(
 logistic_zerosum = ModelSpec(
     name = "logistic zerosum",
     directory = "logistic/1-zerosum",
-    fitter = glmnet::cv.glmnet,
+    fitter = zeroSum::zeroSum,
     split_index = 1:15,
     time_cutoffs = seq(1, 2, .25), # seq(1.5, 2, .25)
     optional_fitter_args = list(family = "binomial", alpha = 1),

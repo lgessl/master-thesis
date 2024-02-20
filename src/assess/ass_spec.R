@@ -1,6 +1,6 @@
 # General AssSpec2d you can use to assess the performance of any model
 
-colors <- unicol::uni_regensburg_2[c(
+uni_colors <- unicol::uni_regensburg_2[c(
         "eisvogelblau",
         "glutrot",
         "tuerkisgruen",
@@ -11,6 +11,24 @@ colors <- unicol::uni_regensburg_2[c(
         "urangelb",
         "heucherarot"
     )] |> unname()
+metropolis_colors <- c("#23373b", "#eb811b", "#14B03D", "#604c38")
+metropolis_bright_bg <- grDevices::rgb(250, 250, 250, maxColorValue = 255)
+
+colors <- c(metropolis_colors, uni_colors)
+theme <- ggplot2::theme_light() + 
+    ggplot2::theme(
+        rect = ggplot2::element_rect(
+            fill = metropolis_bright_bg, 
+            color = metropolis_bright_bg
+        ),
+        panel.background = ggplot2::element_rect(
+            fill = metropolis_bright_bg,
+            color = metropolis_bright_bg
+        ),
+        text = ggplot2::element_text(
+            family = "Fira Sans"
+        )
+    )
 
 rpp_prec_as2 <- AssSpec2d(
     file = "precision.jpeg",
@@ -26,7 +44,8 @@ rpp_prec_as2 <- AssSpec2d(
     scores_plot = FALSE,
     smooth_method = "loess",
     alpha = .075,
-    colors = colors
+    colors = colors,
+    theme = theme
 )
 
 logrank_as2 <- AssSpec2d(
@@ -39,15 +58,17 @@ logrank_as2 <- AssSpec2d(
     ylim = c(1e-4, 1), # try with 0 in the future
     x_lab = "rate of positive predictions",
     y_lab = "p-value (logrank test)",
+    text_size = 3,
     fellow_csv = FALSE,
     scores_plot = FALSE,
     smooth_method = "loess",
     scale_y = "log10",
     hline = list(yintercept = .05, linetype = "dashed", color = "black"),
     text = list(ggplot2::aes(x = .48, y = .05, label = "p = 0.05"), 
-        inherit.aes = FALSE, size = 3),
+        inherit.aes = FALSE, size = 3, family = "Fira Sans"),
     alpha = .075,
-    colors = colors
+    colors = colors,
+    theme = theme
 )
 
 prec_ci_as2 <- AssSpec2d(
@@ -59,14 +80,16 @@ prec_ci_as2 <- AssSpec2d(
     xlim = c(0, .5),
     x_lab = "rate of positive predictions",
     y_lab = "precision 95%-CI boundary",
+    text_size = 3,
     fellow_csv = FALSE,
     scores_plot = FALSE,
     smooth_method = "loess",
     hline = list(yintercept = 0.351, linetype = "dashed", color = "black"),
     text = list(ggplot2::aes(x = .4, y = .351, label = "IPI-45 (DSNHNL)"),
-        inherit.aes = FALSE, size = 3),
+        inherit.aes = FALSE, size = 3, family = "Fira Sans"),
     alpha = .075,
-    colors = colors
+    colors = colors,
+    theme = theme
 )
 
 as2_list <- list(
