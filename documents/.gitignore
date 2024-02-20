@@ -12,4 +12,7 @@ zerosum/paper
 *.nav
 *.toc
 *.vrb
+*fdb_latexmk
+*.fls
+*.xdv
 *playground*
