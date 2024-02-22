@@ -53,7 +53,7 @@
 \date{March 12, 2024}
 \author{Lukas Geßl}
 \institute{Chair of Statistical Bioinformatics, Regensburg University}
-% \titlegraphic{\hfill\includegraphics[height=1.5cm]{logo.pdf}}
+% \titlegraphic{\hfill\includegraphics[height=1.5cm]{logo.jpeg}}
 
 \begin{document}
 
@@ -62,48 +62,39 @@
 \section{Set the arena}
 
 \begin{frame}{DLBCL: a heterogeneous cancer with a homogeneous therapy}
+  In practice, there is only one treatment regimen: immunochemotherapy with R-CHOP. 
+  It cures two thirds of the patients.
 
-  Diffuse large B-cell lymphoma (DLBCL) is the most common type of B-cell lymphoma, 
-  accounting for 30\% of all diagnoses.
-
-  While DCBCL is a clinically very heterogeneous disease, there is only one treatment 
-  regimen: immunochemotherapy with R-CHOP. It cures two thirds of the patients.
-
-  Cure rates among relapsed or refractory patients are low, hence we should not send 
-  them through the standard therapy in the first place, but into alternative, more 
-  experimental treatments and trials instead. 
+  Cure rates among relapsed and refractory patients are low. Hence, we should not send 
+  them to R-CHOP therapy in the first place, but into alternative treatments including 
+  clinical trials.
   
-  We define relapsed or refractory patients or \alert{high-risk} patients as those with a 
+  We define \alert{high-risk} patients as those with a 
   \alert{progression-free survival (PFS) < 2 years}.
 
+  \begin{alertblock}{The goal of this thesis (and the MMML-Predict project) is ...}
+    ... to develop a \alert{cost-efficent ($\num{1500}$ euros) classifier filtering out 
+    high-risk DLBCL patients} before an R-CHOP treatment begins or at least at an early 
+    stage of it.
+  \end{alertblock}
 \end{frame}
 
-\begin{frame}{The goal of this thesis and the MMML-Predict project is ...}
-
-  ... to develop a \alert{cost-efficent classifier filtering out high-risk DLBCL patients} before an R-CHOP 
-  treatment begins or at least at an early stage of it. 
-
+\begin{frame}{}
   Candidate input features are 
-
   \begin{itemize}
     \item clinical data (like the IPI, see next slide),
     \item transcriptomic (RNA-seq, signatures like LAMIS, ABC vs. GCB),
     \item proteomic signatures,
     \item somatic genetic factors (translocations like MYC),
   \end{itemize}
-
   all of which are measured \alert{at diagnosis}, as well \alert{dynamic} features like 
-
   \begin{itemize}
-    \item imaging (PET-CT) after 2 cycles of R-CHOP,
-    \item the tumor burden in the body determined via circulating tumor DNA (ctDNA) in a 
-    liquid biopsy after 2 and 4 cycles of R-CHOP. 
+    \item the tumor burden accordig to a liquid biopsy after 2 and 4 cycles of R-CHOP. 
   \end{itemize}
 
 \end{frame}
 
-\begin{frame}{To beat: the Internatinal Prognostic Index (IPI) for non-Hodgkin's lymphoma}
-
+\begin{frame}{To beat: the International Prognostic Index (IPI) for non-Hodgkin's lymphoma}
   The IPI \autocite{ipi93} is a simple risk score ranging from 0 to 5 depending on how many of the following 
   \alert{clinical} questions for a patient one can answer with "yes": 
 
@@ -117,7 +108,6 @@
 
   The lower the IPI, the better the patient's outlook: higher progression-free survival (PFS) and 
   overall survival (OS).
-
 \end{frame}
 
 \begin{frame}{The IPI is a 30-year old dinosaur}
@@ -130,33 +120,31 @@
   to identify a clinically relevant high-risk group:
 
   \begin{itemize}
-    \item The cohort with IPI $\leq 5$ is \alert{too small} to significantly differ from the rest in terms 
-    of survival and to get attention from clincians.
-    \item The cohort with IPI $\leq 4$ \alert{lacks precision in identifying high-risk patients}: 16\% of
-    patients have an IPI $\leq 4$, but only 40\% of them are high-risk. This is too low to persuade 
-    a clinician to change the treatment plan.
+    \item The cohort with IPI $= 5$ is \alert{too small} to get attention from clincians.
+    \item The cohort with IPI $\geq 4$ \alert{lacks precision\footnote{Proportion of true 
+      positives among all positives.} in identifying high-risk patients}: 16\% of patients have 
+      an IPI $\geq 4$, but only 40\% of them are high-risk. This is too low to persuade 
+      a clinician to change the treatment plan.
   \end{itemize}
 
 \end{frame}
 
 \begin{frame}{What does "beating the IPI" mean?}
+  We need data to demonstrate the new classifier's superiority. MMML-Predict aims to enroll 300 DLBCL 
+  patients (200 training, 100 validation cohort). For my thesis, I need to use already existent data.
 
-  We need data to demonstrate the new classifier on. The MMML-Predict project is enrolling \alert{200} DLBCL 
-  patients in a \alert{training} cohort right now, \alert{100} will follow for the \alert{validation} cohort. 
-  For my thesis, I need to use already existent data.
-
-  Being better than the IPI means, on the validation cohort the new classifier needs to 
+  Beating the IPI means, on the validation cohort the new classifier needs to 
 
   \begin{itemize}
     \item be \alert{more precise in identifying high-risk patients} than the IPI: the 95\% confidence interval (CI) 
-    of the precision\footnote{Proportion of true positives among all positives.} according to a Clopper-Pearson test 
+    of the precision according to a Clopper-Pearson test 
     must not include 35\%\footnote{This is the  precision of IPI $\geq 4$ on pooled data from DSNHNL trials 
     ($\num{2721}$ samples).},
-    \item yield \alert{two cohorts with significantly differing survival} (PFS): logrank test p-value < 0.05.
+    \item yield \alert{two cohorts with significantly differing survival} (PFS): logrank-test p-value < 0.05.
   \end{itemize}
 
   Calculations with the size of the validation cohort ($n = 100$) suggest that a precision $\geq 50\%$ with a 
-  prevalence $\geq 15\%$ is enough.
+  prevalence\footnote{The rate of positive predictions.} $\geq 15\%$ is enough.
 \end{frame}
 
 \section{Meet the players}
@@ -179,9 +167,9 @@
       \end{tikzpicture}
     \column{0.5\textwidth}
       \begin{itemize}
-        \item Provide all data as input features to a single model.
+        \item Provide all data as input features to a single well-known model.
         \item Upside: easy to implement, one algorithm fits and picks the model 
-          including cross validation.
+          including a cross validation.
         \item Downside: data on vastly different scales may confuse the model and 
           its minimizer.
       \end{itemize}
@@ -216,8 +204,8 @@
       \end{tikzpicture}
     \column{0.5\textwidth}
       \begin{itemize}
-        \item Early models deal with high-throughput data and its problems: overfitting, 
-          systematic errors.
+        \item Early models deal with high-throughput data and its curses: curse 
+          of high dimensionality, measurement errors.
         \item Upside: modularizes the model selection process, allows for very
           sophisticated late models.
         \item Downside: implementing the model selection process becomes more 
@@ -226,7 +214,7 @@
   \end{columns}
 \end{frame}
 
-\begin{frame}{The key player for early-stage models: the zeroSum package}
+\begin{frame}{The key player for early-stage models: zeroSum}
   We feed high-troughput data into 
 
   \begin{itemize}
@@ -234,39 +222,24 @@
     \item \alert{logistic} models,
   \end{itemize}
 
-  both endowed with \alert{LASSO} regularization and the \alert{zero-sum} constraint. More precisely, we 
+  with \alert{LASSO} regularization and the \alert{zero-sum} constraint. Both  
   aim to estimate the response $y_i$ of sample $i$ by a predictor $x_i \in \mathbb{R}^p$ via 
   \begin{align}
     y_i = f(\beta_0 + x_i^T \beta) + \varepsilon_i
   \end{align}
   for a link function $f: \mathbb{R} \to \mathbb{R}$, a set of coefficients $(\beta_0, 
   \beta)$, and a residual $\varepsilon_i$.
-\end{frame}
 
-\begin{frame}{The zero-sum constraint}
-  We demand $\sum_{j=1}^p \beta_j = 0$, the zero-sum constraint. Why?
-
-  \begin{itemize}
-    \item Keep in mind: $x_i$ is usually the result of taking the logarithm of original 
-      observations $x_i'$, i.e. $x_{ij} = \log(x_{ij}')$ for all $j$.
-    \item If we rescale $x_i'$ by a factor $\gamma > 0$, then $x_i$ changes by an additive 
-      constant, $\log(\gamma)$: $\log(\gamma x_{ij}') = \log(\gamma) + \log(x_{ij}')$ for all j.
-    \item The zero-sum consraint ensures $\sum_{j=1}^p \beta_j (\log(\gamma) + \log(x_{ij}')) = 
-      \sum_{j=1}^p \beta_j \log(\gamma) + \sum_{j=1}^p \beta_j x_{ij} = 0 + \sum_{j=1}^p 
-      \beta_j x_i$. 
-  \end{itemize}
-  
-  In particular, $f(\beta_0 + \log(\gamma x_i')^T \beta) = f(\beta_0 + \log(x_i')^T \beta)$: the 
-  model is \alert{invariant under rescaling}.
-
-  This comes at a price: model training takes more computation time.
+  The zero-sum constraint, $\sum_{j=1}^p \beta_j = 0$, enforces \alert{scale-invariance}, i.e., 
+  the model output for $\alpha \cdot x_i$ ($\alpha > 0$) \textit{after taking the log} is the same 
+  as for $x_i$.
 \end{frame}
 
 \begin{frame}{Wrap it all into a loss function}
   Training such a model comes down to minimizing a loss function of the form 
   \begin{align}
     \mathcal{L}_{X, y, \lambda, u, v, w}(\beta_0, \beta) = -\sum_{i=1}^n w_i 
-    \ell(\tilde{y}_i, \beta_0 + x_i^T \beta) + \lambda \sum_{j=1}^p v_j |\beta_j| 
+    \ell_{X, \tilde{y}, \beta}(\tilde{y}_i, \beta_0 + x_i^T \beta) + \lambda \sum_{j=1}^p v_j |\beta_j| 
     \quad \text{subject to } \sum_{j=1}^p u_j \beta_j = 0
   \end{align}
   for hyperparameters 
@@ -277,45 +250,38 @@
     \item $w \in \RR^n_{\geq 0}$, the sample weights (often $w = \frac{1}{n} \mathbf{1}$).
   \end{itemize}
 
-  $\ell: \RR^2 \to \RR$ is a model-dependent log likelihood. $\tilde{y}_i$ is closely 
-  related to $y_i$ (if not the same), its nature again depends on the model.
+  $\ell_{X, y}: \RR^2 \to \RR$ is some kind of model-dependent log likelihood. $\tilde{y}_i$ 
+  is closely related to $y_i$ (if not the same), its nature again depends on the model.
 \end{frame}
 
-\begin{frame}{More on $\ell$ and $y_i$ in the \alert{Cox} model}
-  $y_i$ is the \alert{relative hazard} of sample $i$: the higher it is, the earlier we 
-  expect sample $i$ to face the event (cancer progression in our case) compared to the 
-  other samples.
+\begin{frame}{More on $\ell$ and $y_i$}
+  In the \alert{Cox} model,
+  \begin{itemize}
+    \item $y_i$ is the \alert{relative hazard} of sample $i$: the higher it is, the earlier we 
+      expect sample $i$ to face the event compared to the other samples.
+    \item $\tilde{y}_i$ is the time to event.
+    \item $\ell_{X, \tilde{y}, \beta}$ tries to enforce the correct ordering: $\beta_0 + x_i^T \beta$ 
+      should be monotonic in $\tilde{y}_i$.
+  \end{itemize}
 
-  $\tilde{y}_i$ is the time to event.
-
-  $\ell$ tries to enforce the correct ordering: $\beta_0 + x_i^T \beta$ should be monotonic 
-  in $\tilde{y}_i$.
-
-  \begin{alertblock}{Practical remark}
-    Patients often drop out of a study before the event occurs (so-called right censoring).
-    The Cox model can make use of the information that a sample was event-free for at least 
-    a certain amount of time, so we needn't discard right-censored samples.
-  \end{alertblock}
+  In the \alert{logistic} model,
+  \begin{itemize}
+    \item we need to \alert{threshold the time to event} to get a \alert{binary response}: 
+      $\tilde{y}_i = y_i = 1$ if the event happens before a certain time $T$, $0$ otherwise. 
+      One can view \alert{$T$} as yet \alert{another hyperparameter}.
+    \item $\ell_{X, \tilde{y}, \beta}$ forces $\beta_0 + \beta x_i^T$ to be high if 
+      $\tilde{y}_i = 1$ and low else.
+  \end{itemize}
 \end{frame}
 
-\begin{frame}{More on $\ell$ and $y_i$ in the \alert{logistic} model}
-  We need to \alert{threshold the time to event} to get a \alert{binary response}: 
-  $\tilde{y}_i = y_i = 1$ if the event happens before a certain time $T$, $0$ otherwise. 
-  The most straightforward choice is $T = 2$ years in our case. But: one can view \alert{$T$} 
-  as yet \alert{another hyperparameter}.
-  
-  We want to write 
-  \begin{align}
-    p(x_i) = \Pr(y_i=1 | x_i) = \frac{1}{1 + \exp(-(\beta_0 + x_i^T \beta))}
-  \end{align}
-  and try to enforce this with 
-  \begin{align}
-    \ell(y_i, \beta_0 + x_i^T \beta) = y_i \log p(x_i) + (1 - y_i) \log(1 - p(x_i)).
-  \end{align}
+\begin{frame}{What this means for right-censoring}
+  In reality, the data contains patients that dropped out of the study before the event could 
+  occur (right-censoring).
 
-  \begin{alertblock}{Practical remark}
-    When binarizing the data, we need to discard samples right-censored before $T$.
-  \end{alertblock}
+  The Cox model, more precisely $\ell_{X, \tilde{y}, \beta}$, can take this information into 
+  account.
+
+  For the logistic model, however, we cannot use patients censored before $T$.
 \end{frame}
 
 \section{Train the players and select the best}
@@ -364,10 +330,10 @@
 \end{frame}
 
 \begin{frame}{Software}
-  To fit and cross-validate the logistic and Cox models I rely on the \alert{zeroSum R package} 
-  by Thorsten Rehberg \autocite{zerosumR}. It extends the glmnet package by the zero-sum constraint.
+  \alert{zeroSum R package} \autocite{zerosumR} for fitting and cross-validating the logistic and Cox models. 
+  It extends the glmnet package by the zero-sum constraint.
 
-  When integrating a model found in a cross validation into another model I want to continue the cross 
+  When integrating a model selected in a cross validation into another model I want to continue the cross 
   validation of the early model. zeroSum does not report enough details, so I added this functionality in 
   a \alert{fork zeroSumLI} \autocite{zerosumliR}.
 
@@ -375,7 +341,7 @@
   work. I automized and outsourced this part into an \alert{R package lymphomaSurvivalPipeline} \autocite{lspR}.
 \end{frame}
 
-\section{Watch the game}
+\section{Watch the game: the results}
 
 \begin{frame}{The data}
   I trained models predicting progression-free survival $< 2$ years on data including bulk RNA-seq 
@@ -410,10 +376,9 @@
       What does this mean for choosing the hyperparameters?
       \begin{itemize}
         \item Logistic versus Cox regression not that important.
-        \item Early integrating IPI (features) does not work, yet.
         \item With zero-sum constraint usually a bit worse than with.
-        \item Standardization via LASSO weights $w$ does not help.
         \item Choose $T = 1.75$.
+        \item Early integration and standardization disappoint.
       \end{itemize}
   \end{columns}
 \end{frame}
@@ -457,7 +422,7 @@
       a PFS close to 2 years in the loss,
     \item implement \alert{late integration}: with, e.g., linear regression, random forest as second-
       stage models,
-    \item do \alert{feature selection}: analyze which pheno fetures are worth integrating.
+    \item integrate more features.
   \end{itemize}
 \end{frame}
 

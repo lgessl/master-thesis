@@ -18,6 +18,7 @@ data <- read(data_spec)
 
 for(as2 in as2_list){
     as2$file <- file.path(dir, as2$file)
+    # as2$file <- stringr::str_replace(as2$file, "\\..+$", ".pdf")
     as2$x_lab <- "prevalence"
     as2$title <- ""
     as2$alpha <- .13

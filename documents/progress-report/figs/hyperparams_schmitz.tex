@@ -8,7 +8,7 @@
         input data & Gene expression only; gene expression with early integrated IPI: 
             as one continuous variable ("with ipi cont") or five binary variables ("with disc ipi feat"). \\ 
         zero-sum weights & $u = 0$; $u_i = 1$ for gene-expression features, 
-            else $u_i = 1$ ("zerosum"). \\
+            else $u_i = 0$ ("zerosum"). \\
         LASSO weights & Standardization, i.e., $v_i$ is the standard deviation of feature $i$ ("std"); 
             $v_i = 1$ for gene-expression features, else $0$. \\
         sample weights & $w = \mathbf{1}/n$. \\
