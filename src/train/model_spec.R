@@ -152,6 +152,34 @@ cv_ipi_cont_std$directory <- "cox/3-early-int/vanilla-ipi-cont-std"
 cv_ipi_cont_std$optional_fitter_args$family <- "cox"
 cv_ipi_cont_std$response_type <- "survival_censored"
 
+# add ipi group as one discrete feature
+# logistic
+# ipi penalty = 0
+lv_ipi_group <- lv_disc_ipi_feat
+lv_ipi_group$name <- "LV with IPI group"
+lv_ipi_group$directory <- "logistic/3-early-int/vanilla-ipi-group"
+lv_ipi_group$optional_fitter_args$penalty.factor <- c(rep(1, n_genes), rep(0, 2))
+lv_ipi_group$include_from_discrete_pheno <- "ipi_group"
+# standardize
+lv_ipi_group_std <- lv_ipi_group
+lv_ipi_group_std$name <- "LV with IPI group std"
+lv_ipi_group_std$directory <- "logistic/3-early-int/vanilla-ipi-group-std"
+lv_ipi_group_std$optional_fitter_args$standardize <- TRUE
+lv_ipi_group_std$optional_fitter_args$penalty.factor <- NULL
+# same for cox
+# ipi penalty = 0
+cv_ipi_group <- lv_ipi_group
+cv_ipi_group$name <- "CV with IPI group"
+cv_ipi_group$directory <- "cox/3-early-int/vanilla-ipi-group"
+cv_ipi_group$optional_fitter_args$family <- "cox"
+cv_ipi_group$response_type <- "survival_censored"
+# standardize
+cv_ipi_group_std <- lv_ipi_group_std
+cv_ipi_group_std$name <- "CV with IPI group std"
+cv_ipi_group_std$directory <- "cox/3-early-int/vanilla-ipi-group-std"
+cv_ipi_group_std$optional_fitter_args$family <- "cox"
+cv_ipi_group_std$response_type <- "survival_censored"
+
 ei_msl <- list(
     lv_disc_ipi_feat = lv_disc_ipi_feat,
     lv_disc_ipi_feat_std = lv_disc_ipi_feat_std,
@@ -160,5 +188,9 @@ ei_msl <- list(
     lv_ipi_cont = lv_ipi_cont,
     lv_ipi_cont_std = lv_ipi_cont_std,
     cv_ipi_cont = cv_ipi_cont,
-    cv_ipi_cont_std = cv_ipi_cont_std
+    cv_ipi_cont_std = cv_ipi_cont_std,
+    lv_ipi_group = lv_ipi_group,
+    lv_ipi_group_std = lv_ipi_group_std,
+    cv_ipi_group = cv_ipi_group,
+    cv_ipi_group_std = cv_ipi_group_std
 )

@@ -13,7 +13,7 @@ uni_colors <- unicol::uni_regensburg_2[c(
     )] |> unname()
 metropolis_colors <- c("#23373b", "#eb811b", "#14B03D", "#604c38")
 metropolis_bright_bg <- grDevices::rgb(250, 250, 250, maxColorValue = 255)
-font_familiy <- "Fira Sans"
+font_family <- "Fira Sans"
 
 colors <- c(metropolis_colors, uni_colors)
 theme <- ggplot2::theme_light() + 
@@ -35,7 +35,7 @@ theme <- ggplot2::theme_light() +
             color = metropolis_bright_bg
         ),
         text = ggplot2::element_text(
-            family = font_familiy
+            family = font_family
         )
     )
 
@@ -74,7 +74,7 @@ logrank_as2 <- AssSpec2d(
     scale_y = "log10",
     hline = list(yintercept = .05, linetype = "dashed", color = "black"),
     text = list(ggplot2::aes(x = .48, y = .05, label = "p = 0.05"), 
-        inherit.aes = FALSE, size = 3, family = "Fira Sans"),
+        inherit.aes = FALSE, size = 3, family = font_family),
     alpha = .075,
     colors = colors,
     theme = theme
@@ -95,7 +95,7 @@ prec_ci_as2 <- AssSpec2d(
     smooth_method = "loess",
     hline = list(yintercept = 0.351, linetype = "dashed", color = "black"),
     text = list(ggplot2::aes(x = .4, y = .351, label = "IPI-45 (DSNHNL)"),
-        inherit.aes = FALSE, size = 3, family = "Fira Sans"),
+        inherit.aes = FALSE, size = 3, family = font_family),
     alpha = .075,
     colors = colors,
     theme = theme
