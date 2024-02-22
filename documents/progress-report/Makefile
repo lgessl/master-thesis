@@ -1,6 +1,6 @@
-rscripts = figs/plots.R figs/tables.R
+rscripts = figs/plots.R figs/tables.R ../../src/assess/ass_spec.R\
+	../../src/train/model_spec.R
 csvs = ../../results/schmitz/auc.csv ../../results/schmitz/ei_auc.csv
-rdss = ../../models/schmitz/logistic/0-vanilla/zerosum/1-75/fit_obj.rds
 
 .PHONY: main.pdf all clean
 
@@ -8,9 +8,9 @@ all: main.pdf
 
 # CUSTOM BUILD RULES
 
-figs/auc_table.tex: $(rscripts) $(csvs) $(rdss)
+figs/auc_table.tex: $(rscripts) $(csvs)
 	Rscript figs/plots.R
-	Rscript figs/tables.R 
+	Rscript figs/tables.R
 
 # MAIN LATEXMK RULE
 

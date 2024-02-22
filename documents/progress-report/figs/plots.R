@@ -22,6 +22,7 @@ for(as2 in as2_list){
     as2$x_lab <- "prevalence"
     as2$title <- ""
     as2$alpha <- .13
+    as2$dpi <- 400
     assess_2d(
         expr_mat = data[["expr_mat"]],
         pheno_tbl = data[["pheno_tbl"]],

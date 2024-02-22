@@ -69,18 +69,20 @@
   them to R-CHOP therapy in the first place, but into alternative treatments including 
   clinical trials.
   
+  \pause
   We define \alert{high-risk} patients as those with a 
   \alert{progression-free survival (PFS) < 2 years}.
 
-  \begin{alertblock}{The goal of this thesis (and the MMML-Predict project) is ...}
-    ... to develop a \alert{cost-efficent ($\num{1500}$ euros) classifier filtering out 
+  \medskip
+  \begin{block}{The goal of this thesis (and the MMML-Predict project) is ...}
+    ... to develop a \alert{cost-efficent ($< \num{1500}$ euros) classifier filtering out 
     high-risk DLBCL patients} before an R-CHOP treatment begins or at least at an early 
     stage of it.
-  \end{alertblock}
+  \end{block}
 \end{frame}
 
 \begin{frame}{}
-  Candidate input features are 
+  Candidate input features for the new classifier are 
   \begin{itemize}
     \item clinical data (like the IPI, see next slide),
     \item transcriptomic (RNA-seq, signatures like LAMIS, ABC vs. GCB),
@@ -106,6 +108,7 @@
     \item Number of extranodal sites (like bone marrow, liver, lung) involved: more than one?
   \end{itemize}
 
+  \pause
   The lower the IPI, the better the patient's outlook: higher progression-free survival (PFS) and 
   overall survival (OS).
 \end{frame}
@@ -119,6 +122,7 @@
   Still, just six values the IPI can attain mean it's very rough. In particular, it fails 
   to identify a clinically relevant high-risk group:
 
+  \pause
   \begin{itemize}
     \item The cohort with IPI $= 5$ is \alert{too small} to get attention from clincians.
     \item The cohort with IPI $\geq 4$ \alert{lacks precision\footnote{Proportion of true 
@@ -133,6 +137,7 @@
   We need data to demonstrate the new classifier's superiority. MMML-Predict aims to enroll 300 DLBCL 
   patients (200 training, 100 validation cohort). For my thesis, I need to use already existent data.
 
+  \pause
   Beating the IPI means, on the validation cohort the new classifier needs to 
 
   \begin{itemize}
@@ -143,6 +148,7 @@
     \item yield \alert{two cohorts with significantly differing survival} (PFS): logrank-test p-value < 0.05.
   \end{itemize}
 
+  \pause
   Calculations with the size of the validation cohort ($n = 100$) suggest that a precision $\geq 50\%$ with a 
   prevalence\footnote{The rate of positive predictions.} $\geq 15\%$ is enough.
 \end{frame}
@@ -227,9 +233,10 @@
   \begin{align}
     y_i = f(\beta_0 + x_i^T \beta) + \varepsilon_i
   \end{align}
-  for a link function $f: \mathbb{R} \to \mathbb{R}$, a set of coefficients $(\beta_0, 
+  for a link function $f: \mathbb{R} \to \mathbb{R}$, a vector of coefficients $(\beta_0, 
   \beta)$, and a residual $\varepsilon_i$.
 
+  \pause
   The zero-sum constraint, $\sum_{j=1}^p \beta_j = 0$, enforces \alert{scale-invariance}, i.e., 
   the model output for $\alpha \cdot x_i$ ($\alpha > 0$) \textit{after taking the log} is the same 
   as for $x_i$.
@@ -250,7 +257,7 @@
     \item $w \in \RR^n_{\geq 0}$, the sample weights (often $w = \frac{1}{n} \mathbf{1}$).
   \end{itemize}
 
-  $\ell_{X, y}: \RR^2 \to \RR$ is some kind of model-dependent log likelihood. $\tilde{y}_i$ 
+  $\ell_{X, \tilde{y}, \beta}: \RR^2 \to \RR$ is some kind of model-dependent log likelihood. $\tilde{y}_i$ 
   is closely related to $y_i$ (if not the same), its nature again depends on the model.
 \end{frame}
 
@@ -264,6 +271,7 @@
       should be monotonic in $\tilde{y}_i$.
   \end{itemize}
 
+  \pause
   In the \alert{logistic} model,
   \begin{itemize}
     \item we need to \alert{threshold the time to event} to get a \alert{binary response}: 
@@ -333,10 +341,12 @@
   \alert{zeroSum R package} \autocite{zerosumR} for fitting and cross-validating the logistic and Cox models. 
   It extends the glmnet package by the zero-sum constraint.
 
+  \pause
   When integrating a model selected in a cross validation into another model I want to continue the cross 
   validation of the early model. zeroSum does not report enough details, so I added this functionality in 
   a \alert{fork zeroSumLI} \autocite{zerosumliR}.
 
+  \pause
   Training and assessing a bunch of models on several data sets means a lot of administrative, repetitive 
   work. I automized and outsourced this part into an \alert{R package lymphomaSurvivalPipeline} \autocite{lspR}.
 \end{frame}
@@ -358,7 +368,7 @@
       \end{itemize}
     \column{.4\textwidth}
       \input{figs/ipi_schmitz.tex}
-    \end{columns}
+  \end{columns}
 \end{frame}
 
 \begin{frame}{The line-up: the models tried out}
@@ -415,6 +425,7 @@
       for this thesis, less helpful for MMML-Predict).
   \end{itemize}
 
+  \pause
   \textbf{On the methods front}, I want to 
   \begin{itemize}
     \item try to get \alert{early integration} with zeroSum working,

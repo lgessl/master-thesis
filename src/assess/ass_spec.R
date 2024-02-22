@@ -13,20 +13,29 @@ uni_colors <- unicol::uni_regensburg_2[c(
     )] |> unname()
 metropolis_colors <- c("#23373b", "#eb811b", "#14B03D", "#604c38")
 metropolis_bright_bg <- grDevices::rgb(250, 250, 250, maxColorValue = 255)
+font_familiy <- "Fira Sans"
 
 colors <- c(metropolis_colors, uni_colors)
 theme <- ggplot2::theme_light() + 
     ggplot2::theme(
-        rect = ggplot2::element_rect(
-            fill = metropolis_bright_bg, 
+        plot.background = ggplot2::element_rect(
+            fill = metropolis_bright_bg,
             color = metropolis_bright_bg
         ),
         panel.background = ggplot2::element_rect(
             fill = metropolis_bright_bg,
             color = metropolis_bright_bg
         ),
+        legend.background = ggplot2::element_rect(
+            fill = metropolis_bright_bg,
+            color = metropolis_bright_bg
+        ),
+        legend.box.background = ggplot2::element_rect(
+            fill = metropolis_bright_bg,
+            color = metropolis_bright_bg
+        ),
         text = ggplot2::element_text(
-            family = "Fira Sans"
+            family = font_familiy
         )
     )
 
