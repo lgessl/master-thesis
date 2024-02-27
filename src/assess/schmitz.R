@@ -2,37 +2,21 @@
 
 library(lymphomaSurvivalPipeline)
 
-source("src/train/model_spec.R") # basic_msl
-source("src/assess/ass_spec.R") # as2_list, auc_as0
+source("src/train/model_spec.R") # basic_models
+source("src/assess/ass_spec.R") # ass2d_list, auc_as0
 
 
-basic_msl <- prepend_to_directory(basic_msl, "models/schmitz")
-ei_msl <- prepend_to_directory(ei_msl, "models/schmitz")
+basic_models <- prepend_to_directory(basic_models, "models/schmitz")
+ei_models <- prepend_to_directory(ei_models, "models/schmitz")
 
-data_spec <- readRDS("data/schmitz/data_spec.rds")
+data <- readRDS("data/schmitz/data.rds")
+data$cohort <- "test"
 
-for(as2 in as2_list){
-    assess_2d_center(
-        ass_spec_2d = as2,
-        model_spec_list = c(basic_msl, ei_msl),
-        data_spec = data_spec,
-        cohorts = c("train", "test"),
-        comparison_plot = FALSE
-    )
-}
+for(ass2d in ass2d_list)
+    ass2d$assess_center(data, basic_models)
 
 auc_as0$file <- "models/schmitz/auc.csv"
-assess_0d_center(
-    ass_spec_0d = auc_as0,
-    data_spec = data_spec,
-    model_spec_list = basic_msl,
-    cohorts = c("test")
-)
+auc_ass_scalar$assess_center(data, basic_models)
 
 auc_as0$file <- "models/schmitz/ei_auc.csv"
-assess_0d_center(
-    ass_spec_0d = auc_as0,
-    data_spec = data_spec,
-    model_spec_list = ei_msl,
-    cohorts = c("test")
-)
+auc_ass_scalar$assess_center(data, basic_models)

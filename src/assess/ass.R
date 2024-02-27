@@ -1,4 +1,4 @@
-# General AssSpec2d you can use to assess the performance of any model
+# General Ass2d$new you can use to assess the performance of any model
 
 uni_colors <- unicol::uni_regensburg_2[c(
         "eisvogelblau",
@@ -39,7 +39,7 @@ theme <- ggplot2::theme_light() +
         )
     )
 
-rpp_prec_as2 <- AssSpec2d(
+rpp_prec_as2 <- Ass2d$new(
     file = "precision.jpeg",
     x_metric = "rpp",
     y_metric = "prec",
@@ -57,7 +57,7 @@ rpp_prec_as2 <- AssSpec2d(
     theme = theme
 )
 
-logrank_as2 <- AssSpec2d(
+logrank_as2 <- Ass2d$new(
     file = "logrank.jpeg",
     x_metric = "rpp",
     y_metric = "logrank",
@@ -80,7 +80,7 @@ logrank_as2 <- AssSpec2d(
     theme = theme
 )
 
-prec_ci_as2 <- AssSpec2d(
+prec_ci_as2 <- Ass2d$new(
     file = "precision_ci.jpeg",
     x_metric = "rpp",
     y_metric = "precision_ci",
@@ -101,13 +101,13 @@ prec_ci_as2 <- AssSpec2d(
     theme = theme
 )
 
-as2_list <- list(
+ass2d_list <- list(
     "rpp_prec" = rpp_prec_as2,
     "logrank_as2" = logrank_as2,
     "prec_ci_as2" = prec_ci_as2
 )
 
-auc_as0 <- AssSpec0d(
+auc_ass_scalar <- AssScalar$new(
     metric = "get_auc",
     pivot_time_cutoff = 2
 )

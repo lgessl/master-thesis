@@ -2,19 +2,12 @@
 
 library(lymphomaSurvivalPipeline)
 
-source("src/train/model_spec.R") # model_spec_list
+source("src/train/models.R") # model_spec_list
 
-data_spec <- readRDS("data/schmitz/data_spec.rds")
+data <- readRDS("data/schmitz/data.rds")
 
-basic_msl <- prepend_to_directory(basic_msl, "models/schmitz")
-ei_msl <- prepend_to_directory(ei_msl, "models/schmitz")
+basic_models <- prepend_to_directory(basic_models, "models/schmitz")
+ei_models <- prepend_to_directory(ei_models, "models/schmitz")
 
-# training_camp(
-#     data_spec = data_spec,
-#     model_spec_list = basic_msl
-# )
-
-training_camp(
-    data_spec = data_spec, 
-    model_spec_list = ei_msl
-)
+training_camp(basic_models, data)
+training_camp(ei_models, data)

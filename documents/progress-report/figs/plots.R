@@ -2,7 +2,7 @@
 
 library(lymphomaSurvivalPipeline)
 
-data_spec <- readRDS("../../data/schmitz/data_spec.rds")
+data <- readRDS("../../data/schmitz/data.rds")
 source("../../src/train/model_spec.R") # logistic@1.75
 source("../../src/assess/ass_spec.R") # prec_ci_as2, rpp_prec_as2, logrank_as2
 
@@ -12,9 +12,9 @@ logistic$directory <- file.path("../../models/schmitz", logistic$directory, "1-7
 logistic$time_cutoffs <- 1.75
 logistic$name <- c("logistic, T = 1.75")
 
-data_spec$cohort <- "test"
-data_spec$directory <- file.path("../..", data_spec$directory)
-data <- read(data_spec)
+data$cohort <- "test"
+data$directory <- file.path("../..", data$directory)
+data <- read(data)
 
 for(as2 in as2_list){
     as2$file <- file.path(dir, as2$file)
@@ -26,7 +26,7 @@ for(as2 in as2_list){
     assess_2d(
         expr_mat = data[["expr_mat"]],
         pheno_tbl = data[["pheno_tbl"]],
-        data_spec = data_spec,
+        data = data,
         model_spec = logistic,
         ass_spec_2d = as2
     )

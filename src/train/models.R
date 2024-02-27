@@ -1,4 +1,4 @@
-# General list of ModelSpec objects you can source into any script training models on a 
+# General list of Model$new objects you can source into any script training models on a 
 # certain data set
 
 n_genes <- 25066
@@ -7,7 +7,7 @@ n_genes <- 25066
 
 # COX
 # vanilla
-cox = ModelSpec(
+cox = Model$new(
     name = "cox",
     directory = "cox/0-vanilla/zerosum",
     fitter = zeroSum::zeroSum,
@@ -16,7 +16,7 @@ cox = ModelSpec(
     optional_fitter_args = list(family = "cox", alpha = 1, zeroSum = FALSE),
     response_type = "survival_censored"
 )
-cox_std = ModelSpec(
+cox_std = Model$new(
     name = "cox std",
     directory = "cox/0-vanilla/std",
     fitter = zeroSum::zeroSum,
@@ -27,7 +27,7 @@ cox_std = ModelSpec(
     response_type = "survival_censored"
 )
 # zerosum
-cox_zerosum = ModelSpec(
+cox_zerosum = Model$new(
     name = "cox zerosum",
     fitter = zeroSum::zeroSum,
     directory = "cox/1-zerosum",
@@ -38,7 +38,7 @@ cox_zerosum = ModelSpec(
 )
 # LOGISTIC
 # vanilla
-logistic = ModelSpec(
+logistic = Model$new(
     name = "logistic",
     directory = "logistic/0-vanilla/zerosum",
     fitter = zeroSum::zeroSum,
@@ -47,7 +47,7 @@ logistic = ModelSpec(
     optional_fitter_args = list(family = "binomial", alpha = 1, zeroSum = FALSE),
     response_type = "binary"
 )
-logistic_std = ModelSpec(
+logistic_std = Model$new(
     name = "logistic std",
     directory = "logistic/0-vanilla/std",
     fitter = zeroSum::zeroSum,
@@ -58,7 +58,7 @@ logistic_std = ModelSpec(
     response_type = "binary"
 )
 # zerosum
-logistic_zerosum = ModelSpec(
+logistic_zerosum = Model$new(
     name = "logistic zerosum",
     directory = "logistic/1-zerosum",
     fitter = zeroSum::zeroSum,
@@ -68,7 +68,7 @@ logistic_zerosum = ModelSpec(
     response_type = "binary"
 )
 
-basic_msl <- list(
+basic_models <- list(
     # COX
     # vanilla
     cox = cox,
@@ -91,7 +91,7 @@ basic_msl <- list(
 # add discretized ipi features (as in paper)
 # logistic
 # ipi penalty = 0
-lv_disc_ipi_feat = ModelSpec(
+lv_disc_ipi_feat = Model$new(
     name = "LV with disc IPI feat",
     fitter = zeroSum::zeroSum,
     directory = "logistic/3-early-int/vanilla-disc-ipi-feat",
@@ -180,7 +180,7 @@ cv_ipi_group_std$directory <- "cox/3-early-int/vanilla-ipi-group-std"
 cv_ipi_group_std$optional_fitter_args$family <- "cox"
 cv_ipi_group_std$response_type <- "survival_censored"
 
-ei_msl <- list(
+ei_models <- list(
     lv_disc_ipi_feat = lv_disc_ipi_feat,
     lv_disc_ipi_feat_std = lv_disc_ipi_feat_std,
     cv_disc_ipi_feat = cv_disc_ipi_feat,

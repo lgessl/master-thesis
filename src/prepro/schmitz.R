@@ -76,16 +76,18 @@ if(only_with_survival_analyis){
 }
 
 # Assimilate expression and pheno data
-data <- ensure_patients_match(expr_tbl, pheno_tbl)
-expr_tbl <- data$expr_tbl
-pheno_tbl <- data$pheno_tbl
+res <- ensure_patients_match(expr_tbl, pheno_tbl)
+expr_tbl <- res[["expr_tbl"]]
+pheno_tbl <- res[["pheno_tbl"]]
 
-data_spec <- DataSpec(
+data <- Data$new(
     name = "Schmitz et al. (2018)",
     directory = data_dir,
     train_prop = training_prop,
     pivot_time_cutoff = pivot_time_cutoff,
-    benchmark_col = benchmark_col
+    benchmark_col = benchmark_col,
+    time_to_event_col = time_to_event_col,
+    event_col = event_col
 )
 
 pheno_tbl <- discretize_tbl_cols(
@@ -96,23 +98,22 @@ pheno_tbl <- discretize_tbl_cols(
 )
 
 qc_preprocess(
+    data = data,
     expr_tbl = expr_tbl,
-    pheno_tbl = pheno_tbl,
-    data_spec = data_spec,
-    check_default = TRUE
+    pheno_tbl = pheno_tbl
 )
 
 write_data_info(
     filename = file.path(data_dir, "info.json"),
     expr_tbl = expr_tbl,
     pheno_tbl = pheno_tbl,
-    data_spec = data_spec
+    data = data
 )
 
 cat("Writing preprocessed data to", data_dir, "\n")
 # readr::write_csv(pheno_tbl, file.path(data_dir, "pheno.csv"))
 # readr::write_csv(expr_tbl, file.path(data_dir, "expr.csv"))
-saveRDS(data_spec, file.path(data_dir, "data_spec.rds"))
+saveRDS(data, file.path(data_dir, "data.rds"))
 
 if(clean){
     cat("Removing downloaded files\n")
