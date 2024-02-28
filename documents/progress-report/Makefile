@@ -1,5 +1,5 @@
-rscripts = figs/plots.R figs/tables.R ../../src/assess/ass_spec.R\
-	../../src/train/model_spec.R
+rscripts = figs/plots.R figs/tables.R ../../src/assess/ass.R\
+	../../src/train/models.R
 csvs = ../../results/schmitz/auc.csv ../../results/schmitz/ei_auc.csv
 
 .PHONY: main.pdf all clean

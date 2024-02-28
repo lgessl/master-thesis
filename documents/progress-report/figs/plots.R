@@ -3,8 +3,8 @@
 library(lymphomaSurvivalPipeline)
 
 data <- readRDS("../../data/schmitz/data.rds")
-source("../../src/train/model_spec.R") # logistic@1.75
-source("../../src/assess/ass_spec.R") # prec_ci_as2, rpp_prec_as2, logrank_as2
+source("../../src/train/models.R") # logistic@1.75
+source("../../src/assess/ass.R") # prec_ci_ass2d, rpp_prec_ass2d, logrank_ass2d
 
 dir <- "figs"
 
@@ -14,21 +14,13 @@ logistic$name <- c("logistic, T = 1.75")
 
 data$cohort <- "test"
 data$directory <- file.path("../..", data$directory)
-data <- read(data)
+data$read()
 
-for(as2 in as2_list){
-    as2$file <- file.path(dir, as2$file)
-    # as2$file <- stringr::str_replace(as2$file, "\\..+$", ".pdf")
-    as2$x_lab <- "prevalence"
-    as2$title <- ""
-    as2$alpha <- .13
-    as2$dpi <- 400
-    assess_2d(
-        expr_mat = data[["expr_mat"]],
-        pheno_tbl = data[["pheno_tbl"]],
-        data = data,
-        model_spec = logistic,
-        ass_spec_2d = as2
-    )
+for(ass2d in ass2d_list){
+    ass2d$file <- file.path(dir, ass2d$file)
+    ass2d$x_lab <- "prevalence"
+    ass2d$title <- ""
+    ass2d$alpha <- .13
+    ass2d$dpi <- 400
+    ass2d$assess(data, logistic)
 }
-#
