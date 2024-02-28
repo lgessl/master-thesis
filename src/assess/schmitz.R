@@ -2,8 +2,8 @@
 
 library(lymphomaSurvivalPipeline)
 
-source("src/train/model_spec.R") # basic_models
-source("src/assess/ass_spec.R") # ass2d_list, auc_as0
+source("src/train/models.R") # basic_models, ei_models
+source("src/assess/ass.R") # ass2d_list, auc_ass_scalar
 
 
 basic_models <- prepend_to_directory(basic_models, "models/schmitz")
@@ -15,8 +15,8 @@ data$cohort <- "test"
 for(ass2d in ass2d_list)
     ass2d$assess_center(data, basic_models)
 
-auc_as0$file <- "models/schmitz/auc.csv"
+auc_ass_scalar$file <- "models/schmitz/auc.csv"
 auc_ass_scalar$assess_center(data, basic_models)
 
-auc_as0$file <- "models/schmitz/ei_auc.csv"
-auc_ass_scalar$assess_center(data, basic_models)
+auc_ass_scalar$file <- "models/schmitz/ei_auc.csv"
+auc_ass_scalar$assess_center(data, ei_models)
