@@ -91,7 +91,7 @@
   \end{itemize}
   all of which are measured \alert{at diagnosis}, as well \alert{dynamic} features like 
   \begin{itemize}
-    \item the tumor burden accordig to a liquid biopsy after 2 and 4 cycles of R-CHOP. 
+    \item the tumor burden according to a liquid biopsy after 2 and 4 cycles of R-CHOP. 
   \end{itemize}
 
 \end{frame}
@@ -135,21 +135,21 @@
 
 \begin{frame}{What does "beating the IPI" mean?}
   We need data to demonstrate the new classifier's superiority. MMML-Predict aims to enroll 300 DLBCL 
-  patients (200 training, 100 validation cohort). For my thesis, I need to use already existent data.
+  patients (200 training, 100 test cohort). For my thesis, I need to use already existent data.
 
   \pause
-  Beating the IPI means, on the validation cohort the new classifier needs to 
+  Beating the IPI means, on the test cohort the new classifier needs to 
 
   \begin{itemize}
     \item be \alert{more precise in identifying high-risk patients} than the IPI: the 95\% confidence interval (CI) 
-    of the precision according to a Clopper-Pearson test 
+    of the precision according to Clopper-Pearson  
     must not include 35\%\footnote{This is the  precision of IPI $\geq 4$ on pooled data from DSNHNL trials 
     ($\num{2721}$ samples).},
     \item yield \alert{two cohorts with significantly differing survival} (PFS): logrank-test p-value < 0.05.
   \end{itemize}
 
   \pause
-  Calculations with the size of the validation cohort ($n = 100$) suggest that a precision $\geq 50\%$ with a 
+  Calculations with the size of the test cohort ($n = 100$) suggest that a precision $\geq 50\%$ with a 
   prevalence\footnote{The rate of positive predictions.} $\geq 15\%$ is enough.
 \end{frame}
 
@@ -246,7 +246,7 @@
   Training such a model comes down to minimizing a loss function of the form 
   \begin{align}
     \mathcal{L}_{X, y, \lambda, u, v, w}(\beta_0, \beta) = -\sum_{i=1}^n w_i 
-    \ell_{X, \tilde{y}, \beta}(\tilde{y}_i, \beta_0 + x_i^T \beta) + \lambda \sum_{j=1}^p v_j |\beta_j| 
+    \ell_{X, y, \beta}(\tilde{y}_i, \beta_0 + x_i^T \beta) + \lambda \sum_{j=1}^p v_j |\beta_j| 
     \quad \text{subject to } \sum_{j=1}^p u_j \beta_j = 0
   \end{align}
   for hyperparameters 
@@ -386,7 +386,7 @@
       What does this mean for choosing the hyperparameters?
       \begin{itemize}
         \item Logistic versus Cox regression not that important.
-        \item With zero-sum constraint usually a bit worse than with.
+        \item With zero-sum constraint usually a bit worse than without.
         \item Choose $T = 1.75$.
         \item Early integration and standardization disappoint.
       \end{itemize}
@@ -429,7 +429,7 @@
   \textbf{On the methods front}, I want to 
   \begin{itemize}
     \item try to get \alert{early integration} with zeroSum working,
-    \item use zero-sum weights $w \neq \frac{1}{n} \mathbf{1}$ to give less weight to patients with 
+    \item use sample weights $w \neq \frac{1}{n} \mathbf{1}$ to give less weight to patients with 
       a PFS close to 2 years in the loss,
     \item implement \alert{late integration}: with, e.g., linear regression, random forest as second-
       stage models,
