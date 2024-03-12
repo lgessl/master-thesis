@@ -257,7 +257,7 @@
     \item $w \in \RR^n_{\geq 0}$, the sample weights (often $w = \frac{1}{n} \mathbf{1}$).
   \end{itemize}
 
-  $\ell_{X, \tilde{y}, \beta}: \RR^2 \to \RR$ is some kind of model-dependent log likelihood. $\tilde{y}_i$ 
+  $\ell_{X, y, \beta}: \RR^2 \to \RR$ is some kind of model-dependent log likelihood. $\tilde{y}_i$ 
   is closely related to $y_i$ (if not the same), its nature again depends on the model.
 \end{frame}
 
@@ -267,7 +267,7 @@
     \item $y_i$ is the \alert{relative hazard} of sample $i$: the higher it is, the earlier we 
       expect sample $i$ to face the event compared to the other samples.
     \item $\tilde{y}_i$ is the time to event.
-    \item $\ell_{X, \tilde{y}, \beta}$ tries to enforce the correct ordering: $\beta_0 + x_i^T \beta$ 
+    \item $\ell_{X, y, \beta}$ tries to enforce the correct ordering: $\beta_0 + x_i^T \beta$ 
       should be monotonic in $\tilde{y}_i$.
   \end{itemize}
 
@@ -277,7 +277,7 @@
     \item we need to \alert{threshold the time to event} to get a \alert{binary response}: 
       $\tilde{y}_i = y_i = 1$ if the event happens before a certain time $T$, $0$ otherwise. 
       One can view \alert{$T$} as yet \alert{another hyperparameter}.
-    \item $\ell_{X, \tilde{y}, \beta}$ forces $\beta_0 + \beta x_i^T$ to be high if 
+    \item $\ell_{X, y, \beta}$ forces $\beta_0 + \beta x_i^T$ to be high if 
       $\tilde{y}_i = 1$ and low else.
   \end{itemize}
 \end{frame}
@@ -286,7 +286,7 @@
   In reality, the data contains patients that dropped out of the study before the event could 
   occur (right-censoring).
 
-  The Cox model, more precisely $\ell_{X, \tilde{y}, \beta}$, can take this information into 
+  The Cox model, more precisely $\ell_{X, y, \beta}$, can take this information into 
   account.
 
   For the logistic model, however, we cannot use patients censored before $T$.
