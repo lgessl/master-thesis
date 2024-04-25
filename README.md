@@ -135,7 +135,7 @@ In the key prevalence area, [15%, 20%],
 2. the logrank test gives p-values below .05, for the best models we get to 0.1%, and 
 3. the precision 95% CI interval for the best models does not contain 35.1% (2-years PFS of IPI 4-5 in pooled DSHNHL trials, n = 2721).
 
-Censoring samples with time to event greater than t for t = 1.5, 1.75 at t or thresholding it according to this cutoff for binomial regression gives best results (in particual better than t = 2).
+Censoring samples with time to event greater than t for t = 1.5, 1.75 at t or thresholding it according to this cutoff for binomial regression gives best results (in pratice better than t = 2).
 
 ### Early integration of pheno data leads to overfitting
 
@@ -143,8 +143,21 @@ Early integrating the IPI features from the pheno data causes more overfitting, 
 
 ## To do
 
-### Use sample-wise weights in cost function
+Sorted by decreasing priority.
 
 ### Late integration
 
-Fork `zeroSum` package so *all* models fit during the cross validation are returned by `zeroSum::zeroSum()`. Maybe issue a pull request.
+- Find out about random forests ("The Elements of Statistical Learning", Hastie et al.)
+- Find out about nested CV: For every left-out fold, do another CV with the remaining folds for the first-stage model to get cross-validated predictions we can use as input for the second-stage model.
+- Implement this (zeroSumLI seems useless)
+
+### More data
+
+- Only the models deemed best in earlier evaluations get a try on the new data.
+- Reddy et al.: Prepro, talk to Paul about the paper
+- Nanostring: find out which data set is meant from Rainer, ask Christian then
+
+### Use sample-wise weights in cost function
+
+- With something decreasing (molecular pattern for very low risk group might differ from that of low-risk group)
+- For censored samples: take censoring time to calculate sample weight
