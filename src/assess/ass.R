@@ -111,3 +111,13 @@ auc_ass_scalar <- AssScalar$new(
     metric = "get_auc",
     pivot_time_cutoff = 2
 )
+
+all_ass_scalar <- AssScalar$new(
+    metric = c("accuracy", "precision", "auc", "logrank"),
+    pivot_time_cutoff = 2
+)
+
+ass_scalar_list <- list(
+    auc_ass_scalar,
+    all_ass_scalar
+)

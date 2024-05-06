@@ -4,7 +4,7 @@
 # This script yields three files: two csv files with pheno and expression data, respectively, and one json 
 # file holding info. Modify the names and directories for these files via the below global variables
 
-library(lymphomaSurvivalPipeline)
+library(patroklos)
 
 set.seed(234)
 

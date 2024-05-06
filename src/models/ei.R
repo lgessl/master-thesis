@@ -1,90 +1,6 @@
-# General list of Model$new objects you can source into any script training models on a 
-# certain data set
+# EARLY INTEGRATION
 
 n_genes <- 25066
-
-# BASIC models (only genomic data)
-
-# COX
-# vanilla
-cox = Model$new(
-    name = "cox",
-    directory = "cox/0-vanilla/zerosum",
-    fitter = zeroSum::zeroSum,
-    split_index = 1:15, # 1:20
-    time_cutoffs = c(seq(1, 2.5, .25), Inf), # seq(1.5, 2, .25)
-    hyperparams = list(family = "cox", alpha = 1, zeroSum = FALSE),
-    response_type = "survival_censored"
-)
-cox_std = Model$new(
-    name = "cox std",
-    directory = "cox/0-vanilla/std",
-    fitter = zeroSum::zeroSum,
-    split_index = 1:15,
-    time_cutoffs = c(seq(1, 2, .25), Inf),
-    hyperparams = list(family = "cox", alpha = 1, zeroSum = FALSE,
-        standardize = TRUE),
-    response_type = "survival_censored"
-)
-# zerosum
-cox_zerosum = Model$new(
-    name = "cox zerosum",
-    fitter = zeroSum::zeroSum,
-    directory = "cox/1-zerosum",
-    split_index = 1:15,
-    time_cutoffs = c(seq(1, 2, .25), Inf), # seq(1.5, 2, .25)
-    hyperparams = list(family = "cox", alpha = 1),
-    response_type = "survival_censored"
-)
-# LOGISTIC
-# vanilla
-logistic = Model$new(
-    name = "logistic",
-    directory = "logistic/0-vanilla/zerosum",
-    fitter = zeroSum::zeroSum,
-    split_index = 1:15, # 1:20
-    time_cutoffs = seq(1, 2, .25), # seq(1.5, 2, .25)
-    hyperparams = list(family = "binomial", alpha = 1, zeroSum = FALSE),
-    response_type = "binary"
-)
-logistic_std = Model$new(
-    name = "logistic std",
-    directory = "logistic/0-vanilla/std",
-    fitter = zeroSum::zeroSum,
-    split_index = 1:15,
-    time_cutoffs = seq(1, 2, .25),
-    hyperparams = list(family = "binomial", alpha = 1, zeroSum = FALSE,
-        standardize = TRUE),
-    response_type = "binary"
-)
-# zerosum
-logistic_zerosum = Model$new(
-    name = "logistic zerosum",
-    directory = "logistic/1-zerosum",
-    fitter = zeroSum::zeroSum,
-    split_index = 1:15,
-    time_cutoffs = seq(1, 2, .25), # seq(1.5, 2, .25)
-    hyperparams = list(family = "binomial", alpha = 1),
-    response_type = "binary"
-)
-
-basic_models <- list(
-    # COX
-    # vanilla
-    cox = cox,
-    cox_std = cox_std,
-    # zerosum
-    cox_zerosum = cox_zerosum,
-    # LOGISTIC
-    # vanilla
-    logistic = logistic,
-    logistic_std = logistic_std,
-    # zerosum
-    logistic_zerosum = logistic_zerosum
-)
-
-
-# EARLY INTEGRATION
 
 # ipi
 
@@ -180,7 +96,7 @@ cv_ipi_group_std$directory <- "cox/3-early-int/vanilla-ipi-group-std"
 cv_ipi_group_std$hyperparams$family <- "cox"
 cv_ipi_group_std$response_type <- "survival_censored"
 
-ei_models <- list(
+models <- list(
     lv_disc_ipi_feat = lv_disc_ipi_feat,
     lv_disc_ipi_feat_std = lv_disc_ipi_feat_std,
     cv_disc_ipi_feat = cv_disc_ipi_feat,

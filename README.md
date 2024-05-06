@@ -105,7 +105,7 @@ The data gathered for the MMML-Predict project won't be available until 2025, so
 2. `glmnet` can do everything `zeroSum` can, but without zero-sum constraint. The documentation for `zeroSum` promises equivalent results for the case `zeroSum::zeroSum()` with parameters `zeroSum = FALSE`, `standardize = TRUE` and `glmnet::cv.glmnet()`. This is not entirely true, so we keep `glmnet` here to check `zeroSum`.
 
 
-### [`lymphomSurvivalPipeline`](https://github.com/lgessl/lymphomaSurvivalPipeline)
+### [`lymphomSurvivalPipeline`](https://github.com/lgessl/patroklos)
 
 I outsourced all the reused and reusable code for
 
@@ -114,16 +114,16 @@ I outsourced all the reused and reusable code for
 - fitting models (including late integration by nesting multiple models (t.b.d)) and
 - assessing models in plots and tables
 
-into an R package called `lymphomaSurvivalPipeline` you can find on GitHub. Most importantly, the `lymphomaSurvivalPipeline` makes integrating new data and models into a running project easy.
+into an R package called `patroklos` you can find on GitHub. Most importantly, the `patroklos` makes integrating new data and models into a running project easy.
 
-Now, the `lymphomaSurvivalPipeline` also enables
+Now, the `patroklos` also enables
 
 - splitting the data into a training and test set multiple times and averaging accordingly in the assessment step,
 - censoring samples with time to event greater than a certain value at this value (Cox) and thresholding PFS for training differently than for assessing the fits.
 
 ### This repo...
 
-... brings the `lymphomaSurvivalPipeline` into action.
+... brings the `patroklos` into action.
 
 ## Results
 

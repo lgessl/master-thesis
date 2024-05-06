@@ -1,6 +1,6 @@
 # Generate plots
 
-library(lymphomaSurvivalPipeline)
+library(patroklos)
 
 data <- readRDS("../../data/schmitz/data.rds")
 source("../../src/train/models.R") # logistic@1.75

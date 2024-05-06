@@ -1,13 +1,16 @@
-# This scripts trains all models specified in model_spec.R on the Schmitz training data
+# This scripts trains models specified in below src/models on the Schmitz 
+# training data
 
-library(lymphomaSurvivalPipeline)
-
-source("src/train/models.R") # model_spec_list
+library(patroklos)
 
 data <- readRDS("data/schmitz/data.rds")
+data$cohort <- "train"
 
-basic_models <- prepend_to_directory(basic_models, "models/schmitz")
-ei_models <- prepend_to_directory(ei_models, "models/schmitz")
-
-training_camp(basic_models, data)
-training_camp(ei_models, data)
+model_groups <- c("li") # , "basic", "ei")
+all_models <- list()
+for (mg in model_groups) {
+    source(paste0("src/models/", mg, ".R"))
+    models <- prepend_to_directory(models, "models/schmitz") 
+    all_models <- c(all_models, models)
+}
+training_camp(all_models, data)
