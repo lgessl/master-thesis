@@ -1,7 +1,5 @@
 # EARLY INTEGRATION
 
-n_genes <- 25066
-
 # ipi
 
 # add discretized ipi features (as in paper)
@@ -9,12 +7,11 @@ n_genes <- 25066
 # ipi penalty = 0
 lv_disc_ipi_feat = Model$new(
     name = "LV with disc IPI feat",
-    fitter = zeroSum::zeroSum,
+    fitter = ptk_zerosum,
     directory = "logistic/3-early-int/vanilla-disc-ipi-feat",
     split_index = 1:5,
     time_cutoffs = c(1.75),
-    hyperparams = list(family = "binomial", alpha = 1, zeroSum = FALSE, 
-        penalty.factor = c(rep(1, n_genes), rep(0, 5))),
+    hyperparams = list(family = "binomial", alpha = 1, zeroSum = FALSE), 
     include_from_discrete_pheno = c("age>60", "ldh_ratio>1", "ecog_performance_status>1", 
         "n_extranodal_sites>1", "ann_arbor_stage>2"),
     response_type = "binary"
