@@ -63,17 +63,56 @@ logistic_zerosum = Model$new(
     response_type = "binary"
 )
 
-models <- list(
-    # COX
-    # vanilla
-    cox = cox,
-    cox_std = cox_std,
-    # zerosum
-    cox_zerosum = cox_zerosum,
-    # LOGISTIC
-    # vanilla
-    logistic = logistic,
-    logistic_std = logistic_std,
-    # zerosum
-    logistic_zerosum = logistic_zerosum
+# GAUSS
+# vanilla
+gauss = Model$new(
+    name = "gauss",
+    directory = "gauss/0-vanilla/zerosum",
+    fitter = zeroSum::zeroSum,
+    split_index = 1:10, # 1:20
+    time_cutoffs = seq(1.5, 2, .25), # seq(1.5, 2, .25)
+    hyperparams = list(family = "gaussian", alpha = 1, zeroSum = FALSE),
+    response_type = "binary"
 )
+gauss_std = Model$new(
+    name = "gauss std",
+    directory = "gauss/0-vanilla/std",
+    fitter = zeroSum::zeroSum,
+    split_index = 1:10,
+    time_cutoffs = seq(1.5, 2, .25),
+    hyperparams = list(family = "gaussian", alpha = 1, zeroSum = FALSE,
+        standardize = TRUE),
+    response_type = "binary"
+)
+# zerosum
+gauss_zerosum = Model$new(
+    name = "gauss zerosum",
+    fitter = zeroSum::zeroSum,
+    directory = "gauss/1-zerosum",
+    split_index = 1:10,
+    time_cutoffs = seq(1.5, 2, .25), # seq(1.5, 2, .25)
+    hyperparams = list(family = "gaussian", alpha = 1),
+    response_type = "binary"
+)
+
+models <- list(
+    cox,
+    cox_std,
+    cox_zerosum,
+    logistic,
+    logistic_std,
+    logistic_zerosum,
+    gauss,
+    gauss_std,
+    gauss_zerosum
+)
+
+ridge_models <- list()
+for (i in seq_along(models)) {
+    model <- models[[i]]$clone()
+    model$name <- paste0(model$name, " ridge")
+    model$directory <- file.path(model$directory, "ridge")
+    model$hyperparams$alpha <- 0.1
+    ridge_models[[i]] <- model
+}
+models <- c(models, ridge_models)
