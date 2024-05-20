@@ -57,7 +57,7 @@ logistic_zerosum = Model$new(
     name = "logistic zerosum",
     directory = "logistic/1-zerosum",
     fitter = zeroSum::zeroSum,
-    split_index = 1:15,
+    split_index = 1:10,
     time_cutoffs = seq(1, 2, .25), # seq(1.5, 2, .25)
     hyperparams = list(family = "binomial", alpha = 1),
     response_type = "binary"
