@@ -6,11 +6,11 @@ library(patroklos)
 data <- readRDS("data/schmitz/data.rds")
 data$cohort <- "train"
 
-model_groups <- c("li") # , "basic", "ei")
+model_groups <- c("li", "basic", "ei")
 all_models <- list()
 for (mg in model_groups) {
     source(paste0("src/models/", mg, ".R"))
-    models <- prepend_to_directory(models, "models/schmitz") 
+    prepend_to_directory(models, "models/schmitz") 
     all_models <- c(all_models, models)
 }
 training_camp(all_models, data)
