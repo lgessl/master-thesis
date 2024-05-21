@@ -89,8 +89,8 @@ rf_disc_ipi = Model$new(
     time_cutoffs = c(1.75),
     hyperparams = list(
         num.trees = 600, 
-        mtry = 1:3,
-        min.node.size = 1:5, 
+        mtry = 3,
+        min.node.size = 1,
         classification = TRUE,
         skip_on_invalid_input = TRUE
     ),
@@ -125,7 +125,7 @@ for(i in seq_along(no_expr)) { # logistic instead of rf
     model$directory <- stringr::str_replace(model$directory, "^rf", 
         "logistic/3-early-int/nil")
     model$fitter <- ptk_zerosum
-    model$hyperparams <- list(family = "binomial", alpha = 1, zeroSum = FALSE)
+    model$hyperparams <- list(family = "binomial", lambda = 0, zeroSum = FALSE)
     no_expr <- append(no_expr, model)
 }
 
