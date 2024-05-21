@@ -1,0 +1,40 @@
+{
+  "publication": {
+    "title": "A novel lymphoma-associated macrophage interaction signature (LAMIS) provides robust risk prognostication in diffuse large B-cell lymphoma clinical trial cohorts of the DSHNHL",
+    "author": "Staiger et al.",
+    "year": 2019,
+    "doi": "https://doi.org/10.1038/s41375-019-0573-y",
+    "pubmed id": ""
+  },
+  "data": {
+    "website": "https://gitlab.spang-lab.de/sct39258/toscdata",
+    "disease type": "DLBCL",
+    "number of samples": 466,
+    "pheno data": {
+      "included in survival analysis": 466,
+      "pivot time cutoff": 2,
+      "number high risk": 104,
+      "number low risk": 324,
+      "unknown": 38,
+      "proportion high risk": 0.243
+    },
+    "expression data": {
+      "technology": "NanoString",
+      "platform": "nCounter",
+      "read length": "",
+      "number of genes": 144,
+      "gene symbols": "HGNC",
+      "primary processing": "",
+      "normalization": "log2"
+    },
+    "benchmark": {
+      "name": "ipi",
+      "reference": "",
+      "performance": {
+        "ipi >=": [5, 4, 3, 2, 1],
+        "rpp": [0.034, 0.1698, 0.4259, 0.6821, 1],
+        "prec": [0.4545, 0.3818, 0.3696, 0.3167, 0.2407]
+      }
+    }
+  }
+}
