@@ -10,7 +10,7 @@ model_groups <- c("li", "basic", "ei")
 all_models <- list()
 for (mg in model_groups) {
     source(paste0("src/models/", mg, ".R"))
-    prepend_to_directory(models, "models/schmitz") 
     all_models <- c(all_models, models)
 }
+prepend_to_directory(all_models, "models/schmitz") 
 training_camp(all_models, data)

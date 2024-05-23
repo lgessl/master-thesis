@@ -107,7 +107,6 @@ for (i in seq_along(models)) {
         lambda = 0,
         nFold = 10 # only provide so zeroSum does a CV at all
     )
-    model$hyperparams[["oob"]] <- c(FALSE, FALSE)
     model$hyperparams[["metric"]] <- "binomial_log_likelihood"
     log_late_list[[i]] <- model
 }

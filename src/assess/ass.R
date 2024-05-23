@@ -1,4 +1,5 @@
-# General Ass2d$new you can use to assess the performance of any model
+loadNamespace("ranger")
+loadNamespace("zeroSum")
 
 uni_colors <- unicol::uni_regensburg_2[c(
         "eisvogelblau",
@@ -108,16 +109,19 @@ ass2d_list <- list(
 )
 
 auc_ass_scalar <- AssScalar$new(
-    metric = "get_auc",
-    pivot_time_cutoff = 2
+    metrics = "auc",
+    pivot_time_cutoff = 2,
+    file = "auc.csv"
 )
 
-all_ass_scalar <- AssScalar$new(
-    metric = c("accuracy", "precision", "auc", "logrank"),
-    pivot_time_cutoff = 2
+pan_ass_scalar <- AssScalar$new(
+    metrics = c("accuracy", "precision", "auc", "logrank", "threshold", 
+        "n_samples", "prevalence", "perc_true"),
+    pivot_time_cutoff = 2,
+    file = "panta.csv"
 )
 
 ass_scalar_list <- list(
     auc_ass_scalar,
-    all_ass_scalar
+    pan_ass_scalar
 )
