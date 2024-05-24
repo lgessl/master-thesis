@@ -75,12 +75,8 @@ data <- Data$new(
     time_to_event_col = time_to_event_col,
     event_col = event_col
 )
-
-qc_preprocess(
-    data = data,
-    expr_tbl = expr_tbl,
-    pheno_tbl = pheno_tbl
-)
+data$pheno_tbl <- pheno_tbl
+data$qc_preprocess(expr_tbl)
 
 write_data_info(
     filename = file.path(data_dir, "info.json"),
@@ -90,8 +86,8 @@ write_data_info(
 )
 
 cat("Writing preprocessed data to", data_dir, "\n")
-readr::write_csv(pheno_tbl, file.path(data_dir, "pheno.csv"))
-readr::write_csv(expr_tbl, file.path(data_dir, "expr.csv"))
+# readr::write_csv(pheno_tbl, file.path(data_dir, "pheno.csv"))
+# readr::write_csv(expr_tbl, file.path(data_dir, "expr.csv"))
 saveRDS(data, file.path(data_dir, "data.rds"))
 
 if(clean){

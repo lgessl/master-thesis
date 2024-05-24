@@ -97,11 +97,8 @@ pheno_tbl <- discretize_tbl_cols(
     gl = gl
 )
 
-qc_preprocess(
-    data = data,
-    expr_tbl = expr_tbl,
-    pheno_tbl = pheno_tbl
-)
+data$pheno_tbl <- pheno_tbl
+data$qc_preprocess(expr_tbl)
 
 write_data_info(
     filename = file.path(data_dir, "info.json"),
