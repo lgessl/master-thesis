@@ -124,3 +124,10 @@ for (model in models) {
         the_best <- c(the_best, model)
     }
 }
+
+for_reddy <- list()
+for (i in seq_along(the_best)) {
+    model <- the_best[[i]]$clone()
+    model$time_cutoffs <- model$time_cutoffs + 0.5
+    for_reddy <- c(for_reddy, model)
+}
