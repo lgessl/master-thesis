@@ -130,3 +130,10 @@ for(i in seq_along(no_expr)) { # logistic instead of rf
 }
 
 models <- c(models, no_expr)
+the_best <- list()
+for(model in models){
+    # Other data sets don't include gene subtype
+    if(!stringr::str_detect(model$name, "gene subtype")){
+        the_best <- c(the_best, model)
+    }
+}

@@ -116,3 +116,11 @@ for (i in seq_along(models)) {
     ridge_models[[i]] <- model
 }
 models <- c(models, ridge_models)
+
+# Model for new data sets where you cannot try out everything
+the_best <- list()
+for (model in models) {
+    if(!stringr::str_detect(model$name, "zerosum")) {
+        the_best <- c(the_best, model)
+    }
+}
