@@ -121,7 +121,7 @@ models <- c(models, ridge_models)
 the_best <- list()
 for (model in models) {
     if(!stringr::str_detect(model$name, "zerosum")) {
-        the_best <- c(the_best, model)
+        the_best <- c(the_best, model$clone())
     }
 }
 

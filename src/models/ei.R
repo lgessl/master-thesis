@@ -131,6 +131,7 @@ for(i in seq_along(no_expr)) { # logistic instead of rf
 
 models <- c(models, no_expr)
 
+# Other data sets in general
 # Model for new data sets where you cannot try out everything
 exclude_patterns <- c("gene subtype", "cont ipi")
 exclude_patterns <- paste(exclude_patterns, collapse = "|")
@@ -139,13 +140,30 @@ the_best <- list()
 for(model in models){
     # Other data sets don't include gene subtype
     if(!stringr::str_detect(model$name, exclude_patterns)){
-        the_best <- c(the_best, model)
+        the_best <- append(the_best, model$clone())
     }
 }
 
+# Reddy
 for_reddy <- list()
-for (i in seq_along(the_best)) {
+for (i in seq(12)) {
     model <- the_best[[i]]$clone()
-    model$time_cutoffs <- model$time_cutoffs + 0.5
-    for_reddy <- c(for_reddy, model)
+    model$time_cutoffs <- 2
+    for_reddy <- append(for_reddy, model)
 }
+# Add Gaussian model
+for(i in seq((1+2)*2)){
+    model <- for_reddy[[i]]$clone()
+    model$name <- stringr::str_replace(model$name, "log", "gauss")
+    model$directory <- stringr::str_replace(model$directory, "logistic", "gauss")
+    model$hyperparams[["family"]] <- "gaussian"
+    for_reddy <- append(for_reddy, model)
+}
+# for (i in seq_along(the_best)) {
+#     model <- the_best[[i]]$clone()
+#     model$time_cutoffs <- 2.5
+#     for_reddy <- c(for_reddy, model)
+# }
+
+# LAMIS
+for_lamis <- lapply(the_best, function(x) x$clone())

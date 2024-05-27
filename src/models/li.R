@@ -126,6 +126,7 @@ for (i in seq_along(models)) {
 
 models <- c(models, binary_log_list)
 
+# For general new data sets
 # Model for new data sets where you cannot try out everything
 exclude_patterns <- c("gene subtype", "cont ipi")
 exclude_patterns <- paste(exclude_patterns, collapse = "|")
@@ -134,13 +135,6 @@ the_best <- list()
 for(model in models){
     # Other data sets don't include gene subtype
     if(!stringr::str_detect(model$name, exclude_patterns)){
-        the_best <- c(the_best, model)
+        the_best <- c(the_best, model$clone())
     }
-}
-
-for_reddy <- list()
-for (i in seq_along(the_best)) {
-    model <- the_best[[i]]$clone()
-    model$time_cutoffs <- model$time_cutoffs + 0.5
-    for_reddy <- c(for_reddy, model)
 }
