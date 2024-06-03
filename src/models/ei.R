@@ -148,7 +148,7 @@ for(model in models){
 for_reddy <- list()
 for (i in seq(12)) {
     model <- the_best[[i]]$clone()
-    model$time_cutoffs <- 2
+    model$time_cutoffs <- c(2, 2.25, 2.5)
     for_reddy <- append(for_reddy, model)
 }
 # Add Gaussian model
@@ -159,6 +159,9 @@ for(i in seq((1+2)*2)){
     model$hyperparams[["family"]] <- "gaussian"
     for_reddy <- append(for_reddy, model)
 }
+include_from_discrete_pheno <- c("b_symptoms_at_diagnosis", "testicular_involvement", 
+    "myc_high_expr", "bcl2_high_expr", "bcl6_high_expr", "cns_relapse", 
+    "myc_translocation_seq", "bcl6_translocation_seq", "bcl2_translocation_seq")
 # for (i in seq_along(the_best)) {
 #     model <- the_best[[i]]$clone()
 #     model$time_cutoffs <- 2.5
