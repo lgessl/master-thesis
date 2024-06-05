@@ -22,7 +22,7 @@
       "technology": "NanoString",
       "platform": "nCounter",
       "read length": "",
-      "number of genes": 144,
+      "number of genes": 145,
       "gene symbols": "HGNC",
       "primary processing": "",
       "normalization": "log2"

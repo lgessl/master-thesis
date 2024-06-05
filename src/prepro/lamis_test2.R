@@ -43,8 +43,8 @@ df <- toscdata::lamis_test2_v2
 
 cat("Cutting out pheno and expression data\n")
 pheno_tbl <- tibble::as_tibble(df, rownames = "patient_id")[, 1:26]
-expr_mat <- t(as.matrix(df[, 27:ncol(df)]))
-expr_tbl <- tibble::as_tibble(expr_mat, rownames = "gene_id")
+expr_mat <- as.matrix(df[, 26:ncol(df)])
+expr_tbl <- tibble::as_tibble(t(expr_mat), rownames = "gene_id")
 
 # Tidy up
 cat("Tidying up\n")
@@ -60,6 +60,11 @@ pheno_tbl[["os_years"]] <- pheno_tbl[["os_years"]]/12
 pheno_tbl[["efs_years"]] <- pheno_tbl[["efs_years"]]/12
 ipi_group_mapper <- c("low", "low", "intermediate", "intermediate", "high", "high")
 pheno_tbl[["ipi_group"]] <- ipi_group_mapper[pheno_tbl[["ipi"]]+1]
+# Add LAMIS score
+pheno_tbl[["lamis_score"]] <- (expr_mat[, attr(toscdata::lamis_signature, "names")] %*% 
+    toscdata::lamis_signature)[, 1]
+pheno_tbl[["lamis_high"]] <- as.numeric(pheno_tbl[["lamis_score"]] >
+    quantile(pheno_tbl[["lamis_score"]], 0.75))
 
 # Assimilate expression and pheno data
 res <- ensure_patients_match(expr_tbl, pheno_tbl)
@@ -77,6 +82,7 @@ data <- Data$new(
 )
 data$pheno_tbl <- pheno_tbl
 data$qc_preprocess(expr_tbl)
+data$pheno_tbl <- NULL # Do not store
 
 write_data_info(
     filename = file.path(data_dir, "info.json"),
@@ -86,8 +92,8 @@ write_data_info(
 )
 
 cat("Writing preprocessed data to", data_dir, "\n")
-# readr::write_csv(pheno_tbl, file.path(data_dir, "pheno.csv"))
-# readr::write_csv(expr_tbl, file.path(data_dir, "expr.csv"))
+readr::write_csv(pheno_tbl, file.path(data_dir, "pheno.csv"))
+readr::write_csv(expr_tbl, file.path(data_dir, "expr.csv"))
 saveRDS(data, file.path(data_dir, "data.rds"))
 
 if(clean){
