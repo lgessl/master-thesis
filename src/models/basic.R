@@ -5,62 +5,62 @@
 cox = Model$new(
     name = "cox",
     directory = "cox/0-vanilla/zerosum",
-    fitter = zeroSum::zeroSum,
+    fitter = ptk_zerosum,
     split_index = 1:15, # 1:20
     time_cutoffs = c(seq(1, 2.5, .25), Inf), # seq(1.5, 2, .25)
     hyperparams = list(family = "cox", alpha = 1, zeroSum = FALSE),
-    response_type = "survival_censored"
+    continuous_output = TRUE
 )
 cox_std = Model$new(
     name = "cox std",
     directory = "cox/0-vanilla/std",
-    fitter = zeroSum::zeroSum,
+    fitter = ptk_zerosum,
     split_index = 1:15,
-    time_cutoffs = c(seq(1, 2, .25), Inf),
+    time_cutoffs = c(seq(1, 2.5, .25), Inf),
     hyperparams = list(family = "cox", alpha = 1, zeroSum = FALSE,
         standardize = TRUE),
-    response_type = "survival_censored"
+    continuous_output = TRUE
 )
 # zerosum
 cox_zerosum = Model$new(
     name = "cox zerosum",
-    fitter = zeroSum::zeroSum,
+    fitter = ptk_zerosum,
     directory = "cox/1-zerosum",
     split_index = 1:15,
-    time_cutoffs = c(seq(1, 2, .25), Inf), # seq(1.5, 2, .25)
+    time_cutoffs = c(seq(1.5, 2., .25), Inf), # seq(1.5, 2, .25)
     hyperparams = list(family = "cox", alpha = 1),
-    response_type = "survival_censored"
+    continuous_output = TRUE
 )
 # LOGISTIC
 # vanilla
 logistic = Model$new(
     name = "logistic",
     directory = "logistic/0-vanilla/zerosum",
-    fitter = zeroSum::zeroSum,
+    fitter = ptk_zerosum,
     split_index = 1:15, # 1:20
-    time_cutoffs = seq(1, 2, .25), # seq(1.5, 2, .25)
+    time_cutoffs = seq(1, 2.5, .25), # seq(1.5, 2, .25)
     hyperparams = list(family = "binomial", alpha = 1, zeroSum = FALSE),
-    response_type = "binary"
+    continuous_output = TRUE
 )
 logistic_std = Model$new(
     name = "logistic std",
     directory = "logistic/0-vanilla/std",
-    fitter = zeroSum::zeroSum,
+    fitter = ptk_zerosum,
     split_index = 1:15,
-    time_cutoffs = seq(1, 2, .25),
+    time_cutoffs = seq(1, 2.5, .25),
     hyperparams = list(family = "binomial", alpha = 1, zeroSum = FALSE,
         standardize = TRUE),
-    response_type = "binary"
+    continuous_output = TRUE
 )
 # zerosum
 logistic_zerosum = Model$new(
     name = "logistic zerosum",
     directory = "logistic/1-zerosum",
-    fitter = zeroSum::zeroSum,
+    fitter = ptk_zerosum,
     split_index = 1:10,
-    time_cutoffs = seq(1, 2, .25), # seq(1.5, 2, .25)
+    time_cutoffs = seq(1.5, 2, .25), # seq(1.5, 2, .25)
     hyperparams = list(family = "binomial", alpha = 1),
-    response_type = "binary"
+    continuous_output = TRUE
 )
 
 # GAUSS
@@ -68,31 +68,31 @@ logistic_zerosum = Model$new(
 gauss = Model$new(
     name = "gauss",
     directory = "gauss/0-vanilla/zerosum",
-    fitter = zeroSum::zeroSum,
+    fitter = ptk_zerosum,
     split_index = 1:10, # 1:20
-    time_cutoffs = seq(1.5, 2, .25), # seq(1.5, 2, .25)
+    time_cutoffs = seq(1, 2.5, .25), # seq(1.5, 2, .25)
     hyperparams = list(family = "gaussian", alpha = 1, zeroSum = FALSE),
-    response_type = "binary"
+    continuous_output = TRUE
 )
 gauss_std = Model$new(
     name = "gauss std",
     directory = "gauss/0-vanilla/std",
-    fitter = zeroSum::zeroSum,
+    fitter = ptk_zerosum,
     split_index = 1:10,
-    time_cutoffs = seq(1.5, 2, .25),
+    time_cutoffs = seq(1, 2.5, .25),
     hyperparams = list(family = "gaussian", alpha = 1, zeroSum = FALSE,
         standardize = TRUE),
-    response_type = "binary"
+    continuous_output = TRUE
 )
 # zerosum
 gauss_zerosum = Model$new(
     name = "gauss zerosum",
-    fitter = zeroSum::zeroSum,
+    fitter = ptk_zerosum,
     directory = "gauss/1-zerosum",
     split_index = 1:10,
     time_cutoffs = seq(1.5, 2, .25), # seq(1.5, 2, .25)
     hyperparams = list(family = "gaussian", alpha = 1),
-    response_type = "binary"
+    continuous_output = TRUE
 )
 
 models <- list(
@@ -118,16 +118,9 @@ for (i in seq_along(models)) {
 models <- c(models, ridge_models)
 
 # Model for new data sets where you cannot try out everything
-the_best <- list()
+general <- list()
 for (model in models) {
     if(!stringr::str_detect(model$name, "zerosum")) {
-        the_best <- c(the_best, model$clone())
+       general <- c(general, model$clone())
     }
-}
-
-for_reddy <- list()
-for (i in seq_along(the_best)) {
-    model <- the_best[[i]]$clone()
-    model$time_cutoffs <- model$time_cutoffs + 0.5
-    for_reddy <- c(for_reddy, model)
 }
