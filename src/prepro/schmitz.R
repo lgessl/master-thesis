@@ -87,7 +87,8 @@ data <- Data$new(
     pivot_time_cutoff = pivot_time_cutoff,
     benchmark_col = benchmark_col,
     time_to_event_col = time_to_event_col,
-    event_col = event_col
+    event_col = event_col,
+    imputer = mean_impute
 )
 
 pheno_tbl <- discretize_tbl_cols(
