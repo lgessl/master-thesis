@@ -83,6 +83,7 @@ pheno_tbl <- res[["pheno_tbl"]]
 data <- Data$new(
     name = "Schmitz et al. (2018)",
     directory = data_dir,
+    cohort = ".",
     train_prop = training_prop,
     pivot_time_cutoff = pivot_time_cutoff,
     benchmark_col = benchmark_col,
@@ -109,11 +110,21 @@ write_data_info(
 )
 
 cat("Writing preprocessed data to", data_dir, "\n")
-# readr::write_csv(pheno_tbl, file.path(data_dir, "pheno.csv"))
-# readr::write_csv(expr_tbl, file.path(data_dir, "expr.csv"))
+readr::write_csv(pheno_tbl, file.path(data_dir, "pheno.csv"))
+readr::write_csv(expr_tbl, file.path(data_dir, "expr.csv"))
 saveRDS(data, file.path(data_dir, "data.rds"))
 
 if(clean){
     cat("Removing downloaded files\n")
     file.remove(expr_fname, pheno_fname)
 }
+
+# Add LAMIS signature to pheno data
+schmitz <- data$read()
+lamis_sig <- toscdata::lamis_signature
+cat("Are all LAMIS genes in Schmitz? ")
+cat(all(names(lamis_sig) %in% colnames(schmitz$expr_mat)))
+schmitz$pheno_tbl[["lamis_score"]] <- (schmitz$expr_mat[, names(lamis_sig)] %*% lamis_sig)[, 1]
+schmitz$pheno_tbl[["lamis_high"]] <- (schmitz$pheno_tbl[["lamis_score"]] > 
+    quantile(schmitz$pheno_tbl[["lamis_score"]], 0.75)) * 1
+readr::write_csv(schmitz$pheno_tbl, file.path(data_dir, "pheno.csv"))

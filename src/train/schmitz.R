@@ -9,4 +9,4 @@ data$cohort <- "train"
 source("src/models/schmitz.R")
 
 prepend_to_directory(models, "models/schmitz") 
-training_camp(models, data, skip_on_error = TRUE)
+training_camp(models, data, skip_on_error = FALSE)
