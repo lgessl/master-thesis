@@ -1,0 +1,24 @@
+\documentclass[10pt, a4paper, oneside]{report}
+
+\usepackage{fontspec}
+\setmainfont{TeX Gyre Pagella}
+\setsansfont{TeX Gyre Heros}[Scale=MatchLowercase]
+\setmonofont{Inconsolata}[Scale=MatchLowercase]
+
+\usepackage{amsmath}
+\def\RR{\mathbb{R}}
+\def\Pr{\mathrm{Pr}}
+
+\usepackage{natbib}
+\bibliographystyle{plainnat}
+
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\begin{document}
+    \input{1-intro.tex}
+    \input{2-methods.tex}
+    \input{3-results.tex}
+    \input{4-discussion.tex}
+\end{document}
