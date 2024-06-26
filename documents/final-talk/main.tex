@@ -1,0 +1,213 @@
+\documentclass[10pt, aspectratio=169]{beamer}
+% hi
+\usetheme{metropolis}
+\metroset{block=fill}
+\usepackage{appendixnumberbeamer}
+
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+
+\usepackage{siunitx}
+
+\usepackage{xspace}
+\newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
+
+\usepackage{amsmath}
+\def\RR{\mathbb{R}}
+\def\Pr{\mathrm{Pr}}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\usepackage{natbib}
+\bibliographystyle{plainnat}
+
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\definecolor{mDarkTeal}{HTML}{23373b}
+\definecolor{mLightBrown}{HTML}{EB811B}
+\definecolor{mDarkBrown}{HTML}{B85002}
+\definecolor{mLightGreen}{HTML}{14B03D}
+\setbeamertemplate{itemize/enumerate subbody begin}{\normalsize}
+
+\title{Beating the International Prognostic Index for high-risk DLBCL patients}
+\subtitle{Master thesis final report}
+\date{July 9th, 2024}
+\author{Lukas Geßl}
+\institute{Chair of Statistical Bioinformatics, Regensburg University}
+
+\begin{document}
+
+\maketitle
+
+\section{Recap: The goal of this thesis}
+
+\begin{frame}{}
+  \begin{itemize}
+    \item The MMML-Predict project wants to develop a cost-efficient classifier 
+    that filters DLBCL patients with progression-free survival $\leq 2$ years more reliably 
+    than the International Prognostic Index for non-Hodgkin's lymphoma (IPI).
+    \item The IPI is a simple risk score (0-5) based on five clinical features one can
+    measure cheaply and without batch effects. The cohorts IPI $\geq i, i = 0, 1, \ldots, 5$
+    lack precision ($< 50 \%$) or are too small to be clinically relevant
+    (prevalence $< 10 \%$) (at least in the DSNHL trials).
+    \item Our classfier should label at least 15\% of patients as high-risk with a precision
+    of at least $\max(50\%, \text{precision of IPI} \geq 4)$.
+    \item Unlike the IPI, the new classifier can incorporate the whole range of 
+    modern features (like transcriptomic, genetic, clinical data, already-existent 
+    signatures) measured at diagnosis and even dynamic features measured during 
+    the treatment.
+  \end{itemize}
+\end{frame}
+
+\section{How to find and sell the best model}
+\begin{frame}{A two-step approach}
+  \begin{description}
+    \item[Validation] Of those models we have trained, we want to find and choose
+       the model that performs best on new data to the best of \alert{our} knowledge.
+    \item[Testing] We need to demonstrate the performance of the chosen model to 
+      \alert{outside} people on new, independent data.
+  \end{description}
+
+  To this end, we split the data into a train cohort (for validation) and test 
+  cohort (for testing); we even do so multiple times so particulary lucky or 
+  unlucky splits will not mislead us. 
+\end{frame}
+
+\begin{frame}{Validation}
+  We start with a set of tuples of hyperparameters $H$, where every $h \in H$ 
+  defines a model up to its parameters (the latter is the job of the fitting 
+  algorithm).
+
+  For every hyperparameter tuple $h \in H$ and every split $s \in S$ into train 
+  cohort $(X_{\text{train}, s}, y_{\text{train}, s})$ and test cohort 
+  $(X_{\text{test}, s}, y_{\text{test}, s})$,
+
+  \begin{enumerate}
+    \item fit the model to train cohort $(X_{\text{train}, s}, y_{\text{train}, s})$
+    in a cross-validation. This yields a tuple $(y_{\text{train}, s}, \hat{y}_s)$
+    of true and cross-validated predicions. We describe this with a mapping 
+    $\text{cv}: (h, s) \mapsto (y_{\text{train}, s}, \hat{y}_s)$.
+    \item Then calculate the model's cross-validation error via $\text{err}(
+      y_{\text{train}, s}, \hat{y}_s)$.
+  \end{enumerate}
+
+  The model's final cross-validation error is
+  \begin{align*}
+    \text{Err}_{\text{cv}}: H \to \RR: h \mapsto \frac{1}{|S|} \sum_{s \in S} 
+      (\text{err} \circ \text{cv})(h, s).
+  \end{align*}
+\end{frame}
+
+\begin{frame}{Validation and testing}
+  We select the model with hyperparameter tuple
+  \begin{align*}
+    h^* = \arg \min_{h \in H} \text{Err}_{\text{cv}}(h)
+  \end{align*}
+  and call it $m^*$.
+
+  As for testing, we obtain $m^*$'s predictions $\hat{y}_s$ on the test cohort 
+  $(X_{\text{test}, s}, y_{\text{test}, s})$ for all $s \in S$ and estimate 
+  its performance on independent data via
+  \begin{align*}
+    \frac{1}{|S|} \sum_{s \in S} \text{err}(y_{\text{test}, s}, \hat{y}_s).
+  \end{align*}
+\end{frame}
+
+\begin{frame}{Validation and testing}
+  For our problem, we choose $\text{err}(y, \hat{y})$ as the maximum of the precisions
+  with a prevalence of at least 15\% (model output usually needs thresholding).
+
+  Strictly speaking, the threshold for the model output is another hyperparameter, 
+  but it is a platform-dependent one, so we will not fix it. On a new data set,
+  one might then take the 15\% quantile of the model output as the threshold.
+\end{frame}
+
+\section{Let's talk about $H$: candidate models}
+
+\begin{frame}{Model-agnostic hyperparameters ...}
+  ... apply for every model. In our case, they concern the predictor matrix 
+  $X \in \RR^{n \times p}$ and the response vector $y \in \{ 0, 1 \}^n \cup 
+  (\RR \times \{0, 1 \})^n$ (binarized response and Cox response with time-to-event 
+  and censoring status).
+
+  \begin{itemize}
+    \item We add all combinations of at most $n_{\text{combi}}$ discrete features 
+      that are positive in a share of at least $s_{\text{min}}$ patients to $X$; e.g. 
+      we add a column "female and ABC-type tumor" if at least 5\% of patients 
+      have this property.
+    \item For $T > 0$, we provide the fitting algorithm a modified reponse $y$, namely
+      \begin{itemize}
+        \item for the binary response, we set $y_i = 1$ if the patient's progression-free 
+          survival is $< T$ years, $y_i = 0$ otherwise,
+        \item for the Cox response, we censor all samples with time to event 
+          exceeding $T$ at $T$.
+      \end{itemize}
+    \item A-priori feature selection: which features do we include in $X$ in the 
+      first place?
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{The most model-specific hyperparameter: model class}
+  At the core, our models consist of 
+  \begin{itemize}
+    \item Cox proportional-hazards,
+    \item logistic regression and 
+    \item ordinary linear regression
+  \end{itemize}
+  models with a loss function optionally equipped with
+  \begin{itemize}
+    \item $\ell_1$ or $\ell_2$ regularization,
+    \item the zero-sum constraint which promises to make the model transferable
+      between different data sets.
+  \end{itemize}
+
+  Moreover, we deploy random forests.
+\end{frame}
+
+\begin{frame}{Nested models}
+  Given some "early" models $f_i: \RR^p \to \RR, i = 1, \ldots, m$, we can nest 
+  them into another, "late" model $f: \RR^m \to \RR$ and get a new model 
+  $f \circ (f_1, \ldots, f_m)$.
+
+  \begin{itemize}
+    \item Often, the early models have been trained on another data set, so we 
+      observe their output as features in our data set (like ABC/GCB).
+    \item If we need to fit some of the early models to our data, getting good 
+      models and reliable cross-validated predictions gets a bit more tricky. 
+  \end{itemize}
+  On the next slide, we will deal with a special case of the latter case, where 
+  exactly one early model, say $f_1$, needs to be learned from our data.
+
+  Typically, we train the early (generalized linear) model on the high-dimensional 
+  part of the data (like gene expression) and use its output together with the 
+  remaining features as input for the (possibly more sophisticated) late model.
+\end{frame}
+
+\begin{frame}{}
+  \begin{algorithm}[H]
+    \caption{Nested pseudo cross validation}
+    \begin{algorithmic}[1]
+      \State \textbf{Input:} Predictor matrix $X$, response $y$, hyperparameter tuple $h = (h_1, h_2)$
+      \State Fit $f_1$ to $X$ and obtain $\hat{f}_1: \RR^p \to \RR$
+      \State \textbf{Output:} $f: \RR^p \to \RR$
+    \end{algorithmic}
+  \end{algorithm}
+\end{frame}
+
+\section{How this plays out on real data}
+
+\section{Take aways and outlook}
+
+\begin{frame}[standout]
+  Thank you for your attention! \par Questions?
+\end{frame}
+
+\appendix
+
+\begin{frame}[allowframebreaks]{References}
+  \bibliography{lit}
+\end{frame}
+
+\end{document}
