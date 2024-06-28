@@ -6,6 +6,10 @@
 
 \usepackage{booktabs}
 \usepackage[scale=2]{ccicons}
+\usepackage{array}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}m{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}m{#1}}
 
 \usepackage{siunitx}
 
@@ -15,12 +19,15 @@
 \usepackage{amsmath}
 \def\RR{\mathbb{R}}
 \def\Pr{\mathrm{Pr}}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 
 \usepackage{natbib}
-\bibliographystyle{plainnat}
-
+\bibliographystyle{abbrvnat}
+\setcitestyle{numbers,square}
+% \newcommand{\xfnm}[1][]{\ifx!#1!\else\unskip,\space#1\fi}
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{hyperref}
@@ -48,7 +55,7 @@
     \item The MMML-Predict project wants to develop a cost-efficient classifier 
     that filters DLBCL patients with progression-free survival $\leq 2$ years more reliably 
     than the International Prognostic Index for non-Hodgkin's lymphoma (IPI).
-    \item The IPI is a simple risk score (0-5) based on five clinical features one can
+    \item The IPI \cite{ipi93} is a simple risk score (0-5) based on five clinical features one can
     measure cheaply and without batch effects. The cohorts IPI $\geq i, i = 0, 1, \ldots, 5$
     lack precision ($< 50 \%$) or are too small to be clinically relevant
     (prevalence $< 10 \%$) (at least in the DSNHL trials).
@@ -61,7 +68,20 @@
   \end{itemize}
 \end{frame}
 
+\begin{frame}
+  MMML-Predict will enroll 300 DLBCL patients in a prospective trial.
+  \begin{itemize}
+    \item Data with a rich variety of fetures for the first 200 patients will 
+      arrive here and will be our sole foundation to train classifiers and 
+      finally submit a single one.
+    \item A group in Leipzig will test the submitted classifier on the remaining 
+      100 patients.
+  \end{itemize}
+  For this thesis, we also played by these rules, but on already existing data.
+\end{frame}
+
 \section{How to find and sell the best model}
+
 \begin{frame}{A two-step approach}
   \begin{description}
     \item[Validation] Of those models we have trained, we want to find and choose
@@ -71,57 +91,54 @@
   \end{description}
 
   To this end, we split the data into a train cohort (for validation) and test 
-  cohort (for testing); we even do so multiple times so particulary lucky or 
-  unlucky splits will not mislead us. 
+  cohort (for testing); I abandoned the plan to split into train and test cohort 
+  \textit{mutliple times} (both hyperparameter tuning and interpretation becomes 
+  to complicated).
 \end{frame}
 
 \begin{frame}{Validation}
   We start with a set of tuples of hyperparameters $H$, where every $h \in H$ 
   defines a model up to its parameters (the latter is the job of the fitting 
-  algorithm).
+  algorithm) and split the data set $(X, y)$ into a train 
+  cohort $(X_{\text{train}}, y_{\text{train}})$ and test cohort 
+  $(X_{\text{test}}, y_{\text{test}})$,
 
-  For every hyperparameter tuple $h \in H$ and every split $s \in S$ into train 
-  cohort $(X_{\text{train}, s}, y_{\text{train}, s})$ and test cohort 
-  $(X_{\text{test}, s}, y_{\text{test}, s})$,
+  For every hyperparameter tuple $h \in H$, we
 
   \begin{enumerate}
-    \item fit the model to train cohort $(X_{\text{train}, s}, y_{\text{train}, s})$
-    in a cross-validation. This yields a tuple $(y_{\text{train}, s}, \hat{y}_s)$
+    \item fit the model to the train cohort $(X_{\text{train}}, y_{\text{train}})$
+    in a cross-validation. This yields a tuple $(y_{\text{train}}, \hat{y})$
     of true and cross-validated predicions. We describe this with a mapping 
-    $\text{cv}: (h, s) \mapsto (y_{\text{train}, s}, \hat{y}_s)$.
+    $\text{cv}: h \mapsto (y_{\text{train}}, \hat{y})$.
     \item Then calculate the model's cross-validation error via $\text{err}(
-      y_{\text{train}, s}, \hat{y}_s)$.
+      y_{\text{train}}, \hat{y})$.
   \end{enumerate}
 
-  The model's final cross-validation error is
+  We select the model with hyperparameter tuple
   \begin{align*}
-    \text{Err}_{\text{cv}}: H \to \RR: h \mapsto \frac{1}{|S|} \sum_{s \in S} 
-      (\text{err} \circ \text{cv})(h, s).
+    h^* = \argmin_{h \in H} \ (\text{err} \circ \text{cv})(h).
   \end{align*}
 \end{frame}
 
-\begin{frame}{Validation and testing}
-  We select the model with hyperparameter tuple
-  \begin{align*}
-    h^* = \arg \min_{h \in H} \text{Err}_{\text{cv}}(h)
-  \end{align*}
-  and call it $m^*$.
+\begin{frame}{Testing}
 
-  As for testing, we obtain $m^*$'s predictions $\hat{y}_s$ on the test cohort 
+  For testing, we train the model with hyperparameter tuple $h^*$ on the whole
+  training cohort $(X_\text{train}, y_{\text{train}})$ resulting in a model $m^*$.
+
+  We obtain $m^*$'s predictions $\hat{y}$ on the test cohort 
   $(X_{\text{test}, s}, y_{\text{test}, s})$ for all $s \in S$ and estimate 
   its performance on independent data via
   \begin{align*}
-    \frac{1}{|S|} \sum_{s \in S} \text{err}(y_{\text{test}, s}, \hat{y}_s).
+    \text{err}(y_{\text{test}}, \hat{y}).
   \end{align*}
-\end{frame}
 
-\begin{frame}{Validation and testing}
   For our problem, we choose $\text{err}(y, \hat{y})$ as the maximum of the precisions
-  with a prevalence of at least 15\% (model output usually needs thresholding).
+  with a prevalence of at least 17\% (model output usually needs thresholding).
 
   Strictly speaking, the threshold for the model output is another hyperparameter, 
-  but it is a platform-dependent one, so we will not fix it. On a new data set,
-  one might then take the 15\% quantile of the model output as the threshold.
+  but it is a platform-dependent one, so we will not choose it once and for all. 
+  On a new data set, one might then take the 15\% quantile of the model output 
+  as the threshold.
 \end{frame}
 
 \section{Let's talk about $H$: candidate models}
@@ -156,11 +173,13 @@
     \item logistic regression and 
     \item ordinary linear regression
   \end{itemize}
-  models with a loss function optionally equipped with
+  models, with a loss function optionally equipped with
   \begin{itemize}
     \item $\ell_1$ or $\ell_2$ regularization,
     \item the zero-sum constraint which promises to make the model transferable
-      between different data sets.
+      between different data sets \cite{transplatform17},
+    \item standardization of $X$ to calibrate the above regularization for input
+      features on different scales.
   \end{itemize}
 
   Moreover, we deploy random forests.
@@ -188,15 +207,70 @@
 \begin{frame}{}
   \begin{algorithm}[H]
     \caption{Nested pseudo cross validation}
+    \label{alg:nested-pcv}
     \begin{algorithmic}[1]
-      \State \textbf{Input:} Predictor matrix $X$, response $y$, hyperparameter tuple $h = (h_1, h_2)$
-      \State Fit $f_1$ to $X$ and obtain $\hat{f}_1: \RR^p \to \RR$
-      \State \textbf{Output:} $f: \RR^p \to \RR$
+      \State  \textbf{Input:} Predictor matrix $X$, response $y$, 
+        hyperparameter tuple $h = (h_1, h_2)$
+      \State Fit $f_1$ to $(X; y)$ subject to $h_1$ in a $k$-fold cross-validation, 
+        yielding cross-validated predictions $\hat{y}^{(1)}$.
+      \State Fit $f$ to $(\hat{y}^{(1)}, f_2(X), f_3(X), \ldots, f_m(X))$ in a $k$-fold 
+        cross-validation, yielding cross-validated predictions $\hat{y}$.
+      \State $g \gets f \circ (f_1, \ldots, f_n)$
+      \State \textbf{Output:} $(\hat{y}, f_1, f)$
     \end{algorithmic}
   \end{algorithm}
+
+The *pseudo* cross-validated prediction for every sample in $\hat{y}$ slightly 
+depends on the sample itself. Benefit: save a factor $k$ in time complexity.
+\end{frame}
+
+\section{From theory to practice: software}
+
+\begin{frame}{The R package patroklos}
+  \begin{minipage}{0.15\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figs/logo.png}
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.8\textwidth}
+    \raggedright
+    patroklos \cite{patroklos} orchestrates fast fitting functions from existing 
+    R packages (especially zeroSum \cite{zerosumR} and ranger) to efficiently 
+    find the best validated hyperparameter tuple
+    $h^* = \argmin_{h \in H} (\text{err} \circ \text{cv})(h)$ by partioning 
+    $H$, and assess the selected model on the test cohort.
+  \end{minipage}
+
+  In particular, it 
+  \begin{itemize}
+    \item tunes the model-agnostic hyperparameters,
+    \item supports fitting and validating nested models as in Alg. \ref{alg:nested-pcv},
+    \item defines interfaces for fitting and hyperparameter-tuning functions, and 
+    \item provides decorators to increase the number of hyperparameter tuples 
+      a fitting function can tune.
+  \end{itemize}
 \end{frame}
 
 \section{How this plays out on real data}
+
+\begin{frame}{Meet the data}
+  \input{tables/data_sets.tex}
+
+  All datasets include the IPI features in thresholded form, gender and cell of 
+  origin.
+  \footnotetext{High risk is defined as overall survival < 2.5 years (no 
+    progression-free survival provided).}
+\end{frame}
+
+\begin{frame}{Validate and test on the same data set}
+  \input{tables/intra_trial.tex}
+\end{frame}
+
+\begin{frame}{What is $h^*$?}
+\end{frame}
+
+\begin{frame}{Validate on one data set, test on another}
+\end{frame}
 
 \section{Take aways and outlook}
 
