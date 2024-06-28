@@ -6,21 +6,21 @@ cox = Model$new(
     name = "cox",
     directory = "cox/0-vanilla/zerosum",
     fitter = ptk_zerosum,
-    split_index = 1:10,
+    split_index = 1,
     time_cutoffs = c(seq(1, 2.5, .25), Inf), # seq(1.5, 2, .25)
     val_error_fun = neg_roc_auc,
-    hyperparams = list(family = "cox", alpha = 1, zeroSum = FALSE),
+    hyperparams = list(family = "cox", alpha = 1, zeroSum = FALSE, nFold = 100),
     continuous_output = TRUE
 )
 cox_std = Model$new(
     name = "cox std",
     directory = "cox/0-vanilla/std",
     fitter = ptk_zerosum,
-    split_index = 1:10,
+    split_index = 1,
     val_error_fun = neg_roc_auc,
     time_cutoffs = c(seq(1, 2.5, .25), Inf),
     hyperparams = list(family = "cox", alpha = 1, zeroSum = FALSE,
-        standardize = TRUE),
+        standardize = TRUE, nFold = 100),
     continuous_output = TRUE
 )
 # zerosum
@@ -28,44 +28,44 @@ cox_zerosum = Model$new(
     name = "cox zerosum",
     fitter = ptk_zerosum,
     directory = "cox/1-zerosum",
-    split_index = 1:10,
+    split_index = 1,
     time_cutoffs = c(seq(1.5, 2., .25), Inf), # seq(1.5, 2, .25)
     val_error_fun = neg_roc_auc,
-    hyperparams = list(family = "cox", alpha = 1),
+    hyperparams = list(family = "cox", alpha = 1, nFold = 100),
     continuous_output = TRUE
 )
 # LOGISTIC
 # vanilla
-logistic = Model$new(
-    name = "logistic",
-    directory = "logistic/0-vanilla/zerosum",
+log = Model$new(
+    name = "log",
+    directory = "log/0-vanilla/zerosum",
     fitter = ptk_zerosum,
-    split_index = 1:10, # 1:20
+    split_index = 1,
     time_cutoffs = seq(1, 2.5, .25), # seq(1.5, 2, .25)
     val_error_fun = neg_roc_auc,
-    hyperparams = list(family = "binomial", alpha = 1, zeroSum = FALSE),
+    hyperparams = list(family = "binomial", alpha = 1, zeroSum = FALSE, nFold = 100),
     continuous_output = TRUE
 )
-logistic_std = Model$new(
-    name = "logistic std",
-    directory = "logistic/0-vanilla/std",
+log_std = Model$new(
+    name = "log std",
+    directory = "log/0-vanilla/std",
     fitter = ptk_zerosum,
-    split_index = 1:10,
+    split_index = 1,
     time_cutoffs = seq(1, 2.5, .25),
     val_error_fun = neg_roc_auc,
     hyperparams = list(family = "binomial", alpha = 1, zeroSum = FALSE,
-        standardize = TRUE),
+        standardize = TRUE, nFold = 100),
     continuous_output = TRUE
 )
 # zerosum
-logistic_zerosum = Model$new(
-    name = "logistic zerosum",
-    directory = "logistic/1-zerosum",
+log_zerosum = Model$new(
+    name = "log zerosum",
+    directory = "log/1-zerosum",
     fitter = ptk_zerosum,
-    split_index = 1:10,
+    split_index = 1,
     time_cutoffs = seq(1.0, 2, .25), # seq(1.5, 2, .25)
     val_error_fun = neg_roc_auc,
-    hyperparams = list(family = "binomial", alpha = 1),
+    hyperparams = list(family = "binomial", alpha = 1, nFold = 100),
     continuous_output = TRUE
 )
 
@@ -75,21 +75,21 @@ gauss = Model$new(
     name = "gauss",
     directory = "gauss/0-vanilla/zerosum",
     fitter = ptk_zerosum,
-    split_index = 1:10, # 1:20
+    split_index = 1,
     time_cutoffs = seq(1, 2.5, .25), # seq(1.5, 2, .25)
     val_error_fun = neg_roc_auc,
-    hyperparams = list(family = "gaussian", alpha = 1, zeroSum = FALSE),
+    hyperparams = list(family = "gaussian", alpha = 1, zeroSum = FALSE, nFold = 100),
     continuous_output = TRUE
 )
 gauss_std = Model$new(
     name = "gauss std",
     directory = "gauss/0-vanilla/std",
     fitter = ptk_zerosum,
-    split_index = 1:10,
+    split_index = 1,
     time_cutoffs = seq(1, 2.5, .25),
     val_error_fun = neg_roc_auc,
     hyperparams = list(family = "gaussian", alpha = 1, zeroSum = FALSE,
-        standardize = TRUE),
+        standardize = TRUE, nFold = 100),
     continuous_output = TRUE
 )
 # zerosum
@@ -97,7 +97,7 @@ gauss_zerosum = Model$new(
     name = "gauss zerosum",
     fitter = ptk_zerosum,
     directory = "gauss/1-zerosum",
-    split_index = 1:10,
+    split_index = 1,
     time_cutoffs = seq(1.5, 2, .25), # seq(1.5, 2, .25)
     val_error_fun = neg_roc_auc,
     hyperparams = list(family = "gaussian", alpha = 1),
@@ -108,9 +108,9 @@ models <- list(
     cox,
     cox_std,
     cox_zerosum,
-    logistic,
-    logistic_std,
-    logistic_zerosum,
+    log,
+    log_std,
+    log_zerosum,
     gauss,
     gauss_std,
     gauss_zerosum
@@ -133,3 +133,4 @@ for (model in models) {
        general <- c(general, model$clone())
     }
 }
+names(general) <- sapply(general, function(x) x$name)
