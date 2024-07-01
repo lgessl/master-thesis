@@ -6,21 +6,19 @@ cox = Model$new(
     name = "cox",
     directory = "cox/0-vanilla/zerosum",
     fitter = ptk_zerosum,
-    split_index = 1,
     time_cutoffs = c(seq(1, 2.5, .25), Inf), # seq(1.5, 2, .25)
-    val_error_fun = neg_roc_auc,
-    hyperparams = list(family = "cox", alpha = 1, zeroSum = FALSE, nFold = 100),
+    val_error_fun = neg_prec_with_prev_greater(0.17),
+    hyperparams = list(family = "cox", alpha = 1, zeroSum = FALSE, nFold = 1000),
     continuous_output = TRUE
 )
 cox_std = Model$new(
     name = "cox std",
     directory = "cox/0-vanilla/std",
     fitter = ptk_zerosum,
-    split_index = 1,
-    val_error_fun = neg_roc_auc,
+    val_error_fun = neg_prec_with_prev_greater(0.17),
     time_cutoffs = c(seq(1, 2.5, .25), Inf),
     hyperparams = list(family = "cox", alpha = 1, zeroSum = FALSE,
-        standardize = TRUE, nFold = 100),
+        standardize = TRUE, nFold = 1000),
     continuous_output = TRUE
 )
 # zerosum
@@ -28,10 +26,9 @@ cox_zerosum = Model$new(
     name = "cox zerosum",
     fitter = ptk_zerosum,
     directory = "cox/1-zerosum",
-    split_index = 1,
     time_cutoffs = c(seq(1.5, 2., .25), Inf), # seq(1.5, 2, .25)
-    val_error_fun = neg_roc_auc,
-    hyperparams = list(family = "cox", alpha = 1, nFold = 100),
+    val_error_fun = neg_prec_with_prev_greater(0.17),
+    hyperparams = list(family = "cox", alpha = 1, nFold = 1000),
     continuous_output = TRUE
 )
 # LOGISTIC
@@ -40,21 +37,20 @@ log = Model$new(
     name = "log",
     directory = "log/0-vanilla/zerosum",
     fitter = ptk_zerosum,
-    split_index = 1,
     time_cutoffs = seq(1, 2.5, .25), # seq(1.5, 2, .25)
-    val_error_fun = neg_roc_auc,
-    hyperparams = list(family = "binomial", alpha = 1, zeroSum = FALSE, nFold = 100),
+    val_error_fun = neg_prec_with_prev_greater(0.17),
+    hyperparams = list(family = "binomial", alpha = 1, zeroSum = FALSE, 
+        nFold = 1000),
     continuous_output = TRUE
 )
 log_std = Model$new(
     name = "log std",
     directory = "log/0-vanilla/std",
     fitter = ptk_zerosum,
-    split_index = 1,
     time_cutoffs = seq(1, 2.5, .25),
-    val_error_fun = neg_roc_auc,
+    val_error_fun = neg_prec_with_prev_greater(0.17),
     hyperparams = list(family = "binomial", alpha = 1, zeroSum = FALSE,
-        standardize = TRUE, nFold = 100),
+        standardize = TRUE, nFold = 1000),
     continuous_output = TRUE
 )
 # zerosum
@@ -62,10 +58,9 @@ log_zerosum = Model$new(
     name = "log zerosum",
     directory = "log/1-zerosum",
     fitter = ptk_zerosum,
-    split_index = 1,
     time_cutoffs = seq(1.0, 2, .25), # seq(1.5, 2, .25)
-    val_error_fun = neg_roc_auc,
-    hyperparams = list(family = "binomial", alpha = 1, nFold = 100),
+    val_error_fun = neg_prec_with_prev_greater(0.17),
+    hyperparams = list(family = "binomial", alpha = 1, nFold = 1000),
     continuous_output = TRUE
 )
 
@@ -75,21 +70,19 @@ gauss = Model$new(
     name = "gauss",
     directory = "gauss/0-vanilla/zerosum",
     fitter = ptk_zerosum,
-    split_index = 1,
     time_cutoffs = seq(1, 2.5, .25), # seq(1.5, 2, .25)
-    val_error_fun = neg_roc_auc,
-    hyperparams = list(family = "gaussian", alpha = 1, zeroSum = FALSE, nFold = 100),
+    val_error_fun = neg_prec_with_prev_greater(0.17),
+    hyperparams = list(family = "gaussian", alpha = 1, zeroSum = FALSE, nFold = 1000),
     continuous_output = TRUE
 )
 gauss_std = Model$new(
     name = "gauss std",
     directory = "gauss/0-vanilla/std",
     fitter = ptk_zerosum,
-    split_index = 1,
     time_cutoffs = seq(1, 2.5, .25),
-    val_error_fun = neg_roc_auc,
+    val_error_fun = neg_prec_with_prev_greater(0.17),
     hyperparams = list(family = "gaussian", alpha = 1, zeroSum = FALSE,
-        standardize = TRUE, nFold = 100),
+        standardize = TRUE, nFold = 1000),
     continuous_output = TRUE
 )
 # zerosum
@@ -97,9 +90,8 @@ gauss_zerosum = Model$new(
     name = "gauss zerosum",
     fitter = ptk_zerosum,
     directory = "gauss/1-zerosum",
-    split_index = 1,
     time_cutoffs = seq(1.5, 2, .25), # seq(1.5, 2, .25)
-    val_error_fun = neg_roc_auc,
+    val_error_fun = neg_prec_with_prev_greater(0.17),
     hyperparams = list(family = "gaussian", alpha = 1),
     continuous_output = TRUE
 )
