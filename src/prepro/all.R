@@ -14,22 +14,6 @@ reddy$expr_mat <- reddy$expr_mat[, colnames(reddy$expr_mat) %in% mapping[["ensem
 reddy$expr_mat <- reddy$expr_mat[, mapping[["ensembl_gene_id"]]]
 colnames(reddy$expr_mat) <- mapping[["hgnc_symbol"]]
 
-# Calculate LAMIS signature on every dataset
-lamis_sig <- toscdata::lamis_signature
-cat("Are all LAMIS genes in Schmitz? ")
-cat(all(names(lamis_sig) %in% colnames(schmitz$expr_mat)))
-cat("\nAre all LAMIS genes in Reddy after mapping from Ensembl to HGNC? ")
-cat(all(names(lamis_sig) %in% colnames(reddy$expr_mat)))
-cat("\nMissing are:\n")
-print(lamis_sig[!names(lamis_sig) %in% colnames(reddy$expr_mat)])
-lamis4reddy <- lamis_sig[names(lamis_sig) %in% colnames(reddy$expr_mat)]
-schmitz$pheno_tbl[["lamis_score"]] <- (schmitz$expr_mat[, names(lamis_sig)] %*% lamis_sig)[, 1]
-schmitz$pheno_tbl[["lamis_high"]] <- (schmitz$pheno_tbl[["lamis_score"]] > 
-    quantile(schmitz$pheno_tbl[["lamis_score"]], 0.75)) * 1
-reddy$pheno_tbl[["lamis_score"]] <- (reddy$expr_mat[, names(lamis4reddy)] %*% lamis4reddy)[, 1]
-reddy$pheno_tbl[["lamis_high"]] <- (reddy$pheno_tbl[["lamis_score"]] > 
-    quantile(reddy$pheno_tbl[["lamis_score"]], 0.75)) * 1
-
 # Unite expr_mat and pheno_tbl
 colnames(schmitz$pheno_tbl)[colnames(schmitz$pheno_tbl) == "pfs_years"] <- "survival_years"
 colnames(reddy$pheno_tbl)[colnames(reddy$pheno_tbl) == "os_years"] <- "survival_years"
@@ -40,9 +24,6 @@ for (dset in list(reddy, lamis)) {
     common_genes <- intersect(common_genes, colnames(dset$expr_mat))
     common_pheno_feat <- intersect(common_pheno_feat, colnames(dset$pheno_tbl))
 }
-common_pheno_feat <- common_pheno_feat[!stringr::str_detect(common_pheno_feat, 
-    "split_")]
-common_pheno_feat <- c(common_pheno_feat, "split_1")
 expr_mat <- matrix(nrow = 0, ncol = length(common_genes))
 colnames(expr_mat) <- common_genes
 pheno_mat <- matrix(nrow = 0, ncol = length(common_pheno_feat))
@@ -54,7 +35,7 @@ for (i in seq_along(dsets)) {
         dsets[[i]]$pheno_tbl[["patient_id"]])
     rownames(dsets[[i]]$expr_mat) <- paste0(names(dsets)[[i]], "_", 
         rownames(dsets[[i]]$expr_mat))
-    dsets[[i]]$pheno_tbl[["split_1"]] <- names(dsets)[[i]]
+    dsets[[i]]$pheno_tbl[["cohort"]] <- names(dsets)[[i]]
     expr_mat <- rbind(expr_mat, dsets[[i]]$expr_mat[, common_genes])
     pheno_tbl <- rbind(pheno_tbl, dsets[[i]]$pheno_tbl[, common_pheno_feat])
 }
@@ -83,9 +64,9 @@ for(i in seq_along(pheno_tbl)) {
 data <- Data$new(
     name = "Schmitz & Reddy & Lamis",
     directory = "data/all",
-    train_prop = 0.8,
     pivot_time_cutoff = 2,
     cohort = ".",
+    cohort_col = "cohort", 
     benchmark_col = "ipi",
     time_to_event_col = "survival_years",
     event_col = "progression",

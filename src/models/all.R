@@ -8,10 +8,9 @@ models[[1]] <- Model$new(
     name = "gauss zerosum",
     directory = "gauss/zerosum",
     fitter = ptk_zerosum,
-    split_index = 1,
     time_cutoffs = seq(1, 2.6, 0.2),
     val_error_fun = neg_prec_with_prev_greater(0.17),
-    hyperparams = list(family = "gaussian", alpha = 1, zeroSum = TRUE, nFold = 100),
+    hyperparams = list(family = "gaussian", alpha = 1, zeroSum = TRUE, nFold = 1000),
 )
 
 m <- models[[1]]$clone()
@@ -32,18 +31,19 @@ models <- c(models, m)
 ei <- list()
 
 m0 <- Model$new(
-    name = "log ei lamis score, ipi group, rest, no expr",
+    name = "log ei lamis score, rest, no expr",
     fitter = ptk_zerosum,
-    directory = "log/early-int/log-ei-lamis-score-ipi-group-rest-no-expr",
-    split_index = 1,
-    time_cutoffs = seq(1, 2, 0.2),
+    directory = "log/early-int/log-ei-lamis-score-rest-no-expr",
+    time_cutoffs = seq(1.4, 2, 0.2),
     val_error_fun = neg_prec_with_prev_greater(0.17),
     hyperparams = list(family = "binomial", alpha = 1, zeroSum = FALSE, 
-        standardize = TRUE, exclude_pheno_from_lasso = FALSE),
+        standardize = TRUE, exclude_pheno_from_lasso = FALSE, nFold = 1000),
     include_expr = FALSE,
     include_from_continuous_pheno = "lamis_score",
-    include_from_discrete_pheno = c("ipi_group", "gender", "gene_expression_subgroup"),
-    combine_n_max_categorical_features = 1:4
+    include_from_discrete_pheno = c("ipi_group", "gender", "gene_expression_subgroup",
+        "age>60", "ldh_ratio>1", "ecog_performance_status>1", 
+        "n_extranodal_sites>1", "ann_arbor_stage>2"),
+    combine_n_max_categorical_features = 1:3
 )
 ei <- c(ei, m0)
 
@@ -88,37 +88,36 @@ for (m in ei) {
 li <- list()
 
 m0 <- Model$new(
-    name = "cox-zerosum-cox lamis high+score, ipi group, rest",
+    name = "gauss-zerosum-cox lamis high+score, rest",
     fitter = greedy_nestor,
-    directory = "cox/late-int/cox-zerosum-cox-lamis-high-score-ipi-group-rest",
-    split_index = 1,
-    time_cutoffs = c(seq(1.75, 2.25, 0.125), Inf),
+    directory = "gauss/late-int/gauss-zerosum-cox-lamis-high-score-rest",
+    time_cutoffs = c(seq(1.75, 2.25, 0.25), Inf),
     val_error_fun = neg_prec_with_prev_greater(0.17),
     hyperparams = list(
-        fitter1 = ptk_zerosum,
+        model1 = models[[1]], # Gauss zerosum
         fitter2 = ptk_zerosum,
-        hyperparams1 = list(
-            family = "cox",
-            alpha = 1,
-            zeroSum = TRUE,
-            nFold = 10
-        ),
         hyperparams2 = list(
             family = "cox",
             alpha = 1,
             zeroSum = FALSE,
-            nFold = 10,
+            nFold = 1000,
             standardize = TRUE,
             exclude_pheno_from_lasso = FALSE
         )
     ),
     include_from_continuous_pheno = "lamis_score",
-    include_from_discrete_pheno = c("ipi_group", "gender", 
-        "gene_expression_subgroup", "lamis_high"),
-    combine_n_max_categorical_features = 1
+    include_from_discrete_pheno = c("ipi_group", "gender", "gene_expression_subgroup",
+        "age>60", "ldh_ratio>1", "ecog_performance_status>1", 
+        "n_extranodal_sites>1", "ann_arbor_stage>2", "lamis_high"),
+    combine_n_max_categorical_features = 1:3
 )
 
-li <- c(li, m0)
+m1 <- m0$clone()
+m1$name <- "cox-zerosum-log lamis high+score, rest"
+m1$directory <- "cox/late-int/cox-zerosum-log-lamis-high-score-rest"
+m1$hyperparams[["hyperparams2"]][["family"]] <- "binomial"
+
+li <- c(li, m0, m1)
 models <- c(models, ei, li)
 
 # Major lazer: light it up
