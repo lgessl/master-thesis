@@ -1,16 +1,19 @@
 \begin{table}[ht]
     \small
     \centering
-    \begin{tabular}{L{.18\textwidth}||R{.2\textwidth}|R{.28\textwidth}|R{.18\textwidth}}
-        & Schmitz & Reddy & Lamis test \\
+    \begin{tabular}{lrrr}
         \hline
-        \# samples & & & \\
-        high risk [\%] & & & \\
-        IPI-45 (prev./prec.) [\%] & & & \\
-        $h^*$ (prev./prec.) [\%] & & & \\
-        $n_\text{combi}$ ($h^*$)& & & \\
-        $T$ ($h^*$) & & & \\
-        core model & & & \\
+         & \textbf{Schmitz} & \textbf{Reddy} & \textbf{Lamis test} \\
+            \hline
+        \textbf{\# samples} & 58 & 151 & 117 \\
+        \textbf{high risk [\%]} & 37.0 & 31.6 & 24.3 \\
+        \textbf{(prev./prec.) $\text{IPI} \geq 4$} & (\num{0.170}/\num{0.500}) & (0.192/0.421) & (0.139/0.364) \\
+        \textbf{(prev./prec.) $h^*$} & (0.351/0.684) & (0.230/0.556) & (0.280/0.419) \\
+        \textbf{ROC-AUC $h^*$} & 0.80 & 0.65 & 0.66 \\
+        \textbf{logrank $h^*$} & \num[scientific-notation=true]{3.69e-4} & 
+            \num[scientific-notation=true]{1.82e-3} & 
+            \num[scientific-notation=true]{9.38e-4}  \\
+        \hline
     \end{tabular}
     \caption{All numbers refer to the test set.}
 \end{table}

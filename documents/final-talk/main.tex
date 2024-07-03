@@ -55,12 +55,14 @@
     \item The MMML-Predict project wants to develop a cost-efficient classifier 
     that filters DLBCL patients with progression-free survival $\leq 2$ years more reliably 
     than the International Prognostic Index for non-Hodgkin's lymphoma (IPI).
+    \pause
     \item The IPI \cite{ipi93} is a simple risk score (0-5) based on five clinical features one can
     measure cheaply and without batch effects. The cohorts IPI $\geq i, i = 0, 1, \ldots, 5$
     lack precision ($< 50 \%$) or are too small to be clinically relevant
     (prevalence $< 10 \%$) (at least in the DSNHL trials).
     \item Our classfier should label at least 15\% of patients as high-risk with a precision
     of at least $\max(50\%, \text{precision of IPI} \geq 4)$.
+    \pause
     \item Unlike the IPI, the new classifier can incorporate the whole range of 
     modern features (like transcriptomic, genetic, clinical data, already-existent 
     signatures) measured at diagnosis and even dynamic features measured during 
@@ -77,6 +79,7 @@
     \item A group in Leipzig will test the submitted classifier on the remaining 
       100 patients.
   \end{itemize}
+  \pause
   For this thesis, we also played by these rules, but on already existing data.
 \end{frame}
 
@@ -90,8 +93,9 @@
       \alert{outside} people on new, independent data.
   \end{description}
 
+  \pause
   To this end, we split the data into a train cohort (for validation) and test 
-  cohort (for testing); I abandoned the plan to split into train and test cohort 
+  cohort (for testing); we abandoned the plan to split into train and test cohort 
   \textit{mutliple times} (both hyperparameter tuning and interpretation becomes 
   to complicated).
 \end{frame}
@@ -104,12 +108,14 @@
   $(X_{\text{test}}, y_{\text{test}})$,
 
   For every hyperparameter tuple $h \in H$, we
+  \pause
 
   \begin{enumerate}
     \item fit the model to the train cohort $(X_{\text{train}}, y_{\text{train}})$
     in a cross-validation. This yields a tuple $(y_{\text{train}}, \hat{y})$
     of true and cross-validated predicions. We describe this with a mapping 
     $\text{cv}: h \mapsto (y_{\text{train}}, \hat{y})$.
+    \pause
     \item Then calculate the model's cross-validation error via $\text{err}(
       y_{\text{train}}, \hat{y})$.
   \end{enumerate}
@@ -126,12 +132,13 @@
   training cohort $(X_\text{train}, y_{\text{train}})$ resulting in a model $m^*$.
 
   We obtain $m^*$'s predictions $\hat{y}$ on the test cohort 
-  $(X_{\text{test}, s}, y_{\text{test}, s})$ for all $s \in S$ and estimate 
+  $(X_{\text{test}}, y_{\text{test}})$ and estimate 
   its performance on independent data via
   \begin{align*}
     \text{err}(y_{\text{test}}, \hat{y}).
   \end{align*}
 
+  \pause
   For our problem, we choose $\text{err}(y, \hat{y})$ as the maximum of the precisions
   with a prevalence of at least 17\% (model output usually needs thresholding).
 
@@ -143,8 +150,8 @@
 
 \section{Let's talk about $H$: candidate models}
 
-\begin{frame}{Model-agnostic hyperparameters ...}
-  ... apply for every model. In our case, they concern the predictor matrix 
+\begin{frame}{Model-agnostic hyperparameters \ldots}
+  \ldots apply for every model. In our case, they concern the predictor matrix 
   $X \in \RR^{n \times p}$ and the response vector $y \in \{ 0, 1 \}^n \cup 
   (\RR \times \{0, 1 \})^n$ (binarized response and Cox response with time-to-event 
   and censoring status).
@@ -152,8 +159,9 @@
   \begin{itemize}
     \item We add all combinations of at most $n_{\text{combi}}$ discrete features 
       that are positive in a share of at least $s_{\text{min}}$ patients to $X$; e.g. 
-      we add a column "female and ABC-type tumor" if at least 5\% of patients 
+      we add a column ``female and ABC-type tumor'' if at least 5\% of patients 
       have this property.
+    \pause
     \item For $T > 0$, we provide the fitting algorithm a modified reponse $y$, namely
       \begin{itemize}
         \item for the binary response, we set $y_i = 1$ if the patient's progression-free 
@@ -161,6 +169,7 @@
         \item for the Cox response, we censor all samples with time to event 
           exceeding $T$ at $T$.
       \end{itemize}
+    \pause
     \item A-priori feature selection: which features do we include in $X$ in the 
       first place?
   \end{itemize}
@@ -171,9 +180,9 @@
   \begin{itemize}
     \item Cox proportional-hazards,
     \item logistic regression and 
-    \item ordinary linear regression
+    \item ordinary linear (or Gauss) regression
   \end{itemize}
-  models, with a loss function optionally equipped with
+  models, \pause with a loss function optionally equipped with
   \begin{itemize}
     \item $\ell_1$ or $\ell_2$ regularization,
     \item the zero-sum constraint which promises to make the model transferable
@@ -182,20 +191,24 @@
       features on different scales.
   \end{itemize}
 
+  \pause
   Moreover, we deploy random forests.
 \end{frame}
 
 \begin{frame}{Nested models}
-  Given some "early" models $f_i: \RR^p \to \RR, i = 1, \ldots, m$, we can nest 
-  them into another, "late" model $f: \RR^m \to \RR$ and get a new model 
+  Given some ``early'' models $f_i: \RR^p \to \RR, i = 1, \ldots, m$, we can nest 
+  them into another, ``late'' model $f: \RR^m \to \RR$ and get a new model 
   $f \circ (f_1, \ldots, f_m)$.
 
+  \pause
   \begin{itemize}
     \item Often, the early models have been trained on another data set, so we 
-      observe their output as features in our data set (like ABC/GCB).
+      observe their output as features in our data set (like ABC/GCB): such $f_i$
+      are merely projections onto a feature.
     \item If we need to fit some of the early models to our data, getting good 
       models and reliable cross-validated predictions gets a bit more tricky. 
   \end{itemize}
+  \pause
   On the next slide, we will deal with a special case of the latter case, where 
   exactly one early model, say $f_1$, needs to be learned from our data.
 
@@ -206,22 +219,26 @@
 
 \begin{frame}{}
   \begin{algorithm}[H]
-    \caption{Nested pseudo cross validation}
-    \label{alg:nested-pcv}
+    \caption{Nested pseudo cross validation} \label{alg:nested-pcv}
     \begin{algorithmic}[1]
-      \State  \textbf{Input:} Predictor matrix $X$, response $y$, 
+      \State \textbf{Input:} Predictor matrix $X$, response $y$, 
         hyperparameter tuple $h = (h_1, h_2)$
       \State Fit $f_1$ to $(X; y)$ subject to $h_1$ in a $k$-fold cross-validation, 
         yielding cross-validated predictions $\hat{y}^{(1)}$.
       \State Fit $f$ to $(\hat{y}^{(1)}, f_2(X), f_3(X), \ldots, f_m(X))$ in a $k$-fold 
         cross-validation, yielding cross-validated predictions $\hat{y}$.
       \State $g \gets f \circ (f_1, \ldots, f_n)$
-      \State \textbf{Output:} $(\hat{y}, f_1, f)$
+      \State \textbf{Output:} $(\hat{y}, g)$
     \end{algorithmic}
   \end{algorithm}
 
-The *pseudo* cross-validated prediction for every sample in $\hat{y}$ slightly 
+\pause
+The \text{pseudo} cross-validated prediction for every sample in $\hat{y}$ slightly 
 depends on the sample itself. Benefit: save a factor $k$ in time complexity.
+
+\pause
+Experience tells us: procede greedily (first tune $h_1$, then $h_2$) to avoid 
+overfitting of cross-validated predictions to the training cohort.
 \end{frame}
 
 \section{From theory to practice: software}
@@ -234,19 +251,20 @@ depends on the sample itself. Benefit: save a factor $k$ in time complexity.
   \hfill
   \begin{minipage}{0.8\textwidth}
     \raggedright
-    patroklos \cite{patroklos} orchestrates fast fitting functions from existing 
-    R packages (especially zeroSum \cite{zerosumR} and ranger) to efficiently 
+    patroklos~\cite{patroklos} orchestrates fast fitting functions from existing 
+    R packages (especially zeroSum~\cite{zerosumR} and ranger) to efficiently 
     find the best validated hyperparameter tuple
     $h^* = \argmin_{h \in H} (\text{err} \circ \text{cv})(h)$ by partioning 
     $H$, and assess the selected model on the test cohort.
   \end{minipage}
 
+  \pause
   In particular, it 
   \begin{itemize}
     \item tunes the model-agnostic hyperparameters,
-    \item supports fitting and validating nested models as in Alg. \ref{alg:nested-pcv},
+    \item supports fitting and validating nested models as in Alg.~\ref{alg:nested-pcv},
     \item defines interfaces for fitting and hyperparameter-tuning functions, and 
-    \item provides decorators to increase the number of hyperparameter tuples 
+    \item provides decorators to increase the number of hyperparameter  
       a fitting function can tune.
   \end{itemize}
 \end{frame}
@@ -262,17 +280,81 @@ depends on the sample itself. Benefit: save a factor $k$ in time complexity.
     progression-free survival provided).}
 \end{frame}
 
-\begin{frame}{Validate and test on the same data set}
+\begin{frame}{Intra-trial: Validate and test on the same data set}
   \input{tables/intra_trial.tex}
 \end{frame}
 
-\begin{frame}{What is $h^*$?}
+\begin{frame}{What is $h^*$ for the Schmitz data?}
+  For Schmitz,
+  \begin{itemize}
+    \item we first train a Gauss model with $\ell_1$ regularization, without 
+      zero-sum constraint and without standardization of the predictor for 
+      $T_1 = 1.25$ only on the RNA-seq part of the data, 
+    \pause
+    \item then we train a Cox model on 
+      \begin{itemize} 
+        \item the Gauss model's output and 
+        \item the five IPI features in discretized and continuous form, ABC/GCB, LAMIS signature 
+          (score and thresholded) and the genetic subtype ($n_{\text{combi}} = 2$)
+      \end{itemize}
+      with $\ell_1$ regularization, without zero-sum constraint, but with 
+      standardization of the predictor for $T_2 = \infty$.
+  \end{itemize}
 \end{frame}
 
-\begin{frame}{Validate on one data set, test on another}
+\begin{frame}{What is $h^*$ for the Schmitz data?}
+  The Gauss model is quite non-sparse: it uses 107 genes.
+
+  \input{tables/signature_intra_schmitz.tex}
 \end{frame}
 
-\section{Take aways and outlook}
+\begin{frame}{What is $h^*$ for the Reddy and Lamis test data?}
+  The design of the best validated model $m^*$ for the Reddy and Lamis test 
+  data is pretty similar to the one on the Schmitz data, with the notable 
+  exceptions that 
+
+  \begin{itemize}
+    \item among those features related to the IPI, both only use the five IPI 
+      features in discretized form,
+    \item the Lamis-test model nests Cox model into a logistic model.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Inter-trial: Validate on one data set, test on another}
+  \input{tables/inter_trial.tex}
+\end{frame}
+
+\section{Conclusions and discussion}
+\begin{frame}{Take aways}
+  We wanted to deliver a classifier that defines a high-risk group of DLBCL 
+  patients which is bigger and more precise than that defined by the IPI.
+  \begin{itemize}
+    \item In intra-trial experiments, we could deliver on this promise for three 
+      data sets.
+    \pause
+    \item Simple, $\ell_1$ regularized models predicting from high-dimensional 
+      transcriptomic data usually already beat the IPI.
+    \pause
+    \item Integrating these signatures together with other already-existent 
+      signatures and the IPI features into another simple model improves the 
+      performance even more.
+    \pause
+    \item Transferring these models from one data set (and platform) to another
+      works very well (especially Reddy $\to$ Schmitz, Lamis test). It seems like 
+      the size of the data set matters most.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Discussion}
+  \begin{itemize}
+    \item In many cases, we could do a lot better of the discrepancy between 
+      cross-validated and test performance wasn't so big. How can we close the 
+      gap?
+    \item Deploy other, more complex models in the integration step like boosted 
+      trees or neural networks. patroklos would welcome them.
+    \item Are more costly features even necessary?
+  \end{itemize}
+\end{frame}
 
 \begin{frame}[standout]
   Thank you for your attention! \par Questions?

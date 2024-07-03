@@ -1,0 +1,23 @@
+\begin{table}[ht]
+    \centering
+    \small
+    \begin{tabular}{lr}
+        \hline
+        \textbf{Feature} & \textbf{Coefficient} \\
+        \hline
+        Gauss output & 1.155 \\
+        LAMIS score & 0.287 \\
+        gender = male \& LDH ratio > 1 & 0.293 \\
+        ABC & 0.037 \\
+        genetic subtype = MCD \& age > 60 & 0.925 \\
+        LAMIS high \& performance status > 1 & 0.273 \\
+        age > 60 \& performance status > 1 & 0.167 \\
+        LDH ratio > 1 \& performance status > 1 & 0.608 \\
+        LDH ratio > 1 \& \# extranodal sites > 1 & 0.437 \\
+        LDH ratio > 1 \& Ann Arbor Stage > 2 & 0.142 \\
+        \hline
+        \end{tabular}
+        \caption{Features with non-zero coefficients in late Cox model, which is part of the 
+            Gauss-Cox model $m^*$ on the Schmitz data.}
+    \label{tab:coefficients}
+\end{table}

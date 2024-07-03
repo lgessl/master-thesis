@@ -1,0 +1,18 @@
+\begin{table}[ht]
+    \small
+    \centering
+    \begin{tabular}{lrrr}
+        \hline
+        & \textbf{Schmitz} & \textbf{Reddy} & \textbf{Lamis test} \\
+        \hline
+        \textbf{Schmitz} & (12.9/65.2) & & \\
+        \textbf{Reddy} & & (21.6/54.1) & \\
+        \textbf{Lamis test} & & & (17.0/38.2) \\
+        \hline
+    \end{tabular}
+    \caption{Rows $i$ hold training cohorts, columns $j$ hold test cohorts. Diagonal 
+        entries $(i, i)$ hold (prevalence/precision) of $\text{IPI} \geq 4$
+        on cohort $i$. Off-diagonal entries $(i, j)$ hold (prevalence/precision) 
+        on cohort $i$ of the model defined by $h^*_i$ and trained on cohort $j$.}
+    \label{tab:inter_trial}
+\end{table}
