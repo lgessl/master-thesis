@@ -8,11 +8,11 @@
 
 library(patroklos)
 
-set.seed(234)
+set.seed(115)
 
 data_dir <- "data/lamis_test2"
 clean <- FALSE
-training_prop <- 0.7 
+training_prop <- 0.75 
 pivot_time_cutoff <- 2
 time_to_event_col <- "pfs_years"
 event_col <- "progression"
@@ -69,32 +69,32 @@ pheno_tbl[["lamis_high"]] <- as.numeric(pheno_tbl[["lamis_score"]] >
 # Assimilate expression and pheno data
 res <- ensure_patients_match(expr_tbl, pheno_tbl)
 expr_tbl <- res[["expr_tbl"]]
-pheno_tbl <- res[["pheno_tbl"]]
 
 data <- Data$new(
     name = "Staiger et al. (2019)",
     directory = data_dir,
-    train_prop = training_prop,
+    cohort = ".",
     pivot_time_cutoff = pivot_time_cutoff,
     benchmark_col = benchmark_col,
     time_to_event_col = time_to_event_col,
     event_col = event_col,
+    cohort_col = "cohort",
     imputer = mean_impute
 )
-data$pheno_tbl <- pheno_tbl
+data$pheno_tbl <- res[["pheno_tbl"]]
 data$qc_preprocess(expr_tbl)
-data$pheno_tbl <- NULL # Do not store
+data$split(train_prop = training_prop, save = TRUE, keep_risk = TRUE)
 
 write_data_info(
     filename = file.path(data_dir, "info.json"),
-    expr_tbl = expr_tbl,
-    pheno_tbl = pheno_tbl,
-    data = data
+    data = data,
+    expr_tbl = expr_tbl
 )
 
 cat("Writing preprocessed data to", data_dir, "\n")
-# readr::write_csv(pheno_tbl, file.path(data_dir, "pheno.csv"))
-# readr::write_csv(expr_tbl, file.path(data_dir, "expr.csv"))
+readr::write_csv(data$pheno_tbl, file.path(data_dir, "pheno.csv"))
+readr::write_csv(expr_tbl, file.path(data_dir, "expr.csv"))
+data$read()
 saveRDS(data, file.path(data_dir, "data.rds"))
 
 if(clean){

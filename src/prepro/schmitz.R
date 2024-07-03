@@ -6,7 +6,7 @@
 
 library(patroklos)
 
-set.seed(234)
+set.seed(237)
 
 data_dir <- "data/schmitz"
 clean <- FALSE

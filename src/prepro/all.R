@@ -81,10 +81,11 @@ for(i in seq_along(pheno_tbl)) {
 
 # Pack into Data object
 data <- Data$new(
-    name = "Schmitz, Reddy, Lamis",
+    name = "Schmitz & Reddy & Lamis",
     directory = "data/all",
     train_prop = 0.8,
     pivot_time_cutoff = 2,
+    cohort = ".",
     benchmark_col = "ipi",
     time_to_event_col = "survival_years",
     event_col = "progression",
