@@ -1,6 +1,10 @@
 \documentclass[10pt, aspectratio=169]{beamer}
 
 \usetheme{metropolis}
+\definecolor{alertc}{HTML}{008cd9}
+\definecolor{myDarkTeal}{HTML}{2e2e2e}
+\setbeamercolor{alerted text}{fg=alertc}
+\setbeamercolor{normal text}{fg=myDarkTeal,bg=black!2}
 \metroset{block=fill}
 \usepackage{appendixnumberbeamer}
 
@@ -55,8 +59,8 @@
     that filters DLBCL patients with progression-free survival $\leq 2$ years more reliably 
     than the International Prognostic Index for non-Hodgkin's lymphoma (IPI).
     \pause
-    \item The IPI \cite{ipi93} is a simple risk score (0-5) based on five clinical features one can
-    measure cheaply and without batch effects. The cohorts IPI $\geq i, i = 0, 1, \ldots, 5$
+    \item The IPI \cite{ipi93} is a simple risk score (0--5) based on five clinical features one can
+    measure cheaply and without batch effects. The cohorts IPI $\geq i, i = 0, 1, \ldots, 5$,
     lack precision ($< 50 \%$) or are too small to be clinically relevant
     (prevalence $< 10 \%$) (at least in the DSNHNL trials).
     \item Our classifier should label at least 15\% of patients as high-risk with a precision
@@ -187,8 +191,8 @@
     \item the zero-sum constraint on a subset of features which promises to 
       make the model transferable between different data sets 
       \cite{transplatform17},
-    \item standardization of $X$ to calibrate the above regularization for input
-      features on different scales.
+    \item standardization of the predictor to calibrate the above regularization 
+      for input features on different scales.
   \end{itemize}
 
   \pause
@@ -324,7 +328,16 @@ overfitting of cross-validated predictions to the training cohort.
 \end{frame}
 
 \begin{frame}{A closer look at $m^*$ for Reddy $\to$ Lamis test}
-  We train
+  We train a logistic model with $\ell_1$ regularization and standardization of 
+  the predictor, without zero-sum constraint for $T = \num{2.3}$ and 
+  $n_\text{combi} = 2$ providing as features
+  \begin{itemize}
+    \item LAMIS score,
+    \item cell of origin,
+    \item IPI group: low (0--1), intermediate (2--3), high (4--5),
+    \item the five thresholded IPI features,
+    \item gender.
+  \end{itemize}
 \end{frame}
 
 \begin{frame}{A closer look at $m^*$ for Reddy $\to$ Lamis test}
@@ -361,10 +374,13 @@ overfitting of cross-validated predictions to the training cohort.
           prior, general knowledge).
         \item A refined cross validation following \citep{nested-cv-hastie} to 
           estimate the generalization error more reliably.
+        \item Is our choice of $\text{err}$ too unstable? ROC-AUC isn't any 
+          more stable.
       \end{itemize}
     \pause
     \item Deploy other, more complex models in the integration step like boosted 
-      trees or neural networks. patroklos would welcome them.
+      trees or neural networks. How can we use sample weights in loss functions 
+      in a natural way?
     \pause
     \item Are more costly features even necessary?
   \end{itemize}
@@ -373,10 +389,11 @@ overfitting of cross-validated predictions to the training cohort.
 \begin{frame}[standout]
   \begin{minipage}{0.45\textwidth}
     \centering
-    \includegraphics[width=0.9\textwidth]{figs/pumuckl.png}
+    \includegraphics[width=0.7\textwidth]{figs/pumuckl.png}
   \end{minipage}
   \hfill
   \begin{minipage}{0.50\textwidth}
+      \centering
       Thank you for your attention! \par Questions?
   \end{minipage}
 \end{frame}
@@ -385,7 +402,7 @@ overfitting of cross-validated predictions to the training cohort.
 
 \begin{frame}[allowframebreaks]{References}
   \bibliography{lit}
-  The super cute Pumuckl is taken from 
+  The ultra cute Pumuckl is taken from 
   \url{https://irp-cdn.multiscreensite.com/08191d67/dms3rep/multi/Pumuckl_Rennend.png}.
 \end{frame}
 
