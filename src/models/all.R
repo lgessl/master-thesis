@@ -83,42 +83,32 @@ for (m in ei) {
     ei <- c(ei, m)
 }
 
-# Late integration 
-
-li <- list()
-
-m0 <- Model$new(
-    name = "gauss-zerosum-cox lamis high+score, rest",
-    fitter = greedy_nestor,
-    directory = "gauss/late-int/gauss-zerosum-cox-lamis-high-score-rest",
-    time_cutoffs = c(seq(1.75, 2.25, 0.25), Inf),
+# rf on lamis high, without expression
+rf <- Model$new(
+    name = "rf lamis high, rest, no expr",
+    directory = "rf/early-int/rf-lamis-high-rest-no-expr",
+    fitter = hypertune(ptk_ranger, select = TRUE),
+    time_cutoffs = seq(1.4, 2.2, 0.2),
     val_error_fun = neg_prec_with_prev_greater(0.17),
     hyperparams = list(
-        model1 = models[[1]], # Gauss zerosum
-        fitter2 = ptk_zerosum,
-        hyperparams2 = list(
-            family = "cox",
-            alpha = 1,
-            zeroSum = FALSE,
-            nFold = 1000,
-            standardize = TRUE,
-            exclude_pheno_from_lasso = FALSE
-        )
+        num.trees = 1000,
+        min.node.size = 1:5,
+        mtry = seq(0.8, 1.2, 0.04),
+        rel_mtry = TRUE,
+        classification = TRUE,
+        skip_on_invalid_input = TRUE
     ),
-    include_from_continuous_pheno = "lamis_score",
+    include_from_continuous_pheno = NULL,
     include_from_discrete_pheno = c("ipi_group", "gender", "gene_expression_subgroup",
         "age>60", "ldh_ratio>1", "ecog_performance_status>1", 
         "n_extranodal_sites>1", "ann_arbor_stage>2", "lamis_high"),
-    combine_n_max_categorical_features = 1:3
+    combine_n_max_categorical_features = 1
 )
+ei <- c(ei, rf)
 
-m1 <- m0$clone()
-m1$name <- "cox-zerosum-log lamis high+score, rest"
-m1$directory <- "cox/late-int/cox-zerosum-log-lamis-high-score-rest"
-m1$hyperparams[["hyperparams2"]][["family"]] <- "binomial"
+# No late integration: overfitting on validated predictions
 
-li <- c(li, m0, m1)
-models <- c(models, ei, li)
+models <- c(models, ei)
 
 # Major lazer: light it up
 
