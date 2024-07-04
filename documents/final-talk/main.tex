@@ -1,5 +1,5 @@
 \documentclass[10pt, aspectratio=169]{beamer}
-% hi
+
 \usetheme{metropolis}
 \metroset{block=fill}
 \usepackage{appendixnumberbeamer}
@@ -27,7 +27,6 @@
 \usepackage{natbib}
 \bibliographystyle{abbrvnat}
 \setcitestyle{numbers,square}
-% \newcommand{\xfnm}[1][]{\ifx!#1!\else\unskip,\space#1\fi}
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{hyperref}
@@ -59,8 +58,8 @@
     \item The IPI \cite{ipi93} is a simple risk score (0-5) based on five clinical features one can
     measure cheaply and without batch effects. The cohorts IPI $\geq i, i = 0, 1, \ldots, 5$
     lack precision ($< 50 \%$) or are too small to be clinically relevant
-    (prevalence $< 10 \%$) (at least in the DSNHL trials).
-    \item Our classfier should label at least 15\% of patients as high-risk with a precision
+    (prevalence $< 10 \%$) (at least in the DSNHNL trials).
+    \item Our classifier should label at least 15\% of patients as high-risk with a precision
     of at least $\max(50\%, \text{precision of IPI} \geq 4)$.
     \pause
     \item Unlike the IPI, the new classifier can incorporate the whole range of 
@@ -73,9 +72,9 @@
 \begin{frame}
   MMML-Predict will enroll 300 DLBCL patients in a prospective trial.
   \begin{itemize}
-    \item Data with a rich variety of fetures for the first 200 patients will 
-      arrive here and will be our sole foundation to train classifiers and 
-      finally submit a single one.
+    \item Data with a rich variety of features for the first 200 patients 
+      \textit{will} arrive here and will be our sole foundation to train 
+        classifiers and finally submit a single one.
     \item A group in Leipzig will test the submitted classifier on the remaining 
       100 patients.
   \end{itemize}
@@ -97,7 +96,7 @@
   To this end, we split the data into a train cohort (for validation) and test 
   cohort (for testing); we abandoned the plan to split into train and test cohort 
   \textit{mutliple times} (both hyperparameter tuning and interpretation becomes 
-  to complicated).
+  too complicated).
 \end{frame}
 
 \begin{frame}{Validation}
@@ -143,9 +142,9 @@
   with a prevalence of at least 17\% (model output usually needs thresholding).
 
   Strictly speaking, the threshold for the model output is another hyperparameter, 
-  but it is a platform-dependent one, so we will not choose it once and for all. 
-  On a new data set, one might then take the 15\% quantile of the model output 
-  as the threshold.
+  but it is a platform-dependent one \citep{transplatform17}, so we will not 
+  choose it once and for all. On a new data set, one might then take the 15\% 
+  quantile of the model output as the threshold.
 \end{frame}
 
 \section{Let's talk about $H$: candidate models}
@@ -165,7 +164,7 @@
     \item For $T > 0$, we provide the fitting algorithm a modified reponse $y$, namely
       \begin{itemize}
         \item for the binary response, we set $y_i = 1$ if the patient's progression-free 
-          survival is $< T$ years, $y_i = 0$ otherwise,
+          survival is $< T$, $y_i = 0$ otherwise,
         \item for the Cox response, we censor all samples with time to event 
           exceeding $T$ at $T$.
       \end{itemize}
@@ -185,8 +184,9 @@
   models, \pause with a loss function optionally equipped with
   \begin{itemize}
     \item $\ell_1$ or $\ell_2$ regularization,
-    \item the zero-sum constraint which promises to make the model transferable
-      between different data sets \cite{transplatform17},
+    \item the zero-sum constraint on a subset of features which promises to 
+      make the model transferable between different data sets 
+      \cite{transplatform17},
     \item standardization of $X$ to calibrate the above regularization for input
       features on different scales.
   \end{itemize}
@@ -203,8 +203,8 @@
   \pause
   \begin{itemize}
     \item Often, the early models have been trained on another data set, so we 
-      observe their output as features in our data set (like ABC/GCB): such $f_i$
-      are merely projections onto a feature.
+      observe their output as features in our data set (like the Lamis 
+      signature): such $f_i$ are merely projections onto a feature.
     \item If we need to fit some of the early models to our data, getting good 
       models and reliable cross-validated predictions gets a bit more tricky. 
   \end{itemize}
@@ -225,18 +225,17 @@
         hyperparameter tuple $h = (h_1, h_2)$
       \State Fit $f_1$ to $(X; y)$ subject to $h_1$ in a $k$-fold cross-validation, 
         yielding cross-validated predictions $\hat{y}^{(1)}$.
-      \State Fit $f$ to $(\hat{y}^{(1)}, f_2(X), f_3(X), \ldots, f_m(X))$ in a $k$-fold 
-        cross-validation, yielding cross-validated predictions $\hat{y}$.
+      \State Fit $f$ to $(\hat{y}^{(1)}, f_2(X), f_3(X), \ldots, f_m(X); y)$ 
+        in a $k$-fold cross-validation, yielding cross-validated predictions 
+        $\hat{y}$.
       \State $g \gets f \circ (f_1, \ldots, f_n)$
       \State \textbf{Output:} $(\hat{y}, g)$
     \end{algorithmic}
   \end{algorithm}
 
-\pause
 The \text{pseudo} cross-validated prediction for every sample in $\hat{y}$ slightly 
 depends on the sample itself. Benefit: save a factor $k$ in time complexity.
 
-\pause
 Experience tells us: procede greedily (first tune $h_1$, then $h_2$) to avoid 
 overfitting of cross-validated predictions to the training cohort.
 \end{frame}
@@ -252,8 +251,8 @@ overfitting of cross-validated predictions to the training cohort.
   \begin{minipage}{0.8\textwidth}
     \raggedright
     patroklos~\cite{patroklos} orchestrates fast fitting functions from existing 
-    R packages (especially zeroSum~\cite{zerosumR} and ranger) to efficiently 
-    find the best validated hyperparameter tuple
+    R packages (especially zeroSum~\cite{zerosumR} and ranger~\citep{ranger-gh}) 
+    to efficiently find the best validated hyperparameter tuple
     $h^* = \argmin_{h \in H} (\text{err} \circ \text{cv})(h)$ by partioning 
     $H$, and assess the selected model on the test cohort.
   \end{minipage}
@@ -264,7 +263,7 @@ overfitting of cross-validated predictions to the training cohort.
     \item tunes the model-agnostic hyperparameters,
     \item supports fitting and validating nested models as in Alg.~\ref{alg:nested-pcv},
     \item defines interfaces for fitting and hyperparameter-tuning functions, and 
-    \item provides decorators to increase the number of hyperparameter  
+    \item provides decorators to increase the number of hyperparameters  
       a fitting function can tune.
   \end{itemize}
 \end{frame}
@@ -274,17 +273,17 @@ overfitting of cross-validated predictions to the training cohort.
 \begin{frame}{Meet the data}
   \input{tables/data_sets.tex}
 
-  All datasets include the IPI features in thresholded form, gender and cell of 
-  origin.
-  \footnotetext{High risk is defined as overall survival < 2.5 years (no 
+  \footnotetext[1]{High risk is defined as overall survival < 2.5 years (no 
     progression-free survival provided).}
+  \footnotetext[2]{All datasets include the IPI features in thresholded form, 
+    gender and cell of origin.}
 \end{frame}
 
 \begin{frame}{Intra-trial: Validate and test on the same data set}
   \input{tables/intra_trial.tex}
 \end{frame}
 
-\begin{frame}{What is $h^*$ for the Schmitz data?}
+\begin{frame}{A closer look at $m^*$ for the Schmitz data}
   For Schmitz,
   \begin{itemize}
     \item we first train a Gauss model with $\ell_1$ regularization, without 
@@ -302,26 +301,34 @@ overfitting of cross-validated predictions to the training cohort.
   \end{itemize}
 \end{frame}
 
-\begin{frame}{What is $h^*$ for the Schmitz data?}
+\begin{frame}{A closer look at $m^*$ for the Schmitz data}
   The Gauss model is quite non-sparse: it uses 107 genes.
 
   \input{tables/signature_intra_schmitz.tex}
 \end{frame}
 
-\begin{frame}{What is $h^*$ for the Reddy and Lamis test data?}
+\begin{frame}{A not-so-close look at $m^*$ for Reddy and Lamis test}
   The design of the best validated model $m^*$ for the Reddy and Lamis test 
   data is pretty similar to the one on the Schmitz data, with the notable 
   exceptions that 
 
   \begin{itemize}
-    \item among those features related to the IPI, both only use the five IPI 
-      features in discretized form,
-    \item the Lamis-test model nests Cox model into a logistic model.
+    \item among those features related to the IPI, both only are provided the five IPI 
+      features in discretized form for training,
+    \item the Lamis-test model nests a Cox model into a logistic model.
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Inter-trial: Validate on one data set, test on another}
+\begin{frame}{Inter-trial: Train and validate on one data set, test on another}
   \input{tables/inter_trial.tex}
+\end{frame}
+
+\begin{frame}{A closer look at $m^*$ for Reddy $\to$ Lamis test}
+  We train
+\end{frame}
+
+\begin{frame}{A closer look at $m^*$ for Reddy $\to$ Lamis test}
+  \input{tables/signature_reddy_to_lamis.tex}
 \end{frame}
 
 \section{Conclusions and discussion}
@@ -330,40 +337,56 @@ overfitting of cross-validated predictions to the training cohort.
   patients which is bigger and more precise than that defined by the IPI.
   \begin{itemize}
     \item In intra-trial experiments, we could deliver on this promise for three 
-      data sets.
+      data sets. Inter-trial experiments worked even better.
     \pause
     \item Simple, $\ell_1$ regularized models predicting from high-dimensional 
-      transcriptomic data usually already beat the IPI.
+      transcriptomic data only usually already beat the IPI.
     \pause
     \item Integrating these signatures together with other already-existent 
       signatures and the IPI features into another simple model improves the 
       performance even more.
     \pause
     \item Transferring these models from one data set (and platform) to another
-      works very well (especially Reddy $\to$ Schmitz, Lamis test). It seems like 
-      the size of the data set matters most.
+      works very well (especially Reddy $\to$ Schmitz, Lamis test; Schmitz $\to$ 
+      Lamis test). It seems like the size of the data set matters most.
   \end{itemize}
 \end{frame}
 
 \begin{frame}{Discussion}
   \begin{itemize}
-    \item In many cases, we could do a lot better of the discrepancy between 
-      cross-validated and test performance wasn't so big. How can we close the 
-      gap?
+    \item The discrepancy between cross-validated and test performance is 
+      sometimes big. How can we close the gap? \pause
+      \begin{itemize}
+        \item Validating a smaller $H$ (proceding more greedily, relying on 
+          prior, general knowledge).
+        \item A refined cross validation following \citep{nested-cv-hastie} to 
+          estimate the generalization error more reliably.
+      \end{itemize}
+    \pause
     \item Deploy other, more complex models in the integration step like boosted 
       trees or neural networks. patroklos would welcome them.
+    \pause
     \item Are more costly features even necessary?
   \end{itemize}
 \end{frame}
 
 \begin{frame}[standout]
-  Thank you for your attention! \par Questions?
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=0.9\textwidth]{figs/pumuckl.png}
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.50\textwidth}
+      Thank you for your attention! \par Questions?
+  \end{minipage}
 \end{frame}
 
 \appendix
 
 \begin{frame}[allowframebreaks]{References}
   \bibliography{lit}
+  The super cute Pumuckl is taken from 
+  \url{https://irp-cdn.multiscreensite.com/08191d67/dms3rep/multi/Pumuckl_Rennend.png}.
 \end{frame}
 
 \end{document}
