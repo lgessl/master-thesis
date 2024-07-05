@@ -1,23 +1,18 @@
-# Assess the models trained on lamis_test2 training data on the lamis_test2 test data
+# Assess the models trained on lamis_test2 
 
 library(patroklos)
 
 source("src/assess/ass.R") # ass2d_list
-
 data <- readRDS("data/lamis_test2/data.rds")
+source("src/models/lamis_test2.R")
+# models <- basic
+prepend_to_directory(models, "models/lamis_test2")
+
+data$cohort <- "val_predict"
+pan_ass_scalar$file <- "results/lamis_test2/panta_val.csv"
+val_tbl <- pan_ass_scalar$assess_center(data, models)
+
 data$cohort <- "test"
-
-model_groups <- c("li", "basic", "ei")
-
-all_models <- list()
-for (mg in model_groups) {
-    source(paste0("src/models/", mg, ".R"))
-    all_models <- c(all_models, the_best)
-}
-prepend_to_directory(all_models, "models/lamis_test2")
-prepend_to_filename(ass_scalar_list, "models/lamis_test2")
-# 2D
-# for(ass2d in ass2d_list)
-    # ass2d$assess_center(data, models)
-# Scalar
-pan_ass_scalar$assess_center(data, all_models)
+pan_ass_scalar$file <- "results/lamis_test2/panta_test.csv"
+# models <- models[val_tbl[["model"]][1]]
+pan_ass_scalar$assess_center(data, models)

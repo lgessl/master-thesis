@@ -5,11 +5,57 @@ library(patroklos)
 source("src/assess/ass.R")
 
 data <- readRDS("data/all/data.rds")
-data$cohort <- "schmitz"
 
+# Trained on lamis
 source("src/models/all.R")
+prepend_to_directory(models, "models/all/on_lamis")
+data$cohort <- "val_predict"
+pan_ass_scalar$file <- "results/all/lamis_val_predict.csv"
+val_tbl <- pan_ass_scalar$assess_center(data, models)
+models <- models[val_tbl[["model"]][1]]
 
-prepend_to_directory(models, "models/all")
-prepend_to_filename(ass_scalar_list, "results/all")
+# Assess this model on schmitz
+data$cohort <- "schmitz"
+pan_ass_scalar$file <- "results/all/lamis_on_schmitz.csv"
+pan_ass_scalar$assess_center(data, models)
 
+# Assess this model on reddy
+data$cohort <- "reddy"
+pan_ass_scalar$file <- "results/all/lamis_on_reddy.csv"
+pan_ass_scalar$assess_center(data, models)
+
+# Trained on schmitz
+source("src/models/all.R")
+prepend_to_directory(models, "models/all/on_schmitz")
+data$cohort <- "val_predict"
+pan_ass_scalar$file <- "results/all/schmitz_val_predict.csv"
+val_tbl <- pan_ass_scalar$assess_center(data, models)
+models <- models[val_tbl[["model"]][1]]
+
+# Assess this model on the lamis
+data$cohort <- "lamis"
+pan_ass_scalar$file <- "results/all/schmitz_on_lamis.csv"
+pan_ass_scalar$assess_center(data, models)
+
+# Assess this model on reddy
+data$cohort <- "reddy"
+pan_ass_scalar$file <- "results/all/schmitz_on_reddy.csv"
+pan_ass_scalar$assess_center(data, models)
+
+# Trained on reddy
+source("src/models/all.R")
+prepend_to_directory(models, "models/all/on_reddy")
+data$cohort <- "val_predict"
+pan_ass_scalar$file <- "results/all/reddy_val_predict.csv"
+val_tbl <- pan_ass_scalar$assess_center(data, models)
+# models <- models[val_tbl[["model"]][1]]
+
+# Assess this model on the lamis
+data$cohort <- "lamis"
+pan_ass_scalar$file <- "results/all/reddy_on_lamis.csv"
+pan_ass_scalar$assess_center(data, models)
+
+# Assess this model on schmitz
+data$cohort <- "schmitz"
+pan_ass_scalar$file <- "results/all/reddy_on_schmitz.csv"
 pan_ass_scalar$assess_center(data, models)

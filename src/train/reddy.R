@@ -7,6 +7,7 @@ data <- readRDS("data/reddy/data.rds")
 data$cohort <- "train"
 
 source("src/models/reddy.R")
+# models <- basic
 
 prepend_to_directory(models, "models/reddy") 
-training_camp(models, data, skip_on_error = TRUE)
+training_camp(models, data, skip_on_error = FALSE)

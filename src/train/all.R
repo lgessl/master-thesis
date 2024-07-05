@@ -3,9 +3,21 @@
 library(patroklos)
 
 data <- readRDS("data/all/data.rds")
-data$cohort <- "lamis"
-
 source("src/models/all.R")
 
-prepend_to_directory(models, "models/all")
+data$cohort <- "lamis"
+prepend_to_directory(models, "models/all/on_lamis")
+training_camp(models, data, skip_on_error = FALSE)
+
+source("src/models/all.R")
+data$cohort <- "schmitz"
+prepend_to_directory(models, "models/all/on_schmitz")
+training_camp(models, data, skip_on_error = FALSE)
+
+source("src/models/all.R")
+data$cohort <- "reddy"
+for (i in seq_along(models)) {
+    models[[i]]$time_cutoffs <- models[[i]]$time_cutoffs + 0.5
+}
+prepend_to_directory(models, "models/all/on_reddy")
 training_camp(models, data, skip_on_error = FALSE)

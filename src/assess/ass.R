@@ -44,14 +44,12 @@ rpp_prec_as2 <- Ass2d$new(
     file = "precision.jpeg",
     x_metric = "rpp",
     y_metric = "prec",
-    pivot_time_cutoff = 2.,
     benchmark = "ipi",
     xlim = c(0, .5),
     x_lab = "rate of positive predictions",
     y_lab = "precision",
     text_size = 3,
     fellow_csv = FALSE,
-    scores_plot = FALSE,
     smooth_method = "loess",
     alpha = .075,
     colors = colors,
@@ -62,7 +60,6 @@ logrank_as2 <- Ass2d$new(
     file = "logrank.jpeg",
     x_metric = "rpp",
     y_metric = "logrank",
-    pivot_time_cutoff = 2.,
     benchmark = "ipi",
     xlim = c(0, .5),
     ylim = c(1e-4, 1), # try with 0 in the future
@@ -70,7 +67,6 @@ logrank_as2 <- Ass2d$new(
     y_lab = "p-value (logrank test)",
     text_size = 3,
     fellow_csv = FALSE,
-    scores_plot = FALSE,
     smooth_method = "loess",
     scale_y = "log10",
     hline = list(yintercept = .05, linetype = "dashed", color = "black"),
@@ -85,14 +81,12 @@ prec_ci_as2 <- Ass2d$new(
     file = "precision_ci.jpeg",
     x_metric = "rpp",
     y_metric = "precision_ci",
-    pivot_time_cutoff = 2.,
     benchmark = NULL,
     xlim = c(0, .5),
     x_lab = "rate of positive predictions",
     y_lab = "precision 95%-CI boundary",
     text_size = 3,
     fellow_csv = FALSE,
-    scores_plot = FALSE,
     smooth_method = "loess",
     hline = list(yintercept = 0.351, linetype = "dashed", color = "black"),
     text = list(ggplot2::aes(x = .4, y = .351, label = "IPI-45 (DSNHNL)"),
@@ -110,14 +104,14 @@ ass2d_list <- list(
 
 auc_ass_scalar <- AssScalar$new(
     metrics = "auc",
-    pivot_time_cutoff = 2,
+    prev_range = c(0.15, 1),
     file = "auc.csv"
 )
 
 pan_ass_scalar <- AssScalar$new(
-    metrics = c("accuracy", "precision", "auc", "logrank", "threshold", 
-        "n_samples", "prevalence", "perc_true"),
-    pivot_time_cutoff = 2,
+    metrics = c("precision", "prevalence", "auc", "logrank", "accuracy", "threshold", 
+        "n_samples", "perc_true"),
+    prev_range = c(0.17, 1),
     file = "panta.csv"
 )
 
