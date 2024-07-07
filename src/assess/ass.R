@@ -12,7 +12,7 @@ uni_colors <- unicol::uni_regensburg_2[c(
         "urangelb",
         "heucherarot"
     )] |> unname()
-metropolis_colors <- c("#23373b", "#eb811b", "#14B03D", "#604c38")
+metropolis_colors <- c("#1c2d30", "#33b8ff", "#14B03D", "#604c38")
 metropolis_bright_bg <- grDevices::rgb(250, 250, 250, maxColorValue = 255)
 font_family <- "Fira Sans"
 
