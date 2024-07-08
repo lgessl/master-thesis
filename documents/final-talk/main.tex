@@ -62,6 +62,7 @@
     \item The IPI \cite{ipi93} is a simple risk score (0--5) based on five clinical features. 
     The cohorts IPI $\geq i, i = 0, 1, \ldots, 5$, lack precision ($< 50 \%$) or 
     are too small to be clinically relevant (prevalence $< 10 \%$).
+    \pause
     \item Our classifier should label at least 15\% of patients as high-risk with a precision
     of at least $\max(50\%, \text{precision of IPI} \geq 4)$.
     \pause
@@ -75,14 +76,13 @@
 \begin{frame}
   MMML-Predict will enroll 300 DLBCL patients in a prospective trial.
   \begin{itemize}
-    \item Data with a rich variety of features for the first 200 patients 
-      \textit{will} arrive here and will be our sole foundation to train 
-        classifiers and finally submit a single one.
+    \item Data for the first 200 patients \textit{will} arrive here and will be 
+      our sole foundation to train classifiers and finally submit a single one.
     \item A group in Leipzig will test the submitted classifier on the remaining 
       100 patients.
   \end{itemize}
   \pause
-  For this thesis, we also played by these rules, but on already existing data.
+  For this thesis, we also play by these rules, but on already existing data.
 \end{frame}
 
 \section{How to find and sell the best model}
@@ -117,19 +117,15 @@
       cross-validated error $\text{err}(y_{\text{train}}, \hat{y}_\text{train})$.
   \end{enumerate}
 
-  We select the model with hyperparameter tuple
+  We select the model $m^*$ with hyperparameter tuple
   \begin{align*}
     h^* = \argmin_{h \in H} \ \text{err}(y_\text{train}, \text{cv}(h)).
   \end{align*}
 \end{frame}
 
 \begin{frame}{Testing}
-  For testing, we train the model with hyperparameter tuple $h^*$ on the whole
-  training cohort $(X_\text{train}, y_{\text{train}})$ resulting in a model $m^*$.
-
-  We obtain $m^*$'s predictions $\hat{y}_{\text{test}}$ on the test cohort 
-  $(X_{\text{test}}, y_{\text{test}})$ and estimate 
-  its performance on independent data via
+  We calculate $m^*$'s predictions $m^*(X_\text{test}) = \hat{y}_{\text{test}}$ 
+  on the test cohort and estimate its performance on independent data via
   \begin{align*}
     \text{err}(y_{\text{test}}, \hat{y}_{\text{test}}).
   \end{align*}
@@ -142,7 +138,7 @@
   \pause
   Strictly speaking, the threshold for the model output is another hyperparameter, 
   but it is a platform-dependent one \citep{transplatform17}. On a new data set, 
-  one might take the 15\% quantile of the model output as the threshold.
+  one might take the 17\% quantile of the model output as the threshold.
 \end{frame}
 
 \section{Let's talk about $H$: candidate models}
@@ -176,9 +172,9 @@
   \begin{itemize}
     \item Cox proportional-hazards,
     \item logistic regression and 
-    \item ordinary linear (or Gauss) regression
+    \item ordinary linear (or Gauss) regression 
   \end{itemize}
-  models, \pause with a loss function optionally equipped with
+  models \cite{zerosumR}, \pause with a loss function optionally equipped with
   \begin{itemize}
     \item $\ell_1$ or $\ell_2$ regularization,
     \item the zero-sum constraint on a subset of features \cite{transplatform17},
@@ -186,7 +182,7 @@
   \end{itemize}
 
   \pause
-  Moreover, we deploy random forests.
+  Moreover, we deploy random forests \cite{ranger-gh}.
 \end{frame}
 
 \begin{frame}{Nested models}
@@ -232,7 +228,7 @@ Procede greedily (first tune $h_1$, then $h_2$) to avoid
 overfitting of cross-validated predictions to the training cohort.
 \end{frame}
 
-\section{From theory to practice: software}
+% \section{From theory to practice: software}
 
 \begin{frame}{The R package patroklos}
   \begin{minipage}{0.15\textwidth}
@@ -242,12 +238,8 @@ overfitting of cross-validated predictions to the training cohort.
   \hfill
   \begin{minipage}{0.8\textwidth}
     \raggedright
-    patroklos~\cite{patroklos} orchestrates fast fitting functions from existing 
-    R packages (especially zeroSum~\cite{zerosumR} and ranger~\citep{ranger-gh}) 
-    to efficiently find the best validated hyperparameter tuple
-    $h^* = \argmin_{h \in H} \text{err}(y_\text{train}, \text{cv}(h))$ by 
-    partioning $H$, validates these models and assesses the chosen model and 
-    the validation.
+    patroklos~\citep{patroklos} solves this and analogous problems with the 
+    presented methods.
   \end{minipage}
 \end{frame}
 
@@ -319,7 +311,7 @@ overfitting of cross-validated predictions to the training cohort.
 \end{frame}
 
 \begin{frame}{A closer look at $m^*$ for Reddy $\to$ Lamis test}
-  We train a logistic model with $\ell_1$ regularization and standardization of 
+  We train a logistic model with $\ell_1$ penalty and standardization of 
   the predictor, for $T = \num{2.3}$ and 
   $n_\text{combi} = 2$, providing as features
   \begin{itemize}
@@ -352,27 +344,28 @@ overfitting of cross-validated predictions to the training cohort.
 \section{Conclusions and discussion}
 \begin{frame}{Take aways}
   We wanted to deliver a classifier that defines a high-risk group of DLBCL 
-  patients which is bigger and more precise than that defined by the IPI.
+  patients which is larger and more precise than that defined by the IPI.
   \begin{itemize}
     \item In intra-trial experiments, we could deliver on this promise for three 
       data sets. Inter-trial experiments worked even better.
     \pause
-    \item Simple, $\ell_1$ regularized models predicting from high-dimensional 
-      RNA-seq transcriptomic data only often already beat the IPI.
+    \item While simple, $\ell_1$-penalized models predicting from 
+      high-dimensional gene expression levels only sometimes already beat 
+      the IPI, one usually needs to integrate more features.
     \pause
-    \item Integrating already-existent transcriptomic and genetic signatures 
-      and the IPI features into another model improves the performance even more.
+    \item Integrating \textit{already-existent} transcriptomic and genetic 
+      signatures and the IPI features into another model reliably beats the IPI.
     \pause
     \item Transferring these models from one data set (and platform) to another
-      works very well (especially Reddy $\to$ Schmitz, Lamis test; Schmitz $\to$ 
-      Lamis test). It seems like the size of the data set matters most.
+      works very well (especially Reddy $\to$ Lamis test). Apparently, the
+      size of the data set matters most.
   \end{itemize}
 \end{frame}
 
 \begin{frame}{Discussion}
   \begin{itemize}
-    \item The discrepancy between cross-validated and test performance is 
-      sometimes big. How can we close the gap? \pause
+    \item \textbf{Validation:} Ensure a reliable link between validated and 
+      tested performance. How? \pause
       \begin{itemize}
         \item Validating a smaller $H$ (proceding more greedily, relying on 
           prior, general knowledge).
@@ -383,12 +376,11 @@ overfitting of cross-validated predictions to the training cohort.
         \item More samples.
       \end{itemize}
     \pause
-    \item Deploy other, more complex models in the integration step like boosted 
-      trees or neural networks. How can we use sample weights in loss functions 
-      in a natural way?
+    \item \textbf{Training:} Deploy other, more complex models in the 
+      integration step like boosted trees or neural networks. Balance 
+      classification problem via sample weights in loss function.
     \pause
-    \item Are more costly features even necessary? Rather more samples, less 
-      features?
+    \item For MMML-Predict: rather more samples, less features.
   \end{itemize}
 \end{frame}
 
