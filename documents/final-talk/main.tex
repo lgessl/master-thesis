@@ -58,14 +58,14 @@
     \item MMML-Predict: develop a cost-efficient classifier 
     that filters DLBCL patients with progression-free survival $\leq 2$ years more reliably 
     than the International Prognostic Index for non-Hodgkin's lymphoma (IPI).
-    \pause
+    % % \pause
     \item The IPI \cite{ipi93} is a simple risk score (0--5) based on five clinical features. 
     The cohorts IPI $\geq i, i = 0, 1, \ldots, 5$, lack precision ($< 50 \%$) or 
     are too small to be clinically relevant (prevalence $< 10 \%$).
-    \pause
+    % \pause
     \item Our classifier should label at least 15\% of patients as high-risk with a precision
     of at least $\max(50\%, \text{precision of IPI} \geq 4)$.
-    \pause
+    % \pause
     \item Unlike the IPI, the new classifier can incorporate the whole range of 
     modern features (like transcriptomic, genetic, clinical data, already-existent 
     signatures) measured at diagnosis and even dynamic features measured during 
@@ -81,7 +81,7 @@
     \item A group in Leipzig will test the submitted classifier on the remaining 
       100 patients.
   \end{itemize}
-  \pause
+  % \pause
   For this thesis, we also play by these rules, but on already existing data.
 \end{frame}
 
@@ -95,7 +95,7 @@
       \alert{outside} people on new, independent data.
   \end{description}
 
-  \pause
+  % \pause
   To this end, we split the data $(X, y)$ into a train cohort 
   $(X_{\text{train}}, y_{\text{train}})$ (also for validation) and test 
   cohort $(X_{\text{test}}, y_{\text{test}})$ (no more repeated splitting).
@@ -106,13 +106,13 @@
   defines a model up to its parameters.
 
   For every hyperparameter tuple $h \in H$, we
-  \pause
+  % \pause
 
   \begin{enumerate}
     \item fit the model to the train cohort 
     in a cross-validation, yielding a vector of cross-validated predictions 
     $\hat{y}_\text{train} = \text{cv}(h)$.
-    \pause
+    % \pause
     \item We use the cross-validated predictions to calculate the 
       cross-validated error $\text{err}(y_{\text{train}}, \hat{y}_\text{train})$.
   \end{enumerate}
@@ -130,12 +130,12 @@
     \text{err}(y_{\text{test}}, \hat{y}_{\text{test}}).
   \end{align*}
 
-  \pause
+  % \pause
   For our problem, we choose $\text{err}(y, \hat{y})$ as the minimum of the 
   negative precisions with a prevalence of at least 17\% (model output usually 
   needs thresholding).
 
-  \pause
+  % \pause
   Strictly speaking, the threshold for the model output is another hyperparameter, 
   but it is a platform-dependent one \citep{transplatform17}. On a new data set, 
   one might take the 17\% quantile of the model output as the threshold.
@@ -153,7 +153,7 @@
       that are positive in a share of at least $s_{\text{min}}$ patients to $X$; e.g. 
       we add a column ``female and ABC-type tumor'' if at least 5\% of patients 
       have this property.
-    \pause
+    % \pause
     \item For $T > 0$, we provide the fitting algorithm a modified reponse $y$, namely
       \begin{itemize}
         \item for the binary response, we set $y_i = 1$ if the patient's progression-free 
@@ -161,7 +161,7 @@
         \item for the Cox response, we censor all samples with time to event 
           exceeding $T$ at $T$.
       \end{itemize}
-    \pause
+    % \pause
     \item A-priori feature selection: which features do we include in $X$ in the 
       first place?
   \end{itemize}
@@ -174,14 +174,14 @@
     \item logistic regression and 
     \item ordinary linear (or Gauss) regression 
   \end{itemize}
-  models \cite{zerosumR}, \pause with a loss function optionally equipped with
+  models \cite{zerosumR}, % \pause with a loss function optionally equipped with
   \begin{itemize}
     \item $\ell_1$ or $\ell_2$ regularization,
     \item the zero-sum constraint on a subset of features \cite{transplatform17},
     \item standardization of the predictor.
   \end{itemize}
 
-  \pause
+  % \pause
   Moreover, we deploy random forests \cite{ranger-gh}.
 \end{frame}
 
@@ -190,7 +190,7 @@
   them into another, ``late'' model $f: \RR^m \to \RR$ and get a new model 
   $f \circ (f_1, \ldots, f_m)$.
 
-  \pause
+  % \pause
   \begin{itemize}
     \item Often, the early models have been trained on another data set, so we 
       observe their output as features in our data set (like the Lamis 
@@ -198,7 +198,7 @@
     \item If we need to fit some of the early models to our data, how can we 
       get reliable cross-validated predictions for $f$? See next slide.
   \end{itemize}
-  \pause
+  % \pause
 
   Typically, we train the early  model on the high-dimensional 
   part of the data (like gene expression) and use its output together with the 
@@ -348,14 +348,14 @@ overfitting of cross-validated predictions to the training cohort.
   \begin{itemize}
     \item In intra-trial experiments, we could deliver on this promise for three 
       data sets. Inter-trial experiments worked even better.
-    \pause
+    % \pause
     \item While simple, $\ell_1$-penalized models predicting from 
       high-dimensional gene expression levels only sometimes already beat 
       the IPI, one usually needs to integrate more features.
-    \pause
+    % \pause
     \item Integrating \textit{already-existent} transcriptomic and genetic 
       signatures and the IPI features into another model reliably beats the IPI.
-    \pause
+    % \pause
     \item Transferring these models from one data set (and platform) to another
       works very well (especially Reddy $\to$ Lamis test). Apparently, the
       size of the data set matters most.
@@ -365,7 +365,7 @@ overfitting of cross-validated predictions to the training cohort.
 \begin{frame}{Discussion}
   \begin{itemize}
     \item \textbf{Validation:} Ensure a reliable link between validated and 
-      tested performance. How? \pause
+      tested performance. How? % \pause
       \begin{itemize}
         \item Validating a smaller $H$ (proceding more greedily, relying on 
           prior, general knowledge).
@@ -375,11 +375,11 @@ overfitting of cross-validated predictions to the training cohort.
           more stable.
         \item More samples.
       \end{itemize}
-    \pause
+    % \pause
     \item \textbf{Training:} Deploy other, more complex models in the 
       integration step like boosted trees or neural networks. Balance 
       classification problem via sample weights in loss function.
-    \pause
+    % \pause
     \item For MMML-Predict: rather more samples, less features.
   \end{itemize}
 \end{frame}

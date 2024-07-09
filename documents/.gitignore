@@ -16,3 +16,4 @@ zerosum/paper
 *.fls
 *.xdv
 *playground*
+*synctex.gz
