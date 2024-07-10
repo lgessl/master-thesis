@@ -9,16 +9,56 @@
 \def\RR{\mathbb{R}}
 \def\Pr{\mathrm{Pr}}
 
+\usepackage{siunitx}
+
 \usepackage{natbib}
-\bibliographystyle{plainnat}
+\bibliographystyle{abbrvnat}
+\setcitestyle{numbers,square}
 
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{hyperref}
 
 \begin{document}
+    \begin{titlepage}
+        \centering
+        \vspace*{1cm}
+        
+        \LARGE
+        \textbf{Computational detection of a high-risk DLBCL group}
+        
+        \vspace{1.5cm}
+        
+        \large
+        \textbf{Lukas A. Geßl}
+        
+        \vfill
+        
+        \large
+        A thesis presented for the degree of\\
+        Master of Science
+        
+        \vspace{0.8cm}
+        
+        \begin{tabular}{rl}
+            First Supervisor: & Prof. Dr. Harald Garcke \\
+            Second Supervisor: & Prof. Dr. Wolfram Gronwald \\
+        \end{tabular}
+        
+        \vspace{0.8cm}
+        
+        Department of Mathematics\\
+        University of Regensburg\\
+        \vspace{0.8cm}
+        \today
+        
+    \end{titlepage}
+
+    \tableofcontents
     \input{1-intro.tex}
     \input{2-methods.tex}
     \input{3-results.tex}
     \input{4-discussion.tex}
+
+    \bibliography{../lit.bib}
 \end{document}
