@@ -2,12 +2,19 @@
 
 \usepackage{fontspec}
 \setmainfont{TeX Gyre Pagella}
-\setsansfont{TeX Gyre Heros}[Scale=MatchLowercase]
+% \setsansfont{TeX Gyre Heros}[Scale=MatchLowercase]
+\setsansfont{Fira Sans}[Scale=MatchLowercase]
 \setmonofont{Inconsolata}[Scale=MatchLowercase]
+\usepackage{sectsty}
+\allsectionsfont{\sffamily}
 
 \usepackage{amsmath}
+\usepackage{amsfonts}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
 \def\RR{\mathbb{R}}
 \def\Pr{\mathrm{Pr}}
+\def\NN{\mathbb{N}}
 
 \usepackage{siunitx}
 
@@ -24,8 +31,10 @@
         \centering
         \vspace*{1cm}
         
-        \LARGE
+        \huge
+        \textsf{
         \textbf{Computational detection of a high-risk DLBCL group}
+        }
         
         \vspace{1.5cm}
         

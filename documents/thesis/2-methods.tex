@@ -1,1 +1,94 @@
-\chapter{Methods}
+\chapter{Methods} \label{chap:methods}
+
+Finding the best possible model for our given task will not be possible from just theoretical 
+considerations; we will have to fit several models to our data and demonstrate the performance of 
+the chosen one convincingly. Section \ref{sec:train-val-test} will lay the state-of-the-art 
+train-validate-test paradigm for this. In section \ref{sec:candidate-models}, we will introduce 
+the candidate models and the hyperparameters governing their fitting process. We will start with 
+model-agnostic hyperparameters before we go on to present well-known model types and finally 
+introduce a method that lets us train compositions of multiple models.
+
+\section{Training, validation and testing}\label{sec:train-val-test}
+
+The design of MMML-Predict with its train and test cohort, where the people developing the predictor 
+never get to see the test cohort, pays tribute to the standard two-step approach in supervised-
+learning tasks: We use the train cohort to fit multiple models (training) and choose the model
+among these models that we have confidence performs best on new data (validation). We then touch 
+the test cohort for the first time as we evaluate the chosen model on it to persuade the outside 
+world we have come up with model worth deploying.
+
+Since we want to have the same conditions for data used in this thesis as later in MMML-predict,
+we randomly split given data $(X, y)$ with predictor $X$ and response $y$ into 
+a train cohort $(X_\text{train}), y_\text{train}$ and a test cohort $(X_\text{test}, y_\text{test})$.
+The following assumes a single, split data set.
+
+\subsection{Training and validation}
+
+To be able to discuss some probabilistic caveats of validation later, we introduce some formal 
+notation. We start with a set of tuples of hyperparameters $H$, where every $h \in H$ defines a model
+up to its parameters; determining the parameters of a model, by definition, is the job of the 
+algorithm optimizing a given loss function, we refer to this as fitting. There is a one-to-one 
+mapping between $H$ and the set of candidate models.
+
+For every hyperparameter tuple $h \in H$, we
+\begin{enumerate}
+    \item fit the model to the train cohort subject to $h$ in $k$-fold cross-validation. This means 
+        we randomly assign the training samples into $k$ subsets, called folds, and then actually 
+        fit $k+1$ models, one model on all samples and for every $i = 1, \ldots, k$, we train a model
+        on all samples except the $i$-th fold and obtain its cross-validated predictions on the 
+        $i$-th fold; these are predictions on new data. Doing this for all folds, we obtain a 
+        cross-validated prediction for every sample and hence a vector of cross-validated predictions
+        $\hat{y}_\text{train} = \text{cv}(h)$ of the same shape as $y_\text{train}$. There may be 
+        other methods than ordinary cross
+        validation in this step, but their purpose is always the same: yield a prediction for every 
+        sample that looks like it was made on new data.
+    \item We use the cross-validated predictions to calculate the validation error 
+        $\text{err}(y_\text{train}, \hat{y}_\text{train})$.
+\end{enumerate}
+
+Finally, we select the model $m^*$ defined by the hyperparameter tuple 
+\begin{align}
+    h^* = \argmin_{h \in H} \ \text{err}(y_\text{train}, \text{cv}(h)).
+\end{align}
+
+We note that for all $h$ the validation error is a random variable, which e.g. depends on the 
+random assignment of the fold, the train cohort and possibly random involved in the loss-function
+optimizer. It is a well known property of independent,
+identically distributed (i.i.d.) real random variables $X_i, i \in \NN$, that their extreme values 
+are notoriously unstable in the sense that for all $t \in \RR$ with $P(X_1 \geq t) < 1$, 
+\begin{align}
+    \Pr\left( \min_{1 \leq i \leq n} X_i \geq t \right) = \Pr(X_1 \geq t)^n \to 0 \quad n \to \infty.
+\end{align}
+
+While not all $\text{err}(y_\text{train}, \text{cv}(h)), h \in H$ are i.i.d. -- after all, they all depend on 
+$(X_\text{train}, y_\text{train})$ and some model are better suited for the problem than others --,
+we can have situations where at least a subset of $H$ delivers validation errors close to being i.i.d.
+
+\paragraph{Models merely guessing}
+Imagine models not suited to deal with the problem at all. Their cross-validated predictions are 
+merely guesses on $y_\text{train}$ and therefore i.i.d. There is a non-zero probability to guess
+all true outcomes on the train cohort correctly and hence it is only a matter of the number of 
+such merely guessing models until which get the minimal possible error for one of them. The number of 
+such models can indeed grow large e.g. if we keep trying ever new hyperparameters for a model class 
+that can per se not describe the dependence between $X$ and $y$ at all.
+As a practical advice, we should not spend too much time und put too much hope into improving 
+bad models by hyperparamter tuning.
+
+\paragraph{General scenario}
+In general, the validation errors of the candidate models are independent to some extent because we fit them
+subject to differing hyperparameters. As a result, the validation error of every model can 
+fluctuate freely around its expected value to some extent. The larger $H$ gets, the 
+more severely underestimated validation errors we will have in the ranking. This 
+increases the odds that $m^*$ is just a model with a tremendously underestimated validation error, 
+leading to a bad surprise on the test cohort. As a practical advice, we should be careful with 
+trying too many model families and vastly differing hyperparameters for a given base model 
+because both may give us quite independent models.
+
+\paragraph{}
+This underscores the need for a smart and lean choice of the candidate models or hyperparameter 
+tuples, respectively. Exclusion criteria for candidate models may be theoretical considerations
+and experience by both us and others. Concerning experience, this means we will not move away too 
+far from default hyperparameters and we will make our decisions in chapter \ref{chap:results} as 
+move from data set to the next.
+
+\subsection{Testing}
