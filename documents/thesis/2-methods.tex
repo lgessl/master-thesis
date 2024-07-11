@@ -51,16 +51,18 @@ Finally, we select the model $m^*$ defined by the hyperparameter tuple
     h^* = \argmin_{h \in H} \ \text{err}(y_\text{train}, \text{cv}(h)).
 \end{align}
 
-We note that for all $h$ the validation error is a random variable, which e.g. depends on the 
+We note that for all $h$, the validation error is a random variable, which e.g. depends on the 
 random assignment of the fold, the train cohort and possibly random involved in the loss-function
 optimizer. It is a well known property of independent,
 identically distributed (i.i.d.) real random variables $X_i, i \in \NN$, that their extreme values 
 are notoriously unstable in the sense that for all $t \in \RR$ with $P(X_1 \geq t) < 1$, 
 \begin{align}
-    \Pr\left( \min_{1 \leq i \leq n} X_i \geq t \right) = \Pr(X_1 \geq t)^n \to 0 \quad n \to \infty.
+    \Pr\left( \min_{1 \leq i \leq n} X_i \geq t \right) = \Pr(X_1 \geq t)^n \to 0 \quad
+    \text{as } n \to \infty.
 \end{align}
 
-While not all $\text{err}(y_\text{train}, \text{cv}(h)), h \in H$ are i.i.d. -- after all, they all depend on 
+While not all $\text{err}(y_\text{train}, \text{cv}(h)), h \in H$, are i.i.d. -- after all, they 
+all depend on 
 $(X_\text{train}, y_\text{train})$ and some model are better suited for the problem than others --,
 we can have situations where at least a subset of $H$ delivers validation errors close to being i.i.d.
 
@@ -88,7 +90,111 @@ because both may give us quite independent models.
 This underscores the need for a smart and lean choice of the candidate models or hyperparameter 
 tuples, respectively. Exclusion criteria for candidate models may be theoretical considerations
 and experience by both us and others. Concerning experience, this means we will not move away too 
-far from default hyperparameters and we will make our decisions in chapter \ref{chap:results} as 
+far from default hyperparameters and we will develop heuristics in chapter \ref{chap:results} as 
 move from data set to the next.
 
 \subsection{Testing}
+
+We calculate the predictions $m^*(X_\text{test}) = \hat{y}_\text{test}$ of the best validated model 
+$m^*$ on the test cohort and estimate its performance on independent data via 
+
+\begin{align}
+    \text{err}(y_\text{test}, \hat{y}_\text{test}).
+\end{align}
+
+\subsection{Choice of the error function}\label{sec:error-function}
+
+Taking into account the calculations in section \ref{sec:intro-mmml},
+we want to optimize the precision of the high-risk group, which must comprise at least 15\% of the 
+samples in our data. Since an error should be the lower, the better the model is, we choose 
+$\text{err}$ to be the minimum of the negative precisions with a prevalence of at least 17\%. 
+
+Usually, we need 
+to take a minimum over \textit{several} precisions because most models do not output the final 
+classification.
+Instead they return a continuous score where a higher score means a higher probability of being
+in the positive class, in our case being high-risk, and this continuous score needs thresholding
+via $\hat{y}_i > t$ for some $t \in \RR$.
+We notice that as we increase $t$ and thereby decrease the prevalence, the obtained 
+adjacent precision values more and more depend on one another; for high $t$ and low 
+prevalences, fluctuations of up to 50 percentage points would be possible, but requiring a 
+prevalence of at least 17\% caps such fluctuations at 
+\begin{align}
+    \frac{1}{\ceil*{\num{0.17} \cdot n_\text{test}}}
+\end{align}
+for $n_\text{test}$ samples in the test cohort. This gives us an error function that is tailored 
+for our problem, sufficiently far-sighted and robust.
+
+As indicated by the notation $\text{err}(y_\text{train}, \hat{y}_\text{train})$ and 
+$\text{err}(y_\text{test}, \hat{y}_\text{test})$, we optimize $t$ on the true outcomes 
+of the train cohort when validating and we optimize it again on the true outcomes of the test cohort 
+when testing. Strictly speaking, $t$ is a hyperparameter, which we optimize on the 
+test cohort during testing; this sounds delicate. The results however will show that the optimal 
+choice for $t$ (or at least an 
+almost optimal choice) on both train and test cohort correponds to a prevalence of 
+slightly above 17\% such that one can agree on the following when it comes to the MMML-Predict data: 
+choose $t$ as the 17\%-quantile of the coninuous model output on the test cohort.
+
+\paragraph{Inter-technical variability} 
+One could instead suggest to already optimize the output threshold on the cross-validated 
+predictions. While this promises a stricter train-test regime at first glance, fixing the output 
+threshold once and for all neglects inter-technical variability. An always-present problem in 
+Bioinformatics, inter-technical variability refers to the fact fact that one and the same sample 
+measured on different platforms or in different labs, in short: with different protocols, may 
+lead to different values for the same feature. If we measure the same $p$ features of the $n$ 
+patients in $X \in \RR^{n \times p}$ again with another protocol, we end up with another predictor 
+$Z \in \RR^{n \times p}$.
+For gene-expression levels,
+we can often well model the discrepancies with two indepedent biases, sample-wise effects $\theta_i$
+and feature-wise effects $\omega_j$, leading to
+\begin{align}
+    \Delta_{ij} = Z_{ij} - X_{ij} = \theta_i + \omega_j + \epsilon_{ij}
+\end{align}
+for residues $r_{ij}$. Assuming accurate modeling, i.e. small residues, we can well approximate
+\begin{align}
+    Z_{ij} \approx \tilde{Z}_{ij} = X_{ij} + \theta_i + \omega_j.
+\end{align}
+We can now apply an ordinary linear -- or Gaussian -- model to $Z$ obtaining
+\begin{align}
+    \beta_0 + \sum_{j=1}^p \beta_j Z_{ij} &\approx \beta_0 + \sum_{j=1}^p \beta_j \tilde{Z}_{ij} \\
+    &= \beta_0 + \sum_{j=1}^p \beta_j X_{ij} + \sum_{j=1}^p \beta_j \theta_i + \sum_{j=1}^p \beta_j \omega_j.
+\end{align}
+The second summand is zero under the zero-sum constraint $\sum_{j = 1}^p \beta_j = 0$ and the third 
+summand is constant across all samples and can be absorbed by the intercept \cite{transplatform17}. 
+
+Under these (not very 
+strict) conditions, going from one protocol to another just leads to a constant shift of the model 
+output; even for generalized linear models, i.e. a Gauss model composed with some monotic link function,
+inter-technical variability does not change the ordering of the samples. All one needs to do to 
+obtain a final classification is calibrating the threshold for the output scores. However, this 
+also demonstrates that while generalized linear models can cope with inter-technical variability 
+pretty well, there is no point in using the same output threshold across all protocols.
+
+\section{Candidate models}\label{sec:candidate-models}
+
+\subsection{Model-agnostic hyperparameters}\label{subsec:model-agnostic}
+
+Model-agnostic are those hyperparameters we can set and tune for every model. They 
+concern the predictor matrix $X \in \RR^{n \times p}$ and the response vector $y \in 
+(\RR \times \{ 0, 1 \})^n \cup \{ 0, 1 \}^n$. We can provide the response in two formats. In the 
+first case, the response has two entries per sample: the first one is the time to event, in our 
+case progression-free survival, and the second one indicates if the event has occured (1) or 
+if the patient was censored before it could occur (0). In the second case, the response is a binary 
+vector with 1 indicating the positive class (high-risk DLBCL)
+and 0 indicating the negative class (low-risk DLBCL). Note that in the latter case we need 
+to discard samples censored before two years, but this is typically only a small proportion of the 
+samples in the data set.
+
+\paragraph{Imputation}
+
+\paragraph{Adding combinations of discrete features to the predictor}
+
+\paragraph{Focusing on very-high risk patients}
+
+\paragraph{A priori feature selection}
+
+\subsection{Core models}\label{subsec:core-models}
+
+\subsection{Nested models}\label{subsec:nested-models}
+
+\section{Software}
