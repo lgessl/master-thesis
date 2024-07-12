@@ -18,11 +18,11 @@ the test cohort for the first time as we evaluate the chosen model on it to pers
 world we have come up with model worth deploying.
 
 Since we want to have the same conditions for data used in this thesis as later in MMML-predict,
-we randomly split given data $(X, y)$ with predictor $X$ and response $y$ into 
-a train cohort $(X_\text{train}), y_\text{train}$ and a test cohort $(X_\text{test}, y_\text{test})$.
+we randomly split given data $(\mathbf{x}, y)$ with predictor $\mathbf{x}$ and response $y$ into 
+a train cohort $(\mathbf{x}_\text{train}), y_\text{train}$ and a test cohort $(\mathbf{x}_\text{test}, y_\text{test})$.
 The following assumes a single, split data set.
 
-\subsection{Training and validation}
+\subsection{Training and validation}\label{subsec:train-val}
 
 To be able to discuss some probabilistic caveats of validation later, we introduce some formal 
 notation. We start with a set of tuples of hyperparameters $H$, where every $h \in H$ defines a model
@@ -63,7 +63,7 @@ are notoriously unstable in the sense that for all $t \in \RR$ with $P(X_1 \geq 
 
 While not all $\text{err}(y_\text{train}, \text{cv}(h)), h \in H$, are i.i.d. -- after all, they 
 all depend on 
-$(X_\text{train}, y_\text{train})$ and some model are better suited for the problem than others --,
+$(\mathbf{x}_\text{train}, y_\text{train})$ and some model are better suited for the problem than others --,
 we can have situations where at least a subset of $H$ delivers validation errors close to being i.i.d.
 
 \paragraph{Models merely guessing}
@@ -72,7 +72,7 @@ merely guesses on $y_\text{train}$ and therefore i.i.d. There is a non-zero prob
 all true outcomes on the train cohort correctly and hence it is only a matter of the number of 
 such merely guessing models until which get the minimal possible error for one of them. The number of 
 such models can indeed grow large e.g. if we keep trying ever new hyperparameters for a model class 
-that can per se not describe the dependence between $X$ and $y$ at all.
+that can per se not describe the dependence between $\mathbf{x}$ and $y$ at all.
 As a practical advice, we should not spend too much time und put too much hope into improving 
 bad models by hyperparamter tuning.
 
@@ -135,29 +135,29 @@ almost optimal choice) on both train and test cohort correponds to a prevalence 
 slightly above 17\% such that one can agree on the following when it comes to the MMML-Predict data: 
 choose $t$ as the 17\%-quantile of the coninuous model output on the test cohort.
 
-\paragraph{Inter-technical variability} 
+\subsection{Inter-technical variability} 
 One could instead suggest to already optimize the output threshold on the cross-validated 
 predictions. While this promises a stricter train-test regime at first glance, fixing the output 
 threshold once and for all neglects inter-technical variability. An always-present problem in 
-Bioinformatics, inter-technical variability refers to the fact fact that one and the same sample 
+Bioinformatics, inter-technical variability refers to the fact that one and the same sample 
 measured on different platforms or in different labs, in short: with different protocols, may 
 lead to different values for the same feature. If we measure the same $p$ features of the $n$ 
-patients in $X \in \RR^{n \times p}$ again with another protocol, we end up with another predictor 
+patients in $\mathbf{x} \in \RR^{n \times p}$ again with another protocol, we end up with another predictor 
 $Z \in \RR^{n \times p}$.
 For gene-expression levels,
 we can often well model the discrepancies with two indepedent biases, sample-wise effects $\theta_i$
 and feature-wise effects $\omega_j$, leading to
 \begin{align}
-    \Delta_{ij} = Z_{ij} - X_{ij} = \theta_i + \omega_j + \epsilon_{ij}
+    \Delta_{ij} = Z_{ij} - \mathbf{x}_{ij} = \theta_i + \omega_j + \epsilon_{ij}
 \end{align}
 for residues $r_{ij}$. Assuming accurate modeling, i.e. small residues, we can well approximate
 \begin{align}
-    Z_{ij} \approx \tilde{Z}_{ij} = X_{ij} + \theta_i + \omega_j.
+    Z_{ij} \approx \tilde{Z}_{ij} = \mathbf{x}_{ij} + \theta_i + \omega_j.
 \end{align}
 We can now apply an ordinary linear -- or Gaussian -- model to $Z$ obtaining
 \begin{align}
     \beta_0 + \sum_{j=1}^p \beta_j Z_{ij} &\approx \beta_0 + \sum_{j=1}^p \beta_j \tilde{Z}_{ij} \\
-    &= \beta_0 + \sum_{j=1}^p \beta_j X_{ij} + \sum_{j=1}^p \beta_j \theta_i + \sum_{j=1}^p \beta_j \omega_j.
+    &= \beta_0 + \sum_{j=1}^p \beta_j \mathbf{x}_{ij} + \sum_{j=1}^p \beta_j \theta_i + \sum_{j=1}^p \beta_j \omega_j.
 \end{align}
 The second summand is zero under the zero-sum constraint $\sum_{j = 1}^p \beta_j = 0$ and the third 
 summand is constant across all samples and can be absorbed by the intercept \cite{transplatform17}. 
@@ -174,8 +174,8 @@ pretty well, there is no point in using the same output threshold across all pro
 
 \subsection{Model-agnostic hyperparameters}\label{subsec:model-agnostic}
 
-Model-agnostic are those hyperparameters we can set and tune for every model. They 
-concern the predictor matrix $X \in \RR^{n \times p}$ and the response vector $y \in 
+Model-agnostic hyperparameters are those hyperparameters we can set and tune for every model. They 
+concern the predictor matrix $\mathbf{x} \in \RR^{n \times p}$ and the response vector $y \in 
 (\RR \times \{ 0, 1 \})^n \cup \{ 0, 1 \}^n$. We can provide the response in two formats. In the 
 first case, the response has two entries per sample: the first one is the time to event, in our 
 case progression-free survival, and the second one indicates if the event has occured (1) or 
@@ -185,15 +185,139 @@ and 0 indicating the negative class (low-risk DLBCL). Note that in the latter ca
 to discard samples censored before two years, but this is typically only a small proportion of the 
 samples in the data set.
 
-\paragraph{Imputation}
+\subsubsection{A-priori feature selection}
 
-\paragraph{Adding combinations of discrete features to the predictor}
+Of course, not every feature in the data set should be part of the predictor matrix $\mathbf{x}$. Including 
+features measured to toward the end of a patinent's therapy or even after it, is cheating and we 
+should definitely exclude them. Excluding any of the remaining features is hard to justify: If we 
+know for a feature that it alone is associated with the response, we of course include it in $\mathbf{x}$.
+On the other hand, if a feature alone shows no link to the response, the right model might still be 
+able to leverage it in combination with other features; but at this step, we do not know if such 
+a model exists and if it is among our candiate models. The only remaining option for handpicking 
+features a priori is to brute-force the problem and try out all $2^p$ combinations of features.
+Even if we trust on regularization to do its job for the high-dimensional part (typically several 
+hundreds or even thousands of gene expression levels), just \num{10} remaining fetures would still
+leave us with $2^{10} = 1024$ combinations to try out -- per model class. While this may be 
+computationally feasible, validation would be a statistical fiasco as laid out in subsection 
+\ref{subsec:train-val}. Therefore, we decided to reduce this quickly exploding problem to only 
+a couple of decisions to 
+make and have all the other feature selection happen during model fitting. 
 
-\paragraph{Focusing on very-high risk patients}
+\paragraph{Gene-expression data}
+The first and most important decision to make is: do we want to include the high-dimensional
+gene-expression part of the data at all? If we do not, we suddenly have $p \ll n$ instead of 
+$p \gg n$ and can use way more complex models. 
 
-\paragraph{A priori feature selection}
+\paragraph{Features in different formats}
+Second, we need to make a couple of more decisions regarding the format of some features.
+\begin{itemize}
+    \item Concerning the IPI, one can include the five IPI features in their original, continuous 
+        form; discretized as by the IPI inventors; the IPI score as a single continuous feature; 
+        or the so-called IPI group, a partioning of the IPI score into three groups. Similar widely 
+        accepted thresholds may exist for other clinical and genetic features.
+    \item For already existing models, we can include their continuous output or also threshold 
+        it. E.g., cell-of-origin signatures can be -- and most of the time in data sets already 
+        have been -- thresholded into ABC, GCB and unclassified subtypes. The above-mentioned IPI 
+        group thresholds the IPI model. 
+\end{itemize}
+
+Imagine, a data set provides the five IPI features in continuous format and the continuous output 
+of some gene-expression signature for which 
+its inventors also provide a preferred threshold. If we want to decide for exactly one format 
+per feature, this leaves us with $5 \cdot 2$ possibilities for this simple case. If we want try out 
+every combination of non-empty subsets, the number of possibilities jumps to $2^5 \cdot 2^2 = 
+128$. 
+
+Our solution here again is to be generous and include all formats of a feature in $\mathbf{x}$ a 
+certain model may benefit from. This sentence usually 
+simplifies to do: include all widely used formats of a feature in $\mathbf{x}$. E.g., generalized linear models
+cannot threshold continuous features, so a feature in its thresholded format may give a rough 
+contribution to the prediction while the same feature in its continuous form may further refine it.
+Moreover, even decision trees can benefit from a feature additionally provided in its thresholded 
+format if this threshold has been inferred on a much bigger data set since the decision tree 
+may not be able to find the threshold itself.
+
+\subsubsection{Imputation}
+
+If values in $\mathbf{x}$ are missing, i.e. written as \texttt{NA}, actions we can take fall into two 
+categories: we discard the part of data affected by missing values or we replace the missing values 
+with some realistic estimate.
+
+\paragraph{Discarding part of the data}
+
+In a first step, we discard a feature if it is not available for a large proportion of the samples.
+This enables reasonable computing.
+
+\paragraph{Imputing}
+
+We then mean-impute the remaining missing values. At this point, we model a categorical feature 
+with $c$ categories as $c-1$ binary dummy features; if for a sample this categorical feature is not 
+available, all $c-1$ dummy features will be \texttt{NA}. For every column in $\mathbf{x}$, we calculate the 
+mean of the available features in $\mathbf{x}$ and replace the \texttt{NA} values with it. 
+For a missing categorical feature, every dummy feature therefore holds the marginal probability 
+that the feature is in the $k$-th category. This is efficient, transparent and easily applicable to 
+new data.
+
+\subsubsection{Adding combinations of discrete features to the predictor}
+
+We add all combinations of at most $n_\text{combi}$ categorical features that are positive in a 
+share of at least $s_\text{min}$ patients to $\mathbf{x}$; e.g., we add a column ``female \& ABC-type 
+tumor'' if at least \num{5}\% of patients have this property. We always choose $s_\text{min}
+= 5\%$. We set $n_\text{combi} = 1$ for models that facilitate interactions between features 
+themselves, otherwise we set $n_\text{combi} = 3$.
+
+\subsubsection{Tuning the definion of ``high-risk''}
+
+Defining a patient as high-risk if and only if the progression-free survival is less than two years
+is clinically accepted, yet quite arbitrary decision. It may be not be the time cutoff that 
+separates patients' survival 
+best from a biological point of view. Therefore we can provide the fitting 
+algorithm a modified response $y$, governed by the time cutoff $T > 0$.
+\begin{itemize}
+    \item For binary response $y \in \{0, 1\}^n$, we set $y_i = 1$ if the progression-free survival 
+        of patient $i$ is less than $T$ and $y_i = 0$ otherwise.
+    \item For response $y \in (\RR \times \{0, 1\})^n$ with time to event and censoring, we censor 
+        all samples with time to event exceeding $T$ at $T$.
+\end{itemize}
 
 \subsection{Core models}\label{subsec:core-models}
+
+All models trained, validated and tested in this thesis at the core consist of ordinary linear, 
+logistic and Cox proportional-hazards models with additional properties as well as random forests.
+In this chapter, we want to introduce the design of these models and the hyperparameters governing 
+their fitting process.
+
+Formally, we deal with a probability space $(\Omega, \mathcal{A}, P)$ that we do not and cannot 
+specify any further because we only get in touch with two random variables 
+\begin{align}
+    X = (X_1, \ldots, X_n): \Omega \to \RR^p \text{ and } Y: \Omega \to \RR,
+\end{align}
+the predictor and the response, respectively. More 
+precisely, we observe independent samples $(x_i, y_i) \in \RR^{p+1}, i = 1, \ldots, n$, 
+distributed according to $(X, Y)$; $x_i$ is the $i$-th row of the predictor matrix $\mathbf{x}$ and
+$y_i$ is the $i$-th entry of the binary response vector $y$. MMML-Predict is all about getting 
+a hand on the conditional distribution $P(Y \cond X = x)$ for all $x \in \RR^p$.
+
+\subsubsection{Generalized linear models}\label{subsubsec:glm}
+
+Both ordinary linar models and logistic regression models are generalized linear models (GLMs). In 
+a GLM, $Y$ follows an exponential-family distribution and there is an invertible link function 
+$g: \RR \to \RR$ and parameters $(\beta_0, \beta) \in \RR^{p+1}$ such that
+\begin{align}
+    g(E(Y \cond X = x)) = \beta_0 + \sum_{j=1}^p \beta_j x_j \quad \text{for all } x \in \RR^p.
+\end{align}
+The linear predictor $\beta_0 + \sum_{j=1}^p \beta_j x_j$ predicts the expected
+value of $Y$ given $X = x$, $E(Y \cond X = x) = \mu$, via a link function. 
+
+\begin{itemize}
+    \item For the ordinary linear model, the link function is the identity and $Y \cond X = x$ 
+        follows a normal distribution with mean $\mu$ and variance $\text{Var}(Y)$.
+    \item For the logistic model, $g: \mu \mapsto \ln\left( \frac{\mu}{1 - \mu} \right)$ and 
+        $Y \cond X = x$ follows a Bernoulli distribution with parameter $\mu$.
+\end{itemize}
+
+In both cases, the distribution of $Y \cond X = x$ is fully determined by the mean $\mu$ and hence 
+by $(\beta_0, \beta)$. Hence, the log-likelihood for 
 
 \subsection{Nested models}\label{subsec:nested-models}
 
