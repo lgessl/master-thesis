@@ -290,34 +290,55 @@ their fitting process.
 Formally, we deal with a probability space $(\Omega, \mathcal{A}, P)$ that we do not and cannot 
 specify any further because we only get in touch with two random variables 
 \begin{align}
-    X = (X_1, \ldots, X_n): \Omega \to \RR^p \text{ and } Y: \Omega \to \RR,
+    X = (X_1, \ldots, X_p): \Omega \to \RR^p \text{ and } Y: \Omega \to \RR,
 \end{align}
 the predictor and the response, respectively. More 
 precisely, we observe independent samples $(x_i, y_i) \in \RR^{p+1}, i = 1, \ldots, n$, 
 distributed according to $(X, Y)$; $x_i$ is the $i$-th row of the predictor matrix $\mathbf{x}$ and
-$y_i$ is the $i$-th entry of the binary response vector $y$. MMML-Predict is all about getting 
+$y_i$ is the $i$-th entry of the response vector $y$. MMML-Predict is all about getting 
 a hand on the conditional distribution $P(Y \cond X = x)$ for all $x \in \RR^p$.
 
 \subsubsection{Generalized linear models}\label{subsubsec:glm}
 
-Both ordinary linar models and logistic regression models are generalized linear models (GLMs). In 
+In this subsection, we work with binary response $y \in \RR^n$. Both ordinary linar models and 
+logistic regression models are generalized linear models (GLMs). In 
 a GLM, $Y$ follows an exponential-family distribution and there is an invertible link function 
 $g: \RR \to \RR$ and parameters $(\beta_0, \beta) \in \RR^{p+1}$ such that
 \begin{align}
-    g(E(Y \cond X = x)) = \beta_0 + \sum_{j=1}^p \beta_j x_j \quad \text{for all } x \in \RR^p.
+    g(E(Y \cond X = x)) = \beta_0 + \sum_{j=1}^p \beta_j x_j \quad \text{for all } x \in \RR^p,
 \end{align}
-The linear predictor $\beta_0 + \sum_{j=1}^p \beta_j x_j$ predicts the expected
-value of $Y$ given $X = x$, $E(Y \cond X = x) = \mu$, via a link function. 
+where the $E(Y \cond X = x)$ is the expected value of $Y$ given $X = x$. For the above samples 
+$(x_i, y_i)$, we obtain
+\begin{align}
+    \mu_i = E(Y \cond X = x_i) = g^{-1}\left(\beta_0 + \sum_{j=1}^p \beta_j x_{ij}\right).
+\end{align}
+Relating $\mu_i$ to $y_i$ via a log-likelihood, will allow us to fit $(\beta_0, \beta)$ to 
+$(x_i, y_i)_{i = 1, \ldots, n}$.
 
-\begin{itemize}
-    \item For the ordinary linear model, the link function is the identity and $Y \cond X = x$ 
-        follows a normal distribution with mean $\mu$ and variance $\text{Var}(Y)$.
-    \item For the logistic model, $g: \mu \mapsto \ln\left( \frac{\mu}{1 - \mu} \right)$ and 
-        $Y \cond X = x$ follows a Bernoulli distribution with parameter $\mu$.
-\end{itemize}
+\paragraph{Ordinary linear model}
+Here, $g = \text{id}$. $Y$ and $Y \cond X = x_i$ for all $i = 1, \ldots, n$ follow a normal
+distribution with fixed standard deviation $\sigma > 0$ (a property called homoscadasticity), but 
+varying mean. The log-likelihood of $\mu_i$ is
+\begin{align}
+    \ell(\mu_i; y_i) &= \log\left( \frac{1}{\sqrt{2\pi}\sigma} 
+        \exp \left( -\frac{1}{2\sigma^2}(y_i - \mu_i)^2 \right) \right) \\
+    &= -\frac{1}{2\sigma^2}(y_i - \mu_i)^2 - \log \left( \sqrt{2\pi}\sigma \right).
+\end{align}
+Up to a constant shift and re-scaling, which does not affect maximizing the log-likelihood, this
+is the well-known squared error.
 
-In both cases, the distribution of $Y \cond X = x$ is fully determined by the mean $\mu$ and hence 
-by $(\beta_0, \beta)$. Hence, the log-likelihood for 
+\paragraph{Logistic model}
+Here, the linear predictor is the log-odds for $Y = 1$ over $Y = 0$ given $X = x$, i.e.
+\begin{align}
+    g: \mu \mapsto \log\left( \frac{\mu}{1 - \mu} \right), \text{ hence } g^{-1}: \eta \mapsto
+    \frac{1}{1 + \exp(-\eta)}.
+\end{align}
+Y and $Y \cond X = x_i$ for all $i = 1, \ldots, n$ follow a Bernoulli distribution with parameter 
+$p$ and $\mu_i$, respectively. The log-likelihood of $\mu_i$ is
+\begin{align}
+    \ell(\mu_i; y_i) &= \log\left( \mu_i^{y_i} (1 - \mu_i)^{1 - y_i} \right) \\
+    &= y_i \log(\mu_i) + (1 - y_i) \log(1 - \mu_i). 
+\end{align}
 
 \subsection{Nested models}\label{subsec:nested-models}
 
