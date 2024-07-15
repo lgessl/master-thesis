@@ -143,21 +143,23 @@ Bioinformatics, inter-technical variability refers to the fact that one and the 
 measured on different platforms or in different labs, in short: with different protocols, may 
 lead to different values for the same feature. If we measure the same $p$ features of the $n$ 
 patients in $\mathbf{x} \in \RR^{n \times p}$ again with another protocol, we end up with another predictor 
-$Z \in \RR^{n \times p}$.
+$\mathbf{z} \in \RR^{n \times p}$.
 For gene-expression levels,
 we can often well model the discrepancies with two indepedent biases, sample-wise effects $\theta_i$
 and feature-wise effects $\omega_j$, leading to
 \begin{align}
-    \Delta_{ij} = Z_{ij} - \mathbf{x}_{ij} = \theta_i + \omega_j + \epsilon_{ij}
+    \Delta_{ij} = \mathbf{z}_{ij} - \mathbf{x}_{ij} = \theta_i + \omega_j + \epsilon_{ij}
 \end{align}
 for residues $r_{ij}$. Assuming accurate modeling, i.e. small residues, we can well approximate
 \begin{align}
-    Z_{ij} \approx \tilde{Z}_{ij} = \mathbf{x}_{ij} + \theta_i + \omega_j.
+    \mathbf{z}_{ij} \approx \tilde{\mathbf{z}}_{ij} = \mathbf{x}_{ij} + \theta_i + \omega_j.
 \end{align}
-We can now apply an ordinary linear -- or Gaussian -- model to $Z$ obtaining
-\begin{align}
-    \beta_0 + \sum_{j=1}^p \beta_j Z_{ij} &\approx \beta_0 + \sum_{j=1}^p \beta_j \tilde{Z}_{ij} \\
+We can now apply an ordinary linear -- or Gaussian -- model to $\mathbf{z}$ obtaining
+\begin{align} \label{eq:inter-tech}
+\begin{split}
+    \beta_0 + \sum_{j=1}^p \beta_j \mathbf{z}_{ij} &\approx \beta_0 + \sum_{j=1}^p \beta_j \tilde{\mathbf{z}}_{ij} \\
     &= \beta_0 + \sum_{j=1}^p \beta_j \mathbf{x}_{ij} + \sum_{j=1}^p \beta_j \theta_i + \sum_{j=1}^p \beta_j \omega_j.
+\end{split}
 \end{align}
 The second summand is zero under the zero-sum constraint $\sum_{j = 1}^p \beta_j = 0$ and the third 
 summand is constant across all samples and can be absorbed by the intercept \cite{transplatform17}. 
@@ -179,7 +181,8 @@ concern the predictor matrix $\mathbf{x} \in \RR^{n \times p}$ and the response 
 (\RR \times \{ 0, 1 \})^n \cup \{ 0, 1 \}^n$. We can provide the response in two formats. In the 
 first case, the response has two entries per sample: the first one is the time to event, in our 
 case progression-free survival, and the second one indicates if the event has occured (1) or 
-if the patient was censored before it could occur (0). In the second case, the response is a binary 
+if the patient was censored before it could occur (0); more on this in subsection 
+\ref{subsec:core-models} when we present the Cox model. In the second case, the response is a binary 
 vector with 1 indicating the positive class (high-risk DLBCL)
 and 0 indicating the negative class (low-risk DLBCL). Note that in the latter case we need 
 to discard samples censored before two years, but this is typically only a small proportion of the 
@@ -283,7 +286,7 @@ algorithm a modified response $y$, governed by the time cutoff $T > 0$.
 \subsection{Core models}\label{subsec:core-models}
 
 All models trained, validated and tested in this thesis at the core consist of ordinary linear, 
-logistic and Cox proportional-hazards models with additional properties as well as random forests.
+logistic and Cox proportional-hazards models with additional properties, as well as random forests.
 In this chapter, we want to introduce the design of these models and the hyperparameters governing 
 their fitting process.
 
@@ -313,16 +316,20 @@ $(x_i, y_i)$, we obtain
     \mu_i = E(Y \cond X = x_i) = g^{-1}\left(\beta_0 + \sum_{j=1}^p \beta_j x_{ij}\right).
 \end{align}
 Relating $\mu_i$ to $y_i$ via a log-likelihood, will allow us to fit $(\beta_0, \beta)$ to 
-$(x_i, y_i)_{i = 1, \ldots, n}$.
+$(x_i, y_i)_{i = 1, \ldots, n}$. We can express $\sum_{j=1}^p \beta_j x_{ij}$ in terms of the 
+Euclidean scalar product as $x_i^T \beta$, where $x_i^T$ denotes the transpose of the column vector 
+$x_i$.
 
 \paragraph{Ordinary linear model}
 Here, $g = \text{id}$. $Y$ and $Y \cond X = x_i$ for all $i = 1, \ldots, n$ follow a normal
 distribution with fixed standard deviation $\sigma > 0$ (a property called homoscadasticity), but 
 varying mean. The log-likelihood of $\mu_i$ is
 \begin{align}
+\begin{split}
     \ell(\mu_i; y_i) &= \log\left( \frac{1}{\sqrt{2\pi}\sigma} 
         \exp \left( -\frac{1}{2\sigma^2}(y_i - \mu_i)^2 \right) \right) \\
     &= -\frac{1}{2\sigma^2}(y_i - \mu_i)^2 - \log \left( \sqrt{2\pi}\sigma \right).
+\end{split}
 \end{align}
 Up to a constant shift and re-scaling, which does not affect maximizing the log-likelihood, this
 is the well-known squared error.
@@ -336,9 +343,119 @@ Here, the linear predictor is the log-odds for $Y = 1$ over $Y = 0$ given $X = x
 Y and $Y \cond X = x_i$ for all $i = 1, \ldots, n$ follow a Bernoulli distribution with parameter 
 $p$ and $\mu_i$, respectively. The log-likelihood of $\mu_i$ is
 \begin{align}
-    \ell(\mu_i; y_i) &= \log\left( \mu_i^{y_i} (1 - \mu_i)^{1 - y_i} \right) \\
-    &= y_i \log(\mu_i) + (1 - y_i) \log(1 - \mu_i). 
+    \ell(\mu_i; y_i) &= \log\left( \mu_i^{y_i} (1 - \mu_i)^{1 - y_i} \right) 
+    = y_i \log(\mu_i) + (1 - y_i) \log(1 - \mu_i). 
 \end{align}
+
+\paragraph{}
+Using $\mu_i = g^{-1}(\beta_0 + x_i^T \beta)$, in both cases we can express the 
+log-likelihood 
+for $(\beta_0, \beta)$. For our i.i.d. samples $(x_i, y_i)_{i = 1, \ldots, n}$, we therefore obtain 
+\begin{align}
+    L(\beta_0, \beta) &= \sum_{i=1}^n \ell(\mu_i; y_i) 
+    = \sum_{i=1}^n \ell\left( g^{-1}\left( \beta_0 + x_i^T \beta \right); y_i \right).
+\end{align}
+We can augment $L$ with two hyperparameters, sample weights $w_i > 0$, $i = 1, \ldots, n$, and the 
+zero-sum constraint with respect to zero-sum weights $u_j \geq 0$, $j = 1, \ldots, p$, yielding 
+\begin{align} \label{eq:loss-glm-no-lasso}
+    L(\beta_0, \beta) &= \sum_{i=1}^n w_i \ell\left( g^{-1}\left( \beta_0 + x_i^T \beta \right); 
+    y_i \right) \quad \text{subject to } \sum_{j=1}^p \beta_j u_j = 0.
+\end{align}
+While we do not deviate from default value $1/n$ for the sample weights in the results chapter 
+\ref{chap:results}, we will discuss in chapter \ref{chap:discussion} how we can use them in the 
+future in a natural way without getting lost in the vast amount of freedom one has to choose them.
+
+What is the zero-sum constraint good for? Imagine, part of the features suffer from sample-wise 
+shifts. We denote these features by $J \subset \{1, \ldots, p\}$ and the shifts by $s_i \in R$, 
+$i = 1, \ldots, n$. We now set the zero-sum weights  
+\begin{align}
+    u_j =
+    \begin{cases}
+        c & \text{if } j \in J, \\
+        0 & \text{else},
+    \end{cases}
+\end{align}
+for some $c > 0$ (usually $c = 1$); we can express this conviently with the help of the indicator 
+function $\chi_J$ as $u_j = \chi_J(j) c$. By the zero-sum constraint, $\sum_{j \in J} c \beta_j = 0$  
+and hence $\sum{j \in J} \beta_j = 0$. In this situation, the linear predictor 
+\begin{align}
+    \beta_0 + \sum_{j=1}^p \beta_j (x_{ij} + s_i \chi_J(j))
+    = \beta_0 + x_i^T \beta + \sum_{j \in J} \beta_j s_i = \beta_0 + x_i^T \beta,
+\end{align}
+as $\sum_{j \in J} \beta_j s_i = s_i \sum_{j \in J} \beta_j = 0$, is invariant. If $J$ consists of 
+exactly the features holding gene-expression levels, we can transfer our model to other protocols 
+and only need to re-calibrate the intercept, as shown in eq. (\ref{eq:inter-tech}). Moreover, we 
+can switch off the zero-sum constraint for all features by setting $u_j = 0$ for all 
+$j = 1, \ldots, p$. The zero-sum constraint is cheap in terms of model complexity: it only removes 
+one degree of freedom; but it is expensive in terms of computational complexity: enforcing it in
+every step of the coordinate descent leads to a considerably higher computation time. However, the 
+coordinate descent minimizes eq. (\ref{eq:loss-glm-no-lasso}) with a regularization term add. Before 
+we discuss this, we want to introduce a model that is closely related to GLMs.
+
+\subsubsection{Cox proportional-hazards model}\label{subsubsec:cox}
+
+For the Cox proportional-hazards model -- or in short: Cox model -- the response variable $Y$ 
+measures the time until the event of interest occurs (``event'') or the time after which at some 
+point the 
+event occurs (``censoring''). Another binary random variable $\delta: \Omega \to \RR$ encodes 
+which of these two options is the case: $\delta(\omega) = 1$ for the event, $\delta(\omega) = 0$ 
+for censoring. This pays tribute to an important characteristic of survival trials: some
+participants drop out of the trial before the event could happen -- e.g. the trial terminated, the 
+patient decided to withdraw or died from another cause -- or the event luckily never happens.
+
+\paragraph{Hazard function} To understand what the Cox model predicts, we need another random 
+variable $T: \Omega \to \RR$, the time to the event (this time not affected by censoring), and 
+require $T$ to have a density $f_T: \RR \to \RR$. We define the hazard function $h: \RR \to \RR$
+via
+\begin{align}
+    h(t) = \lim_{\Delta t \to 0} \frac{P(t \leq T < t + \Delta t \cond T \geq t)}{\Delta t}.
+\end{align}
+We can interprete $h(t)$ as the instantaneous rate at which the event is occurring at time $t$, 
+given that the event has not occured before time $t$. Let $F_T$ be $T$'s distribution function. Then 
+we can write
+\begin{align}
+    \frac{P(t \leq T < t + \Delta t \cond T \geq t)}{\Delta t} = 
+    \frac{F_T(t + \Delta t) - F_T(t)}{\Delta t \cdot (1 - F_T(t))}.
+\end{align}
+Hence, 
+\begin{align}
+    h(t) = \lim_{\Delta t \to 0} \frac{F_T(t + \Delta t) - F_T(t)}{\Delta t \cdot (1 - F_T(t))} 
+    = \frac{f_T(t)}{1 - F_T(t)} = \frac{f_T(t)}{S_T(t)},
+\end{align}
+where $S(t) = 1 - F_T(t)$ is the survival function, and $h(t)$ is well-defined as long as $S_T(t)
+> 0$.
+
+\paragraph{Conditional hazard} The Cox model wants to get a hand on \textit{conditional} hazards.
+Intuitively, it is clear that the population with one value of $X$ can have a vastly different 
+hazard function than the population with another value of $X$ if $X$ predictive power with respect 
+to $T$. Formally, however, it is hard to define a conditional hazard function: $X$ may very well 
+have a continuous distribution, hence we condition on an event of probability $0$ when we write 
+$P(t \leq T < t + \Delta t \cond T \geq t, X = x)$ -- it is hard to define this in a natural
+and straightforward way. In practice, the measurements in $X$ often fluctuate around their true 
+values anyway, so it is sensible to condition on a small neighborhood of $x$, say an $\epsilon$-ball 
+around $x$ with respect to the Euclidean norm $|\cdot|_2$ for some small $\epsilon > 0$. This 
+amounts to
+\begin{align}
+    h(t \cond X = x) = \lim_{\Delta t \to 0} \frac{P(t \leq T < t + \Delta t \cond T \geq t, 
+    |X - x|_2 < \epsilon)}{\Delta t}
+\end{align}
+or -- equivalently -- $h(t \cond X = x)$ is the hazard of $T$ restricted to $(\Omega, \mathcal{A}, 
+P)$ conditioned on $\Omega_x = \{ \omega \in \Omega: |X(\omega) - x| < \epsilon \}$; unlike before, 
+we usually now have $P(\Omega_x) > 0$.
+
+\paragraph{Proportional hazards} The Cox model assumes \textit{proportional} conditional hazards, 
+i.e. 
+\begin{align}
+    h(t \cond X = x) = \lambda_x h_0(t) 
+\end{align}
+for some (unspecified) baseline hazard $h_0$ and $\lambda_x > 0$. Moreover, it assumes $\lambda_x$ depends 
+on $x$ via 
+\begin{align}
+    \lambda_x = \exp(x^T \beta),
+\end{align}
+for parameters $\beta \in \RR^p$.
+
+\paragraph{Partial log-likelihood}
 
 \subsection{Nested models}\label{subsec:nested-models}
 
