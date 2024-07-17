@@ -296,15 +296,17 @@ specify any further because we only get in touch with two random variables
     X = (X_1, \ldots, X_p): \Omega \to \RR^p \text{ and } Y: \Omega \to \RR,
 \end{align}
 the predictor and the response, respectively. More 
-precisely, we observe independent samples $(x_i, y_i) \in \RR^{p+1}, i = 1, \ldots, n$, 
+precisely, we observe independent training samples $(x_i, y_i) \in \RR^{p+1}, i = 1, \ldots, n$, 
 distributed according to $(X, Y)$; $x_i$ is the $i$-th row of the predictor matrix $\mathbf{x}$ and
-$y_i$ is the $i$-th entry of the response vector $y$. MMML-Predict is all about getting 
-a hand on the conditional distribution $P(Y \cond X = x)$ for all $x \in \RR^p$.
+$y_i$ is the $i$-th entry of the response vector $y$. The i.i.d. test samples follow the same 
+distribution as the training samples, but in this subsection everything is about the training and 
+hence the training samples; if we say samples in this subsection, we always refer to the training   
+samples.
 
 \subsubsection{Generalized linear models}\label{subsubsec:glm}
 
-In this subsection, we work with binary response $y \in \RR^n$. Both ordinary linar models and 
-logistic regression models are generalized linear models (GLMs). In 
+Here, we work with binary response, i.e. $im(Y) \subset \{0, 1\}$. Both ordinary 
+linar models and logistic regression models are generalized linear models (GLMs). In 
 a GLM, $Y$ follows an exponential-family distribution and there is an invertible link function 
 $g: \RR \to \RR$ and parameters $(\beta_0, \beta) \in \RR^{p+1}$ such that
 \begin{align}
@@ -377,7 +379,7 @@ $i = 1, \ldots, n$. We now set the zero-sum weights
 \end{align}
 for some $c > 0$ (usually $c = 1$); we can express this conviently with the help of the indicator 
 function $\chi_J$ as $u_j = \chi_J(j) c$. By the zero-sum constraint, $\sum_{j \in J} c \beta_j = 0$  
-and hence $\sum{j \in J} \beta_j = 0$. In this situation, the linear predictor 
+and hence $\sum_{j \in J} \beta_j = 0$. In this situation, the linear predictor 
 \begin{align}
     \beta_0 + \sum_{j=1}^p \beta_j (x_{ij} + s_i \chi_J(j))
     = \beta_0 + x_i^T \beta + \sum_{j \in J} \beta_j s_i = \beta_0 + x_i^T \beta,
@@ -427,8 +429,8 @@ where $S(t) = 1 - F_T(t)$ is the survival function, and $h(t)$ is well-defined a
 
 \paragraph{Conditional hazard} The Cox model wants to get a hand on \textit{conditional} hazards.
 Intuitively, it is clear that the population with one value of $X$ can have a vastly different 
-hazard function than the population with another value of $X$ if $X$ predictive power with respect 
-to $T$. Formally, however, it is hard to define a conditional hazard function: $X$ may very well 
+hazard function than the population with another value of $X$ if $X$ has predictive power for $T$.
+Formally, however, it is hard to define a conditional hazard function: $X$ may very well 
 have a continuous distribution, hence we condition on an event of probability $0$ when we write 
 $P(t \leq T < t + \Delta t \cond T \geq t, X = x)$ -- it is hard to define this in a natural
 and straightforward way. In practice, the measurements in $X$ often fluctuate around their true 
@@ -456,6 +458,179 @@ on $x$ via
 for parameters $\beta \in \RR^p$.
 
 \paragraph{Partial log-likelihood}
+Given our independent samples $(x_i, y_i, \delta_i) \in \RR^{p+2}$, $i = 1, \ldots, n$, distributed 
+according to $(X, Y, \delta)$, let $E \subset \{ 1, \ldots, n \}$ refer to the non-censored samples 
+($\delta_i = 1$) and for $i \in E$, let $R_i$ denote the set of samples where no event has occurred 
+until $y_i$, i.e. $y_j \geq y_i$ for all $j \in R_i$. For fixed $i \in E$ and time to event $y_i$,
+conditionally on the risk set $R_i$, the probability that the event occurs on sample $i$ as 
+observed is
+\begin{align}
+    \frac{h(y_i \cond X = x_i)}{\sum_{j \in R_i} h(y_i \cond X = x_j)} = 
+    \frac{\exp(x_i^T \beta) h_0(y_i)}{\sum_{j \in R_i} \exp(x_j^T \beta) h_0(y_i)} = 
+    \frac{\exp(x_i^T \beta)}{\sum_{j \in R_i} \exp(x_j^T \beta)}.
+\end{align}
+Taking all events into account yields the partial likelihood 
+\begin{align}
+    \tilde{\ell}(\beta) = \prod_{i \in E} \frac{\exp(x_i^T \beta)}{\sum_{j \in R_i} \exp(x_j^T 
+    \beta)}.
+\end{align}
+Because $T$ is continuous, there is a zero probability for two distinct samples having the same 
+event time, so need not deploy one of the more sophisticated likelihoods capable of handling ties.
+Analogously to eq. (\ref{eq:loss-glm-no-lasso}), we can equip the log-likelihood with sample 
+weights $w_i > 0$ and zero-sum weights $u_j \geq 0$ such that the loss function reads 
+\begin{align}
+\begin{split}
+    L(\beta) &= \sum_{i \in E} w_i x_i^T \beta - \log \left( \sum_{j \in R_i} w_j \exp(x_j^T
+    \beta) \right) \\
+    & \text{subject to } \sum_{j=1}^p \beta_j u_j = 0.
+\end{split}
+\end{align}
+As with GLMs, we can leverage the zero-sum constraint to reach shift-invariance.
+
+\subsection{Elastic-net regularization}
+
+Modern molecular measurements are a big factor in our hope that MMML-Predict can succeed and improve 
+the IPI. These measurements, like gene expression levels, show up as hundreds if not thousands of 
+features in our data, meaning we usually have $p > n$ if not $p \gg n$. In this situation, we 
+cannot uniquely determine the parameters of any of the models by maximzing the log-likelihood: 
+the models have way more degress of freedom than we have samples, find biologically meaningless 
+and non-reproducible structures in the training cohort and generalize to poorly to new data.
+
+The solution to this is to restrict the freedom of the model to the extent that it is forced to 
+learn the gist from the data. For that reason, we want to penalize model complexity. Elastic-net 
+regularization, a widely adopted method proposed by Zou and Hastie \cite{elasticnet05}, does this 
+job for us. The elastic net generalizes two well-established regularization methods,
+\begin{itemize}
+    \item ridge regularization \cite{ridge70}, which forces the parameter vector $\beta$ to 
+        stay inside a ball around the origin by limiting the squared $\ell_2$ norm 
+        of the parameters, and 
+    \item LASSO (least absolute shrinkage and selection operator) regularization \cite{lasso18}, 
+        which forces $\beta$ to stay inside a diamont centered at the origin by limiting the 
+        $\ell_1$ norm of the parameters,
+\end{itemize}
+by combining them with weight factor $\alpha \in [0, 1]$ into 
+\begin{align}
+    p_{\text{enet}, \alpha}(\beta) = \frac{1-\alpha}{2} |\beta|_2^2 + \alpha |\beta|_1.
+\end{align}
+Muliplited with the regularization hyperparameter $\lambda \geq 0$ we can add it to the negative 
+log-likelihood to obtain the regularized loss function
+\begin{align}
+    \mathcal{L}(\beta_0, \beta) = -L(\beta_0, \beta) + \lambda p_{\text{enet}, \alpha}(\beta).
+\end{align}
+Note that in the Cox case, $\mathcal{L}$ does not depend on $\beta_0$ and we just ignore $\beta_0$ 
+in the above equation. 
+
+\paragraph{Effect on correlated features}
+While both ridge and LASSO regularization shrink the coefficients, they act differently in the case 
+of correlated features. Ridge regression tends to force the coefficients of correlated features to 
+similar values while LASSO tends to pick one of them and set the others to zero. E.g, in the 
+extreme case of $k$ identical features, the LASSO arbitrarily picks one of them with, say, 
+coefficient $a$; the ridge regression, meanwhile, assigns every of the $k$ features the coefficient 
+$a/k$. Relying a very few features comes with the advantage of sparse models, for which we 
+can cheaply generate new data, but it is very sensitive to measurement errors in one of the picked 
+features; in the latter case, ridge regularization would average out errors with the help of other 
+correlated features. Elastic-net regularization balances the sparsity of the LASSO with the 
+robustness of the ridge regularization, especially for values of $\alpha$ close to $1$ 
+\cite{elasticnet05}.
+
+\paragraph{Feature-wise penalty weights}
+We refine the elastic-net regularization one last time and introduce \textit{a priori} defined 
+feature weights $v_i \geq 0$ yielding
+\begin{align}
+    p_{\text{enet}, \alpha}(\beta) = \sum_{j=1}^p v_j \left( \frac{1-\alpha}{2} \beta_j^2 +
+    \alpha |\beta_j| \right).
+\end{align}
+The default value is $w_j = 1$ for all $i = 1, \ldots, p$. Deviating from the default can be useful 
+in at least two scenarios. First, sometimes we are so convinced of the predicitve 
+power of a feature in our model that we set $v_j = 0$ for it to all but ensure a non-zero 
+coefficient for it; the IPI (in some format) could be such a feature. 
+
+\paragraph{Standardizing $X$} 
+The second application of the penalty weights is an aspect of a bigger topic: standardizing the
+predictor. We can use the weights to standardize $X$ by setting $v_j$ to an estimate of the standard 
+deviation of feature $j$. Why 
+should we do this? Let us consider two features $X_1$ and $X_2$ with standard deviation $\sigma_1$
+and $\sigma_2$, respectively. To change the output of the model by $1$ when the feature changes by 
+one standard deviation, $X_1$ needs the coefficient $\beta_1 = 1/\sigma_1$ and $X_2$ needs 
+$\beta_2 = 1/\sigma_2$. For $\alpha = 1$, $p_{\text{enet}, \alpha}$ penalizes both coefficients 
+equally and it still does so approximately for $\alpha$ slightly below $1$. Standardization strives 
+to garuantee equal justice for features on different scales.
+Standardization works, however, contrary to the zero-sum idea: thanks to the zero-sum constraint, 
+the fitting process and the final model both are invariant under sample-wise shifts on a subset of 
+features if we set the zero-sum weights accordingly. Standardization, in contrast, actively changes 
+the cost function, which probably results in a different model. Consequently, one should stick to 
+the default value $v_j = 1$ for the features for which we wish to have shift-invariance; these 
+are usually the gene expression levels, which are on comparable scales anyway.
+
+\subsubsection{Random forests}
+
+More precisely, we talk about classification random forests, hence $Y$ is binary in this subsection 
+with $\im(Y) \subset \{ \pm 1 \}$, where $1$ still encodes the positive class. When we say random 
+forests in this thesis, we mean classification 
+random forests. Random forests are an ensemble of classification trees -- in short: 
+trees -- and aggregate the classification of every constituent tree.
+
+\paragraph{Trees}
+A tree is a simple function
+\begin{align}
+    T = \sum_{i=m}^M c_m \chi_{R_m}: \RR^p \to \{0, 1\}
+\end{align}
+with $c_m \in \{\pm 1\}$ and the $R_m$ being disjoint rectangle sets, i.e. $R_m = \prod_{j=1}^p 
+(a_j, b_j]$ for $a_j, b_j \in \RR \cup \{ \pm \infty \}$. It aims to predict the conditional 
+majority class 
+\begin{align}\label{eq:rf-major}
+    \sgn(E(Y \cond X)) = T(X);
+\end{align}
+$\sgn$ the signum function.
+
+How can we use our samples $(x_i, y_i)$, $i = 1, \ldots, n$, to learn a tree $T$? While we can 
+trivially fulfill eq. (\ref{eq:rf-major}) exactly for the samples, this would only lead to terribly 
+overfit trees. Instead, we confine ourselves with simpler, rougher trees that will make errors on 
+training samples, but generalize better. 
+In the algorithm further below, we will only need to calculate an error for the samples inside a 
+rectangle set $R \subset \RR^n$. Let $n(R) = |\{ 1 \leq i \leq n: x_i \in R \}|$ be the number of 
+samples in $R$ and
+\begin{align}
+    \hat{p}_R = \frac{|\{ 1 \leq i \leq n: x_i \in R, y_i = 1 \}|}{n(R)}
+\end{align}
+be the proportion of samples in $R$ with positive outcome. The error measure -- in the context of 
+trees usually termed impurity measure -- we use in this thesis
+is the Gini impurity $Q(R) = 2 \hat{p}_R (1 - \hat{p}_R)$; it is low for pure $R$ dominated by 
+samples with either positive or negative outcome and grows quadratically as the outcome of the 
+samples in $R$ gets more and more imbalanced. The impurity measure is a hyperparameter: other 
+options include the misclassification error and the cross entropy. To govern the complexity $T$,
+we demand that every rectangle set $R_m$ contain at least $n_\text{min}$ samples. Even this 
+constraint still leaves with a computationally infeasible number of possible trees, and this is 
+why we fit $T$ with a greedy algorithm: it recursively partitions every rectangle set along a 
+feature in two subsets in such a way that the impurity measure gets minimal until every resulting 
+rectangle set comprises less than $n_\text{min}$ samples. Formalizing binary partioning, for a 
+rectangle set $R$, a feature $j \in \{1, \ldots, p\}$ and split point $s \in \RR$, we define 
+the pair of half planes
+\begin{align}
+    R^{(1)}_{j, s} = \{x \in R: x_j \leq s\} \text{ and } R^{(2)}_{j, s} = \{x \in R: x_j > s\}.
+\end{align}
+With respect to the impurity measure, there are only finitely many split points of interest since 
+we only have finitely many samples, and hence we need to consider no more than $n \cdot p$ when 
+considering $R$ for partioning. All of this allows us to compactly describe a procedure to grow a 
+tree in Alg. \ref{alg:tree}.
+\input{algos/tree.tex}
+
+\paragraph{Forests}
+Trees are known to be notoriously noisy, meaning if we fix $x \in \RR^p$ the variance 
+$V_\mathbf{z}(T(x))$ is quite high; the index $\mathbf{z}$ makes explicit that we consider $T(x)$ as 
+a function -- or better: random variable -- of i.i.d. drawing training samples $\mathbf{z}$ (and 
+then fitting a tree to them according to Alg. \ref{alg:tree}). On the other hand, if grown deep,
+trees have pretty low bias, meaning for fixed $x \in \RR^p$ the expectation $E_\mathbf{z}(T(x))$ in 
+most cases is exactly what we want, $\sgn(E(Y \cond x))$. High variance and low bias makes trees 
+ideal candidates for a method called bagging, which averages the predictions of many noisy, 
+approximately unbiased models with the goal to reduce their variance. Given trees $T_b$, $b = 1, 
+\ldots, B$, we denote the new model by 
+\begin{align}
+    \overline{T}(x) = \frac{1}{B} \sum_{b=1}^B T_b(x).
+\end{align}
+
+Since the expected value is linear, we have 
+
 
 \subsection{Nested models}\label{subsec:nested-models}
 
