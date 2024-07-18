@@ -1,23 +1,24 @@
   \begin{algorithm}
     \caption{Growing a tree by recursive binary partioning} \label{alg:tree}
     \begin{algorithmic}[1]
-      \State \textbf{Input:} Samples $(x_i, y_i)_{i = 1, \ldots, n}$
-      \State $\mathcal{R} \gets \emptyset$ \Comment{Final partioning}
-      \State $\mathcal{I} \gets \{ \RR \}$ \Comment{Intermediate partioning}
-      \While{$\mathcal{I} \neq \emptyset$}
-        \State Choose some $R \in \mathcal{I}$
-        \State $\mathcal{I} \gets \mathcal{I} \setminus \{ R \}$
-        \State $(j_*, s_*) \gets \argmin_{j, s} N\left(R_{j,s}^{(1)}\right) Q\left(R_{j,s}^{(1)}\right) + 
-          N\left(R_{j,s}^{(2)}\right) Q\left(R_{j,s}^{(2)}\right)$ 
-        \For{$\ell = 1, 2$}
-          \If{$N\left(R_{j_*, s_*}^{(\ell)}\right) < n_{\text{min}}$}
-            \State $\mathcal{R} \gets \mathcal{R} \cup R_{j_*, s_*}^{(\ell)}$
-            \State $c_R \gets 1$ if $\hat{p}_R > \num{0.5}$ else \num{-1}
-          \Else
-            \State $\mathcal{I} \gets \mathcal{I} \cup R_{j_*, s_*}^{(\ell)}$
-          \EndIf
-        \EndFor
-      \EndWhile
-      \State \textbf{Output:} $\sum_{R \in \mathcal{R}} c_R \chi_R$
+      \Function{Tree}{$(x_i, y_i)_{i = 1, \ldots, n}$; $Q$, $n_\text{min}$}
+        \State $\mathcal{R} \gets \emptyset$ \Comment{Final partioning}
+        \State $\mathcal{I} \gets \{ \RR \}$ \Comment{Intermediate partioning}
+        \While{$\mathcal{I} \neq \emptyset$}
+          \State Choose some $R \in \mathcal{I}$
+          \State $\mathcal{I} \gets \mathcal{I} \setminus \{ R \}$
+          \State $(j_*, s_*) \gets \argmin_{j, s} N\left(R_{j,s}^{(1)}\right) Q\left(R_{j,s}^{(1)}\right) + 
+            N\left(R_{j,s}^{(2)}\right) Q\left(R_{j,s}^{(2)}\right)$ \label{alg:tree:split}
+          \For{$\ell = 1, 2$}
+            \If{$N\left(R_{j_*, s_*}^{(\ell)}\right) < n_{\text{min}}$}
+              \State $\mathcal{R} \gets \mathcal{R} \cup R_{j_*, s_*}^{(\ell)}$
+              \State $c_R \gets 1$ if $\hat{p}_R > \num{0.5}$ else \num{-1}
+            \Else
+              \State $\mathcal{I} \gets \mathcal{I} \cup R_{j_*, s_*}^{(\ell)}$
+            \EndIf
+          \EndFor
+        \EndWhile
+        \State \Return $\sum_{R \in \mathcal{R}} c_R \chi_R$
+      \EndFunction
     \end{algorithmic}
   \end{algorithm}

@@ -600,7 +600,7 @@ samples with either positive or negative outcome and grows quadratically as the 
 samples in $R$ gets more and more imbalanced. The impurity measure is a hyperparameter: other 
 options include the misclassification error and the cross entropy. To govern the complexity $T$,
 we demand that every rectangle set $R_m$ contain at least $n_\text{min}$ samples. Even this 
-constraint still leaves with a computationally infeasible number of possible trees, and this is 
+constraint still leaves us with a computationally infeasible number of possible trees, and this is 
 why we fit $T$ with a greedy algorithm: it recursively partitions every rectangle set along a 
 feature in two subsets in such a way that the impurity measure gets minimal until every resulting 
 rectangle set comprises less than $n_\text{min}$ samples. Formalizing binary partioning, for a 
@@ -620,18 +620,87 @@ Trees are known to be notoriously noisy, meaning if we fix $x \in \RR^p$ the var
 $V_\mathbf{z}(T(x))$ is quite high; the index $\mathbf{z}$ makes explicit that we consider $T(x)$ as 
 a function -- or better: random variable -- of i.i.d. drawing training samples $\mathbf{z}$ (and 
 then fitting a tree to them according to Alg. \ref{alg:tree}). On the other hand, if grown deep,
-trees have pretty low bias, meaning for fixed $x \in \RR^p$ the expectation $E_\mathbf{z}(T(x))$ in 
-most cases is exactly what we want, $\sgn(E(Y \cond x))$. High variance and low bias makes trees 
+trees have pretty low bias, meaning for fixed $x \in \RR^p$ the expectation $E_\mathbf{z}(T(x))$ 
+is close to $E(Y \cond x)$. High variance and low bias makes trees 
 ideal candidates for a method called bagging, which averages the predictions of many noisy, 
 approximately unbiased models with the goal to reduce their variance. Given trees $T_b$, $b = 1, 
-\ldots, B$, we denote the new model by 
+\ldots, B$ fit to some identically distributed training data $\mathbf{z}_b$, we denote the new model by 
 \begin{align}
-    \overline{T}(x) = \frac{1}{B} \sum_{b=1}^B T_b(x).
+    \overline{T} = \frac{1}{B} \sum_{b=1}^B T_b.
 \end{align}
 
-Since the expected value is linear, we have 
+We again fix some $x \in \RR^p$. Since the expected value is linear and the $T_b(x)$ are identically 
+distributed, we have $E_\mathbf{z}(\overline{T(x)}) = E_\mathbf{z}(T_1)$ and we see that bagging 
+leaves the bias unchanged. Consequently, our hope rests on reducing the variance. Say, every 
+$T_b(x)$ -- again understood as a random variable dependent on sampling the training data -- has 
+variance $\sigma^2$. If the $T_b(x)$ are independent, the variance is additive and we have 
+$V_\mathbf{z}(\overline{T}(x)) = \sigma^2/B$, which tends to zero as $B \to \infty$. In practice, 
+the $T_b(x)$ are not totally independent as they have training samples in common: we do not i.i.d. 
+sample from the whole population $(X, Y)$, but draw a bootstrap sample of size $n$ from our training 
+data $(x_i, y_i)$, $i = 1, \ldots, n$; providing every 
+tree its own separate, tiny set of training samples would seriously increase the bias. Bootstrapping 
+-- uniformly sampling without replacement -- is the key concept of bagging, explaining why 
+\textit{bootstrap aggregation} is a synonym for it. If in this 
+situation the $T_b(x)$ have a pairwise correlation of $\rho > 0$, we have 
+\begin{align}
+    V_\mathbf{z}\left(\overline{T}(x)\right) = \rho \sigma^2 + \frac{1-\rho}{B} \sigma^2,
+\end{align}
+which tends to $\rho \sigma^2$ as $B \to \infty$, cf. \cite[eq. (15.1)]{elem-stat-learn01}.
 
+Thus, in addition to bagging, random forests strive to reduce to correlation between the trees 
+without increasing the variance and bias too much. We achieve this by randomly selecting a subset
+of $m \leq p$ features every time we split a rectangle into two sub-rectangles when growing the 
+tree in Alg. \ref{alg:tree}; in 
+more detail, the $j$'s over which we take the minimum in line \ref{alg:tree:split} only range over 
+these $m$ features. We denote the modified function with the appended parameter $m$ by 
+\textsc{RfTree}. Alg. \ref{alg:forest} applies these ideas all together.
+
+\input{algos/forest.tex}
+
+Widely used default values are $m = \floor{\sqrt{p}}$ and $n_\text{min} = 1$. As for $B$, we have 
+shown above that increasing it reduces the variance at constant bias; in practice, therefore, only 
+computation time limits the number of trees in the forest. We can fit 
+random forests we can parallize the loop over $b = 1, \ldots, B$ in Alg. \ref{alg:forest}. We can 
+also validate them very efficiently by facilitating out-of-bag (OOB) samples: For each sample 
+$(x_i, y_i)$, we can construct its random forest predictor by averaging only those trees for which 
+$(x_, y_i)$ was not part of the bootstrapped training sample -- no need for a time consuming 
+cross validation. The predicition of this random forest predictor for $x_i$ is the OOB prediction 
+for sample $i$. When we say cross-validated prediction for a random forest, we mean the OOB
+prediction.
 
 \subsection{Nested models}\label{subsec:nested-models}
+
+Given some ``early'' models -- e.g. core models -- $f_i: \RR^p \to \RR$, $i = 1, \ldots, m$, we can 
+nest them into another, ``late'' model $f: \RR^m \to \RR$ and obtain a new model $f \circ 
+(f_1, \ldots, f_m)$. 
+
+\paragraph{Early models trained on another data set}
+Often, the early models have been trained on another, independent data set, so we observe their 
+output as features in our data set. Examples are the cell-of-origin signature, the IPI score or the 
+LAMIS. Such $f_i$ are merely projections onto a feature.
+
+\paragraph{Early models trained on the same data set}
+If we need to fit some of the early models to our data ourselves, getting reliable cross-validated 
+predictions
+for $f$ becomes trickier. To simplify notation, we assume the only early model left to be fit is 
+$f_1$. How do 
+we get realistic cross-validated predictions $\hat{y}_i$, $i \in F_\ell$, for the $\ell$-th fold? 
+We start by fitting $f_1$ to $(x_i, y_i)$, $i \in \{ 1, \ldots, n \} \setminus F_\ell = F_\ell^c$.
+The question reduces to: which values for feature $1$ do we provide the algorithm fitting $f$?
+
+The predictions $f_1(x_i)$, $i \in F_\ell^c$, are too optimistic most of the time since 
+$f_1$ overfits its training data to some extent. Consequently, $f$ will put too much
+trust in them and will generalize poorly, as $f$'s cross-validated predictions already will 
+show.
+
+We can do an inner cross-validation when fitting $f_1$ and provide the resulting 
+cross-validated predictions to $f$'s fitting algorithm. Theoretically convincing, this increases 
+time complexity by a factor of $k$ for a $k$-fold cross-validation.
+
+Because we fit $f_1$ in a cross-validation anyway, we can provide the cross-validated 
+predictions we get in this process to $f$'s fitting algorithm; for the details, see 
+Alg. \ref{alg:nested-pcv}. 
+
+\input{algos/nested_pseudo_cv.tex}
 
 \section{Software}
