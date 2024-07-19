@@ -691,16 +691,100 @@ The question reduces to: which values for feature $1$ do we provide the algorith
 The predictions $f_1(x_i)$, $i \in F_\ell^c$, are too optimistic most of the time since 
 $f_1$ overfits its training data to some extent. Consequently, $f$ will put too much
 trust in them and will generalize poorly, as $f$'s cross-validated predictions already will 
-show.
-
-We can do an inner cross-validation when fitting $f_1$ and provide the resulting 
-cross-validated predictions to $f$'s fitting algorithm. Theoretically convincing, this increases 
-time complexity by a factor of $k$ for a $k$-fold cross-validation.
-
-Because we fit $f_1$ in a cross-validation anyway, we can provide the cross-validated 
+show. We want to tackle this problem by using cross-validated predictions for $f_1$, instead.
+The first and theoretically cleanest option is to do an inner cross-validation when fitting $f_1$ 
+and provide the resulting cross-validated predictions to $f$'s fitting algorithm. However, this 
+increases time complexity by a factor of $k$ for a $k$-fold cross-validation.
+Because we fit $f_1$ in a cross-validation anyway, we prefer to provide the cross-validated 
 predictions we get in this process to $f$'s fitting algorithm; for the details, see 
 Alg. \ref{alg:nested-pcv}. 
 
 \input{algos/nested_pseudo_cv.tex}
 
+This gain in time complexity compared to the other suggestion comes at a little price: a not 
+throughly clean cross validation for $g$. To see this, we assume that the assignment of samples 
+into folds in $f_1$'s and $f$'s cross validation is the same (a very realistic assumption as we 
+usually choose $k = n$). We fix a sample $i$ and another sample $j$ that is another fold. 
+Sample $i$'s cross-validated prediction $\hat{y}_i$ for $g$ (which is nothing but its 
+cross-validated prediction for $f$) depends on the cross-validated 
+prediction $\hat{y}_j^{(1)}$ for $f_1$ of sample $j$. $\hat{y}_j^{(1)}$ in turn depends on sample 
+$i$. All in all, $\hat{y}_i$ very slighly depends on $(x_i, y_i)$.
+
+Next, we want to talk how we tune the hyperparameters of a nested model. In practice, one thinks of 
+the hyperparameter tuples $H$ as partitioned into subsets. We summarize the
+hyperparameters of a model that make it most distinct to other models in its \textit{architecure}. 
+For a core model, the architecture concerns its class (like logistic model or random forest) and 
+the a priori selected features. For a nested model, its architecure is defined by the architectures 
+of the involved core models and the hierarchy that nests them into one another.
+
+For a given architecture of a nested model, we need to tune the hyperparameter tuple $h = (h_1, h_2)$ 
+of 
+Alg. \ref{alg:nested-pcv}, i.e., we repeately call \textsc{NestedPseudoCV} as we vary $h \in H_0$
+with $H_0$ being the set of candidate hyperparameter tuples for this model architecture. We have 
+candidate 
+hyperparameter tuples $H_{0, 1}$ for $f_1$ and $H_{0, 2}$ for $f$. An unprejudiced strategy is to 
+set $H = H_{0, 1} \times H_{0, 2}$. Compared to non-nested models, we try out a considerably 
+higher number of hyperparamter tuples -- roughly a factor of $|H_{0, 1}| \approx |H_{0, 2}|$ and 
+the validated errors of nested models have a higher chance 
+of being overestimated; cf. subsection \ref{subsec:train-val}. We therefore settle on a greedier 
+strategy: We first tune $h_1 \in H_{0, 1}$ and then go on to tune $h_2 \in H_{0, 2}$. 
+
+Often, $f_1$ deals with high-dimensional input. E.g., $f_1$ is a Gauss, logistic or Cox model 
+predicting from 
+several thousand RNA-seq gene expression levels. Hence, we undoubtedly need elastic-net 
+regularization in their training and need to tune the regualarization hyperparameter $\lambda$. 
+With this alone we quickly end up with several hundred hyperparameters to be tuned for $f_1$. 
+With $H_{0,1}$ being so big, good validated performances have one thing in common: they are 
+probably too optimistic, the cross-validated predictions are too accurate. This means we still 
+have not gotten entirely rid of the problem that that $f$ puts too much trust into $f_1$'s output 
+misled by too optimistic values in the training. This problem will propagate into an even bigger 
+problem: even more optimistic cross-validated predictions for $g$ and an even more overestimated 
+cross-validated performance of $g$. It is hard to quantify the effect, so we will have a very close 
+eye on models nested according to Alg. \ref{alg:nested-pcv} in chapter \ref{chap:results}. 
+
 \section{Software}
+
+We wanted to design the software used to generate the results of this thesis in such a way that it 
+can be the foundation of the machine-learning part of MMML-Predict as the project develops and 
+other researchers take over. Beyond this, we have written code, wherever it was possible, in such 
+a general way that one can apply it not just for the MMML-Predict problem, but for all equivalent 
+and closely related problems.
+
+\subsection{The R package \texttt{patroklos}}
+The R package \texttt{patroklos} holds all of the highly reusable code of this thesis. It brings 
+all the methods described in this chapter to life and is available on GitHub \cite{patroklos-gh} 
+together with a \href{https://lgessl.github.io/patroklos/}{website}.
+\begin{description}
+    \item[Training] \texttt{patroklos} allows the user to quickly specify model architectures and 
+        attach hyperparamters tuples, including model-agnostic hyperparameters, tuples. It provides 
+        decorators to transform functions that fit merely one model for a single hyperparameter 
+        tuple into functions that fit and validate models for a variety of hyperparameter tuples. 
+        It supports fitting the models with the support of the R packages \texttt{zeroSum} 
+        \cite{zerosumR} and \texttt{ranger} \cite{ranger-gh} out of the box. \texttt{zeroSum} 
+        augments the popular \texttt{glmnet} package by the zero-sum constraint: it fits and 
+        tunes Gaussian, logistic and Cox models in a cross-validation and endows their loss function 
+        endowed with elastic-net regularization and -- unlike \texttt{glmnet} -- the zero-sum 
+        constraint. The time-critical work happens in a fast, well-structured C++ backbone. 
+        \texttt{ranger} fits random forest fast, also thanks to a performant C++ backbone. 
+    \item[Validation and testing] If fitting functions from existing R packages calculate a 
+        validated error of 
+        their fit models at all, they do it in a plethora of ways, usually using some standard 
+        error measure for the model class they are concerned with derived from the loss function 
+        they minimize; e.g., \texttt{zeroSum} uses the binomial deviance for logistic models and 
+        \texttt{ranger} uses the classicatication error. \texttt{patroklos} unifies validation 
+        by calculating the same error measure across all models and more calculates more statistics
+        with the help of the \texttt{AssScalar} R6 class. With the \texttt{Ass2d} R6 class, the 
+        user can plot one property of a truly binary classifier against another, which guides 
+        thresholding those models with continuous output.
+    \item[Modular, extendible design] \texttt{patroklos} defines function interfaces so the user 
+        can easily wrap fitting functions implemented in other R packages or by the user to make 
+        them \texttt{patroklos}-compliant. With two R6 classes, \texttt{Model} and \texttt{Data}, we 
+        strive to abstract models from the data in such a way that the user can easily $H$ to new 
+        data.
+    \item[Meta analysis] \texttt{patroklos} provides tools to analyze how validated and test error
+        depend for model architectures depend and allows to highlight supgroups of model 
+        architectures to disclose fundamentally flawed validated errors.
+\end{description}
+
+\subsection{\texttt{patroklos} in action}
+
