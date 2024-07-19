@@ -1,0 +1,22 @@
+\begin{table}
+    \centering
+    \begin{tabular}{lrrr}
+        \hline
+        & \textbf{Schmitz \cite{schmitz18}} & \textbf{Reddy \cite{reddy17}} & \textbf{Lamis test \cite{staiger20}} \\
+        \hline
+        \textbf{prospective trial} & no & no & yes \\
+        \textbf{\# samples} & \num{229} & \num{604} & \num{466} \\
+        \textbf{\# genes} & \num{25066} & \num{13302} & \num{145} \\
+        \textbf{technology} & RNA-seq & RNA-seq & NanoString \\
+        \textbf{high risk [\%]} & \num{36.6} & \num{31.5}\footnotemark & \num{24.3} \\
+        \textbf{IPI-45 prev. [\%]} & \num{12.9} & \num{21.6} & \num{17.0} \\
+        \textbf{IPI-45 prec. [\%]} & \num{65.2} & \num{54.1} & \num{38.2} \\
+        \hline
+    \end{tabular}
+    \caption{Overview on used data sets. All datasets include the IPI features in thresholded form, 
+        gender, cell of origin, and, added by us, the LAMIS signature. The Schmitz and Lamis test 
+        data use the high-risk defintion of MMML-Predict: progression-free survival below two years; 
+        because the Reddy data reports only overall, no progression-free survival, we define high risk 
+        as overall survival below \num{2.5} years, leading to a comparable high-risk proportion.}
+        \label{table:data}
+\end{table}

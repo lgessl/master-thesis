@@ -1,1 +1,32 @@
 \chapter{Results} \label{chap:results}
+
+In this triune chapter, we start with introducing three DLBCL data sets that include 
+survival and gene expression features. Next, we split every of these three data sets into 
+a train and test cohort, fit models for a variety of hyperparameter tuples in $H$ to the training 
+cohort, validate them and test the best on the test cohort; this is less about presenting a 
+high-performing model, but more about analyzing validated and tested errors to make $H$ slimmer and 
+better for the future. This future plays out in the last part as we train and validate on one of 
+the three data sets and test on another and deal with cross-platform variability.
+
+\section{The data}
+
+Our data sets are taken from papers by Schmitz et al. \cite{schmitz18}, Reddy et al. \cite{reddy17}
+and Staiger et al. \cite{staiger20}; see Table \ref{table:data} for key properties and comparison.
+
+\input{figs/data.tex}
+
+\paragraph{Schmitz data}
+The data by Schmitz et al. includes the five IPI features in their continuous, original form. In 
+the paper, 
+
+\paragraph{Reddy data}
+
+\paragraph{Lamis test data}
+
+\section{Intra-trial experiments}
+
+\subsection{Summary of model architectures}
+
+\subsection{}
+
+\section{Inter-trial experiments}
