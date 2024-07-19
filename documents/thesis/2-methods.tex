@@ -744,7 +744,7 @@ eye on models nested according to Alg. \ref{alg:nested-pcv} in chapter \ref{chap
 
 \section{Software}
 
-We wanted to design the software used to generate the results of this thesis in such a way that it 
+We have designed the software that generates the results of this thesis in such a way that it 
 can be the foundation of the machine-learning part of MMML-Predict as the project develops and 
 other researchers take over. Beyond this, we have written code, wherever it was possible, in such 
 a general way that one can apply it not just for the MMML-Predict problem, but for all equivalent 
@@ -753,38 +753,62 @@ and closely related problems.
 \subsection{The R package \texttt{patroklos}}
 The R package \texttt{patroklos} holds all of the highly reusable code of this thesis. It brings 
 all the methods described in this chapter to life and is available on GitHub \cite{patroklos-gh} 
-together with a \href{https://lgessl.github.io/patroklos/}{website}.
-\begin{description}
-    \item[Training] \texttt{patroklos} allows the user to quickly specify model architectures and 
-        attach hyperparamters tuples, including model-agnostic hyperparameters, tuples. It provides 
-        decorators to transform functions that fit merely one model for a single hyperparameter 
-        tuple into functions that fit and validate models for a variety of hyperparameter tuples. 
-        It supports fitting the models with the support of the R packages \texttt{zeroSum} 
-        \cite{zerosumR} and \texttt{ranger} \cite{ranger-gh} out of the box. \texttt{zeroSum} 
-        augments the popular \texttt{glmnet} package by the zero-sum constraint: it fits and 
-        tunes Gaussian, logistic and Cox models in a cross-validation and endows their loss function 
-        endowed with elastic-net regularization and -- unlike \texttt{glmnet} -- the zero-sum 
-        constraint. The time-critical work happens in a fast, well-structured C++ backbone. 
-        \texttt{ranger} fits random forest fast, also thanks to a performant C++ backbone. 
-    \item[Validation and testing] If fitting functions from existing R packages calculate a 
-        validated error of 
-        their fit models at all, they do it in a plethora of ways, usually using some standard 
-        error measure for the model class they are concerned with derived from the loss function 
-        they minimize; e.g., \texttt{zeroSum} uses the binomial deviance for logistic models and 
-        \texttt{ranger} uses the classicatication error. \texttt{patroklos} unifies validation 
-        by calculating the same error measure across all models and more calculates more statistics
-        with the help of the \texttt{AssScalar} R6 class. With the \texttt{Ass2d} R6 class, the 
-        user can plot one property of a truly binary classifier against another, which guides 
-        thresholding those models with continuous output.
-    \item[Modular, extendible design] \texttt{patroklos} defines function interfaces so the user 
-        can easily wrap fitting functions implemented in other R packages or by the user to make 
-        them \texttt{patroklos}-compliant. With two R6 classes, \texttt{Model} and \texttt{Data}, we 
-        strive to abstract models from the data in such a way that the user can easily $H$ to new 
-        data.
-    \item[Meta analysis] \texttt{patroklos} provides tools to analyze how validated and test error
-        depend for model architectures depend and allows to highlight supgroups of model 
-        architectures to disclose fundamentally flawed validated errors.
-\end{description}
+together with a 
+\href{https://lgessl.github.io/patroklos/}{website}\footnote{\url{https://lgessl.github.io/patroklos}}. 
+In fact, one can deploy 
+\texttt{patroklos} to solve any binary classification problem in a supervised-learning manner;
+\texttt{patroklos} provides some extra functionality for those problems among them where the 
+reponse is a thresholded survival time, high-dimensional data is involved and one wants to maximize 
+the precision of the classifier for a sufficently large positive cohort.
+
+\paragraph{Training} 
+\texttt{patroklos} allows the user to quickly specify model architectures and 
+attach hyperparamters tuples to them, including model-agnostic hyperparameters to all of them. It 
+provides a decorator to transform a function that fits merely one model for a single hyperparameter 
+tuple into a function that fits and validates models for a variety of hyperparameter tuples. 
+It supports fitting core models with the support of the R packages \texttt{zeroSum} 
+\cite{zerosumR} and \texttt{ranger} \cite{ranger-gh} out of the box. \texttt{zeroSum} 
+augments the popular \texttt{glmnet} package by the zero-sum constraint: it fits and 
+tunes Gaussian, logistic and Cox models in a cross-validation and endows their loss function 
+with elastic-net regularization and -- unlike \texttt{glmnet} -- the zero-sum 
+constraint. The time-critical work happens in a fast, well-structured C++ backbone. 
+\texttt{ranger} fits random forests fast, also thanks to a performant C++ backbone. 
+
+\paragraph{Validation and testing} 
+If fitting functions from existing R packages calculate a validated error of 
+their fit models at all, they do so in a plethora of ways, usually using an error measure derived 
+from the loss function they minimize; e.g., \texttt{zeroSum} uses the binomial deviance for 
+logistic models and \texttt{ranger} uses the classicatication error for classification random 
+forests. \texttt{patroklos} takes 
+full control of validation and unifies it
+by calculating the same error measure across all models and even more statistics of the model
+with the help of the \texttt{AssScalar} R6 class. With the \texttt{Ass2d} R6 class, the 
+user can plot one property of a truly binary classifier against another, which guides 
+thresholding models with continuous output.
+
+\paragraph{Modular, extendible design} 
+\texttt{patroklos} defines function interfaces so the user 
+can easily wrap fitting functions implemented in other R packages or by the user to make 
+them \texttt{patroklos}-compliant. The two R6 classes \texttt{Model} and \texttt{Data}
+strive to abstract models from the data in such a way that the user can easily apply $H$ to new 
+data.
+
+\paragraph{Meta analysis} 
+\texttt{patroklos} provides tools to analyze how, for model architectures, the validated error 
+depends on the test error and allows to highlight supgroups of model 
+architectures to disclose fundamental flaws in validation.
 
 \subsection{\texttt{patroklos} in action}
 
+The Git repository that brings \texttt{patroklos} into action for this thesis is available in a 
+public version on GitHub \cite{thesis-gh}. We try our best at presenting the results in a 
+comprehensive and understandable way in the following chapter \ref{chap:results}. Yet, since code 
+is much more precise than words, the Git repository rigorously defines everything we have done to 
+obtain the results.
+
+The public Git repository does not contain the data because part of it is not publicly available.
+To reproduce the results of this thesis, the reader may request access to the scientific computing 
+servers of the Chair of Statistical Bioinformatics, University of Regensburg, from 
+\href{mailto:christian.kohler@ur.de}{Christian Kohler}\footnote{Email: 
+\href{mailto:christian.kohler@ur.de}{\texttt{christian.kohler@ur.de}}}; on these servers, a mounted
+volume holds all data sets.
