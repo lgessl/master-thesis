@@ -162,7 +162,8 @@ We can now apply an ordinary linear -- or Gaussian -- model to $\mathbf{z}$ obta
 \end{split}
 \end{align}
 The second summand is zero under the zero-sum constraint $\sum_{j = 1}^p \beta_j = 0$ and the third 
-summand is constant across all samples and can be absorbed by the intercept \cite{transplatform17}. 
+summand is constant across all samples and can be absorbed by the intercept, cf.\ 
+\cite{transplatform17}. 
 
 Under these (not very 
 strict) conditions, going from one protocol to another just leads to a constant shift of the model 
@@ -269,10 +270,10 @@ tumor'' if at least \num{5}\% of patients have this property. We always choose $
 = 5\%$. We set $n_\text{combi} = 1$ for models that facilitate interactions between features 
 themselves, otherwise we set $n_\text{combi} = 3$.
 
-\subsubsection{Tuning the definion of ``high-risk''}
+\subsubsection{Tuning the definion of ``high risk''}
 
 Defining a patient as high-risk if and only if the progression-free survival is less than two years
-is clinically accepted, yet quite arbitrary decision. It may be not be the time cutoff that 
+is clinically accepted, yet quite arbitrary decision. It may not be the time cutoff that 
 separates patients' survival 
 best from a biological point of view. Therefore we can provide the fitting 
 algorithm a modified response $y$, governed by the time cutoff $T > 0$.
@@ -386,12 +387,12 @@ and hence $\sum_{j \in J} \beta_j = 0$. In this situation, the linear predictor
 \end{align}
 as $\sum_{j \in J} \beta_j s_i = s_i \sum_{j \in J} \beta_j = 0$, is invariant. If $J$ consists of 
 exactly the features holding gene-expression levels, we can transfer our model to other protocols 
-and only need to re-calibrate the intercept, as shown in eq. (\ref{eq:inter-tech}). Moreover, we 
+and only need to re-calibrate the intercept, as shown in Eq. \eqref{eq:inter-tech}. Moreover, we 
 can switch off the zero-sum constraint for all features by setting $u_j = 0$ for all 
 $j = 1, \ldots, p$. The zero-sum constraint is cheap in terms of model complexity: it only removes 
 one degree of freedom; but it is expensive in terms of computational complexity: enforcing it in
 every step of the coordinate descent leads to a considerably higher computation time. However, the 
-coordinate descent minimizes eq. (\ref{eq:loss-glm-no-lasso}) with a regularization term add. Before 
+coordinate descent minimizes Eq. \eqref{eq:loss-glm-no-lasso} with a regularization term add. Before 
 we discuss this, we want to introduce a model that is closely related to GLMs.
 
 \subsubsection{Cox proportional-hazards model}\label{subsubsec:cox}
@@ -476,7 +477,7 @@ Taking all events into account yields the partial likelihood
 \end{align}
 Because $T$ is continuous, there is a zero probability for two distinct samples having the same 
 event time, so need not deploy one of the more sophisticated likelihoods capable of handling ties.
-Analogously to eq. (\ref{eq:loss-glm-no-lasso}), we can equip the log-likelihood with sample 
+Analogously to Eq. \eqref{eq:loss-glm-no-lasso}, we can equip the log-likelihood with sample 
 weights $w_i > 0$ and zero-sum weights $u_j \geq 0$ such that the loss function reads 
 \begin{align}
 \begin{split}
@@ -512,7 +513,7 @@ by combining them with weight factor $\alpha \in [0, 1]$ into
 \begin{align}
     p_{\text{enet}, \alpha}(\beta) = \frac{1-\alpha}{2} |\beta|_2^2 + \alpha |\beta|_1.
 \end{align}
-Muliplited with the regularization hyperparameter $\lambda \geq 0$ we can add it to the negative 
+Muliplited with the regularization strength $\lambda \geq 0$ we can add it to the negative 
 log-likelihood to obtain the regularized loss function
 \begin{align}
     \mathcal{L}(\beta_0, \beta) = -L(\beta_0, \beta) + \lambda p_{\text{enet}, \alpha}(\beta).
@@ -573,7 +574,7 @@ trees -- and aggregate the classification of every constituent tree.
 \paragraph{Trees}
 A tree is a simple function
 \begin{align}
-    T = \sum_{i=m}^M c_m \chi_{R_m}: \RR^p \to \{0, 1\}
+    T = \sum_{m=1}^M c_m \chi_{R_m}: \RR^p \to \{0, 1\}
 \end{align}
 with $c_m \in \{\pm 1\}$ and the $R_m$ being disjoint rectangle sets, i.e. $R_m = \prod_{j=1}^p 
 (a_j, b_j]$ for $a_j, b_j \in \RR \cup \{ \pm \infty \}$. It aims to predict the conditional 
@@ -581,10 +582,10 @@ majority class
 \begin{align}\label{eq:rf-major}
     \sgn(E(Y \cond X)) = T(X);
 \end{align}
-$\sgn$ the signum function.
+$\sgn$ is the signum function.
 
 How can we use our samples $(x_i, y_i)$, $i = 1, \ldots, n$, to learn a tree $T$? While we can 
-trivially fulfill eq. (\ref{eq:rf-major}) exactly for the samples, this would only lead to terribly 
+trivially fulfill Eq. \eqref{eq:rf-major} exactly for our samples, this would only lead to terribly 
 overfit trees. Instead, we confine ourselves with simpler, rougher trees that will make errors on 
 training samples, but generalize better. 
 In the algorithm further below, we will only need to calculate an error for the samples inside a 
@@ -624,7 +625,7 @@ trees have pretty low bias, meaning for fixed $x \in \RR^p$ the expectation $E_\
 is close to $E(Y \cond x)$. High variance and low bias makes trees 
 ideal candidates for a method called bagging, which averages the predictions of many noisy, 
 approximately unbiased models with the goal to reduce their variance. Given trees $T_b$, $b = 1, 
-\ldots, B$ fit to some identically distributed training data $\mathbf{z}_b$, we denote the new model by 
+\ldots, B$, fit to some identically distributed training data $\mathbf{z}_b$, we denote the new model by 
 \begin{align}
     \overline{T} = \frac{1}{B} \sum_{b=1}^B T_b.
 \end{align}
@@ -645,7 +646,7 @@ situation the $T_b(x)$ have a pairwise correlation of $\rho > 0$, we have
 \begin{align}
     V_\mathbf{z}\left(\overline{T}(x)\right) = \rho \sigma^2 + \frac{1-\rho}{B} \sigma^2,
 \end{align}
-which tends to $\rho \sigma^2$ as $B \to \infty$, cf. \cite[eq. (15.1)]{elem-stat-learn01}.
+which tends to $\rho \sigma^2$ as $B \to \infty$, cf. \cite[Eq. (15.1)]{elem-stat-learn01}.
 
 Thus, in addition to bagging, random forests strive to reduce to correlation between the trees 
 without increasing the variance and bias too much. We achieve this by randomly selecting a subset
@@ -659,9 +660,9 @@ these $m$ features. We denote the modified function with the appended parameter 
 
 Widely used default values are $m = \floor{\sqrt{p}}$ and $n_\text{min} = 1$. As for $B$, we have 
 shown above that increasing it reduces the variance at constant bias; in practice, therefore, only 
-computation time limits the number of trees in the forest. We can fit 
-random forests we can parallize the loop over $b = 1, \ldots, B$ in Alg. \ref{alg:forest}. We can 
-also validate them very efficiently by facilitating out-of-bag (OOB) samples: For each sample 
+computation time limits the number of trees in the forest. We can go for a high $B$ as fitting the 
+constituent trees is an embarrassingly parallel problem. We can 
+also validate random forests very efficiently by facilitating out-of-bag (OOB) samples: For each sample 
 $(x_i, y_i)$, we can construct its random forest predictor by averaging only those trees for which 
 $(x_, y_i)$ was not part of the bootstrapped training sample -- no need for a time consuming 
 cross validation. The predicition of this random forest predictor for $x_i$ is the OOB prediction 

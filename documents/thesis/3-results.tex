@@ -1,32 +1,141 @@
 \chapter{Results} \label{chap:results}
 
 In this triune chapter, we start with introducing three DLBCL data sets that include 
-survival and gene expression features. Next, we split every of these three data sets into 
+survival and gene expression features. Next, in intra-trial experiments, we split every of these 
+three data sets into 
 a train and test cohort, fit models for a variety of hyperparameter tuples in $H$ to the training 
 cohort, validate them and test the best on the test cohort; this is less about presenting a 
 high-performing model, but more about analyzing validated and tested errors to make $H$ slimmer and 
 better for the future. This future plays out in the last part as we train and validate on one of 
-the three data sets and test on another and deal with cross-platform variability.
+the three data sets and test on another and deal with cross-platform variability in inter-trial 
+experiments.
 
 \section{The data}
 
-Our data sets are taken from papers by Schmitz et al. \cite{schmitz18}, Reddy et al. \cite{reddy17}
-and Staiger et al. \cite{staiger20}; see Table \ref{table:data} for key properties and comparison.
+Our DLBCL data sets are taken from papers by Schmitz et al.\ \cite{schmitz18}, Reddy et al.\ 
+\cite{reddy17} and Staiger et al.\ \cite{staiger20}; see Table \ref{table:data} for key properties 
+and comparison. We will refer to them as Schmitz, Reddy and Lamis test data, respectively.
 
 \input{figs/data.tex}
 
 \paragraph{Schmitz data}
-The data by Schmitz et al. includes the five IPI features in their continuous, original form. In 
-the paper, 
+The data by Schmitz et al.\ includes the five IPI features in their continuous form. 
+By heuristically optimizing a novel genetic distinctiveness metric, Schmitz et al.\ 
+clustered 574 DLBCL biopsy samples into four subtypes, called MCD, BN2, N1, EZB and ``other''. They 
+unblinded the clinical data only after the clustering was complete and the 
+model was frozen \cite[Appendix 1, pp. 16--18]{schmitz18}. The following, independent survival analysis 
+unveiled significantly differing progression-free survival between the four subtypes (excluding 
+``other'') according to a logrank test; BN2 and EZB subtypes have far better prognosis than MCD and 
+N1 (2-year PFS rate of \num{81}\% and \num{75}\% as opposed to \num{39}\% and 
+\num{20}\%, respectively). The IPI score did not vary significantly between the subtypes, 
+indicating that the new classifier gives us additional information to predict survival.
+
+There are two caveats: First, the genetic classifier saw the entire data set during training and 
+this runs afoul of a strict train-test regime even if training was 
+survival-agnostic. This only affects the intra-trial experiments as in the inter-trial experiments 
+we do not include the genetic subtype as a feature. As a more important take away, we always need 
+to carefully use features in a data set that are the output of some model trained on this data set. 
+Second, this data set is not the result of a 
+prospective, representative trial, but opportunistically collected samples from highly renowned 
+U.S. hospitals, which preferably treat 
+difficult cases. As a result, the high-risk proportion in the Schmitz data is at \num{36.6}\% -- 
+compared to \num{24.3}\% in the prospective Lamis test data -- and the IPI reaches a precision of 
+\num{65.2}\% for classifying high-risk patients at a prevalence of \num{12.9}\% -- compared to 
+\num{38.2}\% at \num{17.0}\% in the Lamis test data. The IPI already meets the MMML-Predict goals, 
+but we want to see if we can do even better in a such high-risk regime.
 
 \paragraph{Reddy data}
 
+Compared to a prospective study, also the Reddy data is enriched for high-risk patients and the 
+IPI boasts a performance that already satisfies the MMML-Predict goals, even if a bit less 
+convincingly than on the Schmitz data. After identifying \num{150} DLBCL driver genes, Reddy et al.\ 
+trained a Cox model, termed genomic risk model,
+that predicts overall survival (OS) from combinations of genetic events and gene-expression markers 
+(cell of origin, MYC, and BCL2) and thresholded it into low, intermediate and low risk. This is a
+model whose predictions we cannot use because their split into the train and test cohort is not 
+clear, but that inspired us to use combinations of discrete features, cf.\ subsection 
+\ref{subsec:model-agnostic}. Nevertheless, with high expression and translocation of MYC, BCL2 and 
+BCL6, the data provides some of the input features of the genomic risk model as well as three binary 
+clinical features: B symptoms at diagnosis, testicular and central-nervous-system involvement. B 
+symptoms refer to the presence of the triad fever, night sweats and unintential weight 
+loss.
+
 \paragraph{Lamis test data}
+
+The Lamis test data is composed of \num{466} patients enrolled in prospective clinical trials. 
+Staiger et al.\ first determined \num{731} gene pairs with highly correlated gene expression levels 
+between their train cohort -- \num{233} DLBCLs with gene expression levels built from the Affymetrix 
+GeneChip technology -- and the Lamis test data -- \num{466} DLBCLs with gene expression levels built 
+from the NanoString nCounter technology -- with the aid of six paired nCounter-GeneChip samples, cf.\ 
+\cite[Supplementary Methods]{staiger20}.
+Next, they learned a Cox model on the differences of the (logarithmized) gene expression levels 
+from these gene pairs and the five thresholded IPI features using LASSO regularization. 
+Afterwards, they removed the five IPI features from the model aiming to make it independent of the 
+IPI. One can expand the differences of gene expression levels in the signature to obtain an ordinary 
+gene-expression signature with coefficients corresponding to single genes, the Lamis. It is 
+based on \num{17} genes, but dominated by just two genes, CSF1 and CPT1A. 
+
+By dichotomizing the 
+Lamis scores at the 75\%-quantile into their Lamis group (low or high), Staiger et al.\ present two 
+groups on the Lamis test data with significantly differing PFS and OS; 
+meanwhile, the IPI features, breaks in MYC, BCL2, BCL6, and cell of origin remained prognostic 
+indicators independently of the Lamis group.
+
+Since the Lamis coefficients fulfill the 
+zero-sum property, we apply the Lamis unchanged on the two other data sets; according to Eq.\ 
+\eqref{eq:inter-tech}, the Lamis scores have a data-set-dependent shift. We also add the Lamis 
+group by dichotomizing the Lamis scores at the 75\%-quantile of the respective data set.
 
 \section{Intra-trial experiments}
 
-\subsection{Summary of model architectures}
+To gain first insights on our methods, we conduct intra-trial experiments sepratetly on the 
+Schmitz, Reddy and Lamis test data. To this end, we split every data set into a train and test 
+cohort. We do so uniformly at random, with two constraints: first, a ratio of 3 to 1 between train 
+and test cohort and, second, the ratio between high-risk and low-risk patients in train cohort, 
+test cohort and overall data set is the same. As shown in Table \ref{table:intra-trial}, the 
+performance of the IPI score thresholded at 4 to classify high risk notably differ between the whole
+data set and the subsampled test cohort. 
+
+\input{figs/intra_trial.tex}
+
+\subsection{Model architectures}
+
+We want to give a brief summary of the models we send into the race and take a closer look at the 
+best one, $m^*$, on every data set.
+
+\subsubsection{Candidates}
+
+\paragraph{Gene expression levels only}
+Models trained in a leave-one-out cross-validation only on the gene expression levels include the 
+Gaussian, logistic and Cox model. Regarding noteworthy hyperparameter decisions, we both apply and 
+do not apply standardization of the predictor; we do not demand the zero-sum constraint 
+because we do not want to transfer our model to other data sets and want to safe computation time;
+we regularize with elastic-net penalty factor $\alpha \in \{ \num{0.1}, 1 \}$; as troughout this 
+chapter, we have \texttt{zeroSum} calculate a sequence of \num{100} regularization strengths 
+$\lambda$ for us and stop early if the cross-validated error does not improve for \num{10} 
+consecutive decreasing $\lambda$ values; we try out a whole bunch of time cutoffs $T$.
+
+We train and validate a model for every combination of these hyperparameters.
+Not taking into account the values of $\lambda$ (which are hard to foresee due to early stopping), 
+this adds up to \num{88} models.
+
+\paragraph{Core models with other features}
+We use the validated performance of the above models to greedily restrict $H$: by looking at the 
+top performing models, we restrict the number model classes (Gaussian, logistic, Cox) to just one 
+or two; we restrict $T$ to one or two values, usually $\infty$ for Cox models and the value 
+of high-risk definition for Gaussian and logistic models; by choosing $\alpha = 1$, we opt for 
+LASSO regularization and its sparse models. 
+
+We now add all available remaining features: for the 
+IPI, we either add the five continuous features (if available), the five threholded features, the 
+score as a continuous feature or all of them; for the Lamis, here and for the rest of the thesis we 
+add the score as a continuous and the group as discrete features. For $s_\text{min} = \num{0.05}$ and 
+$n_\text{combi} \in \{1, 2, 3, 4 \}$, we add combinations of discrete features to the predictor. 
+Additionally, we train these models without gene expression levels, in which case we also use the 
+random forest as a model class.
 
 \subsection{}
 
 \section{Inter-trial experiments}
+
+\input{figs/inter_trial.tex}

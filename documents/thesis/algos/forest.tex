@@ -2,7 +2,7 @@
     \caption{Growing a forest with bagging and random feature selection} \label{alg:forest}
     \begin{algorithmic}[1]
       \Function{RandomForest}{$(x_i, y_i)_{i = 1, \ldots, n}$; $B$, $m$, $Q$, $n_\text{min}$}
-        \State $\mathcal{E} <- \emptyset$ \Comment{Ensemble to be filled} 
+        \State $\mathcal{E} \gets \emptyset$ \Comment{Ensemble to be filled} 
         \For{$b = 1, \ldots, B$}
           \State Draw a bootstrap sample $(\tilde{x}_i, \tilde{y}_i)_{i = 1, \ldots, n}$ from 
             $(x_i, y_i)_{i = 1, \ldots, n}$
@@ -10,7 +10,7 @@
             $n_\text{min}$, $m$}
           \State $\mathcal{E} \gets \mathcal{E} \cup \{T\}$
         \EndFor
-        \State \Return $\sgn \left( \frac{1}{B} \sum_{T \in \mathcal{E}} T \right)$
+        \State \Return $\sgn \circ \left( \frac{1}{B} \sum_{T \in \mathcal{E}} T \right)$
       \EndFunction
     \end{algorithmic}
   \end{algorithm}
