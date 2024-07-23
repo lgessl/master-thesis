@@ -91,13 +91,12 @@ This underscores the need for a smart and lean choice of the candidate models or
 tuples, respectively. Exclusion criteria for candidate models may be theoretical considerations
 and experience by both us and others. Concerning experience, this means we will not move away too 
 far from default hyperparameters and we will develop heuristics in chapter \ref{chap:results} as 
-move from data set to the next.
+we move from one data set to the next.
 
 \subsection{Testing}
 
 We calculate the predictions $m^*(X_\text{test}) = \hat{y}_\text{test}$ of the best validated model 
 $m^*$ on the test cohort and estimate its performance on independent data via 
-
 \begin{align}
     \text{err}(y_\text{test}, \hat{y}_\text{test}).
 \end{align}
@@ -200,37 +199,36 @@ able to leverage it in combination with other features; but at this step, we do 
 a model exists and if it is among our candiate models. The only remaining option for handpicking 
 features a priori is to brute-force the problem and try out all $2^p$ combinations of features.
 Even if we trust on regularization to do its job for the high-dimensional part (typically several 
-hundreds or even thousands of gene expression levels), just \num{10} remaining fetures would still
+hundreds or even thousands of gene expression levels), just \num{10} remaining features would still
 leave us with $2^{10} = 1024$ combinations to try out -- per model class. While this may be 
 computationally feasible, validation would be a statistical fiasco as laid out in subsection 
-\ref{subsec:train-val}. Therefore, we decided to reduce this quickly exploding problem to only 
-a couple of decisions to 
-make and have all the other feature selection happen during model fitting. 
+\ref{subsec:train-val}. Therefore, we reduce this quickly exploding number of choices to only 
+a handful and have all the other feature selection happen during model fitting. 
 
 \paragraph{Gene-expression data}
 The first and most important decision to make is: do we want to include the high-dimensional
 gene-expression part of the data at all? If we do not, we suddenly have $p \ll n$ instead of 
-$p \gg n$ and can use way more complex models. 
+$p \gg n$ and we can use much more complex models. 
 
 \paragraph{Features in different formats}
 Second, we need to make a couple of more decisions regarding the format of some features.
 \begin{itemize}
     \item Concerning the IPI, one can include the five IPI features in their original, continuous 
         form; discretized as by the IPI inventors; the IPI score as a single continuous feature; 
-        or the so-called IPI group, a partioning of the IPI score into three groups. Similar widely 
-        accepted thresholds may exist for other clinical and genetic features.
+        or the so-called IPI group, a partioning of the IPI score into three groups. Similarly, 
+        widely accepted thresholds may exist for other clinical and genetic features.
     \item For already existing models, we can include their continuous output or also threshold 
         it. E.g., cell-of-origin signatures can be -- and most of the time in data sets already 
         have been -- thresholded into ABC, GCB and unclassified subtypes. The above-mentioned IPI 
         group thresholds the IPI model. 
 \end{itemize}
 
-Imagine, a data set provides the five IPI features in continuous format and the continuous output 
+E.g., imagine a data set provides the five IPI features in continuous format and the continuous output 
 of some gene-expression signature for which 
 its inventors also provide a preferred threshold. If we want to decide for exactly one format 
-per feature, this leaves us with $5 \cdot 2$ possibilities for this simple case. If we want try out 
-every combination of non-empty subsets, the number of possibilities jumps to $2^5 \cdot 2^2 = 
-128$. 
+per feature, this leaves us with $4 \cdot 2$ possibilities for this simple case. If we want try out 
+every combination of non-empty subsets, the number of possibilities jumps to $2^4 \cdot 2^2 = 
+64$. 
 
 Our solution here again is to be generous and include all formats of a feature in $\mathbf{x}$ a 
 certain model may benefit from. This sentence usually 

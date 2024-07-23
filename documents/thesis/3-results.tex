@@ -157,11 +157,27 @@ features: For the Schmitz data, $X$ holds the IPI in all its three formats as op
 discretized IPI features for the Reddy data. We have $n_\text{combi} = 2$ for Schmitz as opposed to 
 $n_\text{combi} = 3$ for Reddy.
 
+On the Schmitz data, $m^*$'s validated precision of \num{89.3}\% drops by more than \num{20} points 
+to \num{68.4}\% on the test set. In an even bigger drop, $m^*$'s validated precision of \num{78.6}\% 
+declines to \num{55.6}\% on the Reddy test set. These way too optimistic cross-validated errors 
+demand further investigation.
+
 \paragraph{Lamis test}
 On the Lamis test data, $m^*$ is a very simple model: a logistic model that neither uses gene 
-expression levels nor combinations of discrete features ($n_\text{combi} = 1$).
+expression levels nor combinations of discrete features ($n_\text{combi} = 1$). Here, $m^*$'s 
+validated precision of \num{58.2}\% is more in line with the \num{45.9}\% on the test set.
 
-\subsection{}
+\subsection{Meta analysis}
+
+Now that we have frozen all models and do not add further ones, we can unlock the test set and 
+evaluate the test performance of more models. Our main focus rests on the discrepancy between 
+validated and test error; as we laid out in section \ref{sec:train-val-test}, the models with the 
+best validated errors most likely have an underestimated test error and it is hard to fight this 
+effect qualitatively. However, we use several methods to calculate a validated error -- cross 
+validation, the pseudo cross validatio of Alg. \ref{alg:nested-pcv} and the OOB error of random 
+forests -- for every model architecture we tune different hyperparameters and a different number of 
+hyperparameter tuples. Hence, we want to investigate if there are systematic dependencies between 
+validation-test error discrepancy and the model architecture.
 
 \section{Inter-trial experiments}
 
