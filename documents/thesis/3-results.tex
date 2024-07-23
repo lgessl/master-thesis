@@ -110,8 +110,8 @@ Models trained in a leave-one-out cross-validation only on the gene expression l
 Gaussian, logistic and Cox model. Regarding noteworthy hyperparameter decisions, we both apply and 
 do not apply standardization of the predictor; we do not demand the zero-sum constraint 
 because we do not want to transfer our model to other data sets and want to safe computation time;
-we regularize with elastic-net penalty factor $\alpha \in \{ \num{0.1}, 1 \}$; as troughout this 
-chapter, we have \texttt{zeroSum} calculate a sequence of \num{100} regularization strengths 
+we regularize with elastic-net penalty factor $\alpha \in \{ \num{0.1}, 1 \}$; as throughout this 
+chapter, we have the \texttt{zeroSum} package calculate a sequence of \num{100} regularization strengths 
 $\lambda$ for us and stop early if the cross-validated error does not improve for \num{10} 
 consecutive decreasing $\lambda$ values; we try out a whole bunch of time cutoffs $T$.
 
@@ -119,20 +119,47 @@ We train and validate a model for every combination of these hyperparameters.
 Not taking into account the values of $\lambda$ (which are hard to foresee due to early stopping), 
 this adds up to \num{88} models.
 
-\paragraph{Core models with other features}
-We use the validated performance of the above models to greedily restrict $H$: by looking at the 
-top performing models, we restrict the number model classes (Gaussian, logistic, Cox) to just one 
-or two; we restrict $T$ to one or two values, usually $\infty$ for Cox models and the value 
-of high-risk definition for Gaussian and logistic models; by choosing $\alpha = 1$, we opt for 
-LASSO regularization and its sparse models. 
+Looking at the models with top validated performance, for the following we narrow down $T$ to one or 
+two values (usually at or slighly below two years) and $\alpha$ to $1$ as the more complex models 
+trained for $\alpha = \num{0.1}$ cannot clearly outperform the spare LASSO-trained models. For 
+models only predicting from gene expression levels, we do not standardize the predictor any more.
 
+\paragraph{Core models with other features}
 We now add all available remaining features: for the 
 IPI, we either add the five continuous features (if available), the five threholded features, the 
-score as a continuous feature or all of them; for the Lamis, here and for the rest of the thesis we 
-add the score as a continuous and the group as discrete features. For $s_\text{min} = \num{0.05}$ and 
-$n_\text{combi} \in \{1, 2, 3, 4 \}$, we add combinations of discrete features to the predictor. 
-Additionally, we train these models without gene expression levels, in which case we also use the 
-random forest as a model class.
+score as a continuous feature or all of these threee; for the Lamis, % here and for the rest of the thesis 
+we add the score as a continuous and the group as a discrete feature. For $s_\text{min} = \num{0.05}$ 
+and $n_\text{combi} \in \{1, 2, 3, 4 \}$, we add combinations of discrete features to the predictor. 
+We both include and exclude gene expression levels in the predictor.
+
+As for the model class, we build on our experience gained from the gene-expression-only models and 
+just use the top performing model class of these models for such models that also use gene 
+expression levels. For models not predicting from gene-expression levels, we have no prior 
+knowledge and thus deploy the full range of core models: Gaussian, logistic, Cox models and random 
+forests. As all of these models need to deal with features on different scales, we always 
+standardize the predictor.
+
+
+\paragraph{Nested models}
+We nest models according to Alg. \ref{alg:nested-pcv}, where the early model $f_1$ is the best 
+validated model among the gene-expression-only models and $f$ has the model class of $f_1$ or is 
+a random forest. If $f$ has the same model class as $f_1$, we still tune the LASSO regularization 
+strengtht for $f_1$ because we may end up adding several hundreds combined disrete featuers to the 
+predictor. As for a-priori feature selection, dito as above.
+
+\subsubsection{Best validated models}
+
+\paragraph{Schmitz and Reddy}
+For both the Schmitz and Reddy data, the best model according to the validation error is a nested 
+model as in Alg. \ref{alg:nested-pcv} with the early model $f_1$, a Gauss model, predicting from 
+the gene-expression levels and the late model $f$ being a Cox model. They only differ in their 
+features: For the Schmitz data, $X$ holds the IPI in all its three formats as opposed to the five 
+discretized IPI features for the Reddy data. We have $n_\text{combi} = 2$ for Schmitz as opposed to 
+$n_\text{combi} = 3$ for Reddy.
+
+\paragraph{Lamis test}
+On the Lamis test data, $m^*$ is a very simple model: a logistic model that neither uses gene 
+expression levels nor combinations of discrete features ($n_\text{combi} = 1$).
 
 \subsection{}
 
