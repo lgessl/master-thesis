@@ -63,7 +63,7 @@ ipi_all$include_from_continuous_pheno <- c("ipi", "lamis_score")
 
 ei_li <- list(ipi_group, ipi_disc, ipi_cont, ipi_all)
 
-# Early integration with Cox, logistic
+# Early integration with Cox
 for (model in ei_li[1:4]) {
     ei_cox <- model$clone()
     ei_cox$name <- stringr::str_replace(model$name, "-cox", " ei")
@@ -72,13 +72,7 @@ for (model in ei_li[1:4]) {
     ei_cox$fitter <- ptk_zerosum
     ei_cox$hyperparams <- list(family = "cox", alpha = 1, zeroSum = FALSE,
         standardize = TRUE, exclude_pheno_from_lasso = FALSE, nFold = 1000)
-    ei_log <- ei_cox$clone()
-    ei_log$name <- stringr::str_replace_all(ei_cox$name, "cox", "log")
-    ei_log$directory <- stringr::str_replace_all(ei_cox$directory, "cox", "log")
-    ei_log$fitter <- ptk_zerosum
-    ei_log$hyperparams <- list(family = "binomial", alpha = 1, zeroSum = FALSE,
-        standardize = TRUE, exclude_pheno_from_lasso = FALSE, nFold = 1000)
-    ei_li <- c(ei_li, ei_cox, ei_log)
+    ei_li <- c(ei_li, ei_cox)
 }
 
 # Late integration with rf, logistic as late model
@@ -114,6 +108,18 @@ for (model in ei_li) {
         no_expr_cox$name <- paste(model$name, "no expr")
         no_expr_cox$directory <- paste0(model$directory, "-no-expr")
         no_expr_cox$include_expr <- FALSE
+        # log
+        log <- no_expr_cox$clone()
+        log$name <- stringr::str_replace(no_expr_cox$name, "cox", "log")
+        log$directory <- stringr::str_replace_all(no_expr_cox$directory, "cox", "log")
+        log$hyperparams[["family"]] <- "binomial"
+        log$time_cutoffs <- 2
+        # Gauss
+        gauss <- no_expr_cox$clone()
+        gauss$name <- stringr::str_replace(no_expr_cox$name, "cox", "gauss")
+        gauss$directory <- stringr::str_replace_all(no_expr_cox$directory, "cox", "gauss")
+        gauss$hyperparams[["family"]] <- "gaussian"
+        gauss$time_cutoffs <- 2
         # rf
         no_expr_rf <- no_expr_cox$clone()
         no_expr_rf$name <- stringr::str_replace(no_expr_rf$name, "cox ei", "rf ei")
@@ -129,15 +135,7 @@ for (model in ei_li) {
             skip_on_invalid_input = TRUE
         )
         no_expr_rf$continuous_output <- TRUE
-        ei_li <- c(ei_li, no_expr_cox, no_expr_rf)
-    }
-    # Logistic
-    if (stringr::str_detect(model$name, "log ei")) {
-        no_expr_log <- model$clone()
-        no_expr_log$name <- paste(model$name, "no expr")
-        no_expr_log$directory <- paste0(model$directory, "-no-expr")
-        no_expr_log$include_expr <- FALSE
-        ei_li <- c(ei_li, no_expr_log)
+        ei_li <- c(ei_li, no_expr_cox, log, gauss, no_expr_rf)
     }
 }
 
@@ -145,3 +143,4 @@ for (model in ei_li) {
 
 models <- c(basic, ei_li)
 names(models) <- sapply(models, function(x) x$name)
+prepend_to_directory(models, "models/lamis_test2")

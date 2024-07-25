@@ -72,7 +72,7 @@ ipi_all$include_from_continuous_pheno <- c("ipi", "lamis_score")
 
 ei_li <- list(ipi_group, ipi_disc, ipi_cont, ipi_all)
 
-# Early integration with gauss, cox
+# Early integration with gauss
 for(model in ei_li[1:4]){
     gauss <- model$clone()
     gauss$name <- stringr::str_replace(model$name, "gauss-gauss", "gauss ei")
@@ -81,13 +81,7 @@ for(model in ei_li[1:4]){
     gauss$fitter <- ptk_zerosum
     gauss$hyperparams <- list(family = "gaussian", alpha = 1, zeroSum = FALSE,
         standardize = TRUE, exclude_pheno_from_lasso = FALSE, nFold = 1000)
-    cox <- gauss$clone()
-    cox$name <- stringr::str_replace(gauss$name, "gauss", "cox")
-    cox$directory <- stringr::str_replace_all(gauss$directory, "gauss", "cox")
-    cox$hyperparams[["family"]] <- "cox"
-    cox$time_cutoffs <- Inf
-
-    ei_li <- c(ei_li, gauss, cox)
+    ei_li <- c(ei_li, gauss)
 }
 
 # Late integration with rf, cox
@@ -125,6 +119,10 @@ for (model in ei_li) {
         cox$directory <- stringr::str_replace_all(cox$directory, "gauss", "cox")
         cox$hyperparams[["family"]] <- "cox"
         cox$time_cutoffs <- Inf
+        log <- gauss$clone()
+        log$name <- stringr::str_replace(log$name, "gauss", "log")
+        log$directory <- stringr::str_replace_all(log$directory, "gauss", "log")
+        log$hyperparams[["family"]] <- "binomial"
         rf <- cox$clone()
         rf$name <- stringr::str_replace(rf$name, "cox ei", "rf ei")
         rf$directory <- stringr::str_replace_all(cox$directory, "cox", "rf")
@@ -139,7 +137,7 @@ for (model in ei_li) {
         )
         rf$continuous_output <- FALSE
         rf$time_cutoffs <- 2.5
-        ei_li <- c(ei_li, gauss, cox, rf)
+        ei_li <- c(ei_li, gauss, cox, log, rf)
     }
 }
 
@@ -147,3 +145,4 @@ for (model in ei_li) {
 
 models <- c(basic, ei_li)
 names(models) <- sapply(models, function(x) x$name)
+prepend_to_directory(models, "models/reddy")

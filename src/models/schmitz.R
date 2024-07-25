@@ -111,6 +111,17 @@ for (model in all_combo) {
         no_expr_gauss$name <- paste(model$name, "no expr")
         no_expr_gauss$directory <- paste0(model$directory, "-no-expr")
         no_expr_gauss$include_expr <- FALSE
+        # Cox 
+        cox <- no_expr_gauss$clone()
+        cox$name <- stringr::str_replace(no_expr_gauss$name, "gauss", "cox")
+        cox$directory <- stringr::str_replace_all(no_expr_gauss$directory, "gauss", "cox")
+        cox$hyperparams[["family"]] <- "cox"
+        cox$time_cutoffs <- Inf
+        # log
+        log <- no_expr_gauss$clone()
+        log$name <- stringr::str_replace(no_expr_gauss$name, "gauss", "log")
+        log$directory <- stringr::str_replace_all(no_expr_gauss$directory, "gauss", "log")
+        log$hyperparams[["family"]] <- "binomial"
         # rf
         no_expr_rf <- no_expr_gauss$clone()
         no_expr_rf$name <- stringr::str_replace(no_expr_rf$name, "gauss ei", "rf ei")
@@ -125,11 +136,11 @@ for (model in all_combo) {
             skip_on_invalid_input = TRUE
         )
         no_expr_rf$continuous_output <- FALSE
-        all_combo <- c(all_combo, no_expr_gauss, no_expr_rf)
+        all_combo <- c(all_combo, no_expr_gauss, cox, log, no_expr_rf)
     }
 }
 
 # Put them all together
-
 models <- c(basic, all_combo)
 names(models) <- sapply(models, function(x) x$name)
+prepend_to_directory(models, "models/schmitz")
