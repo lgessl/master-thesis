@@ -104,9 +104,9 @@ data_sets <- list(schmitz = schmitz, reddy = reddy)
 # data_sets <- list(reddy = reddy)
 # (a) model architecture, just one spot
 model_arch <- c("gauss-(gauss|log|cox)", "gauss-rf", "rf ei", "log", "cox", "gauss")
-model_arch_name <- c("Gauss-GLM", "Gauss-RF", "RF core", "Logistic core", "Cox core", "Gauss core")
+model_arch_name <- c("Gauss-GLM", "Gauss-RF", "RF", "Logistic", "Cox", "Gauss")
 # (b) included features
-features <- c("no expr", ", rest", ".")
+features <- c("no expr", "with", ".")
 features_name <- c("no GE", "GE & more", "GE only")
 regex1_list <- list(model_arch, features)
 name1_list <- list(model_arch_name, features_name)
@@ -131,7 +131,7 @@ plt_list <- generate_plot_list(
 data_sets <- list(lamis_test2 = lamis_test2)
 # (a) model architecture, just one spot
 model_arch <- c("cox-(gauss|log|cox)", "cox-rf", "rf ei", "log", "cox", "gauss")
-model_arch_name <- c("Cox-GLM", "Cox-RF", "RF core", "Logistic core", "Cox core", "Gauss core")
+model_arch_name <- c("Cox-GLM", "Cox-RF", "RF", "Logistic", "Cox", "Gauss")
 # (b) included features (reuse from above)
 regex1_list <- list(model_arch, features)
 name1_list <- list(model_arch_name, features_name)
