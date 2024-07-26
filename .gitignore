@@ -8,3 +8,4 @@
 *.jpeg
 *.code-workspace
 *update.R
+results/**/*.txt
