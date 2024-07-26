@@ -486,7 +486,7 @@ weights $w_i > 0$ and zero-sum weights $u_j \geq 0$ such that the loss function 
 \end{align}
 As with GLMs, we can leverage the zero-sum constraint to reach shift-invariance.
 
-\subsection{Elastic-net regularization}
+\subsection{Elastic-net regularization} \label{subsec:elastic-net}
 
 Modern molecular measurements are a big factor in our hope that MMML-Predict can succeed and improve 
 the IPI. These measurements, like gene expression levels, show up as hundreds if not thousands of 
@@ -563,7 +563,7 @@ are usually the gene expression levels, which are on comparable scales anyway.
 
 \subsubsection{Random forests}
 
-More precisely, we talk about classification random forests, hence $Y$ is binary in this subsection 
+More precisely, we talk about classification random forests (RFs), hence $Y$ is binary in this subsection 
 with $\im(Y) \subset \{ \pm 1 \}$, where $1$ still encodes the positive class. When we say random 
 forests in this thesis, we mean classification 
 random forests. Random forests are an ensemble of classification trees -- in short: 

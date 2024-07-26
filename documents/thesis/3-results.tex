@@ -119,7 +119,8 @@ We train and validate a model for every combination of these hyperparameters.
 Not taking into account the values of $\lambda$ (which are hard to foresee due to early stopping), 
 this adds up to \num{88} models.
 
-Looking at the models with top validated performance, for the following we narrow down $T$ to one or 
+Looking at the models with top validated performance (cf. projection upon validation error in Fig. 
+\ref{fig:intra-val-test-geo}), for the following we narrow down $T$ to one or 
 two values (usually at or slighly below two years) and $\alpha$ to $1$ as the more complex models 
 trained for $\alpha = \num{0.1}$ cannot clearly outperform the spare LASSO-trained models. For 
 models only predicting from gene expression levels, we do not standardize the predictor any more.
@@ -127,7 +128,7 @@ models only predicting from gene expression levels, we do not standardize the pr
 \paragraph{Core models with other features}
 We now add all available remaining features: for the 
 IPI, we either add the five continuous features (if available), the five threholded features, the 
-score as a continuous feature or all of these threee; for the Lamis, % here and for the rest of the thesis 
+score as a continuous feature or all of these threee; for the Lamis, % here and for the rest of thesis 
 we add the score as a continuous and the group as a discrete feature. For $s_\text{min} = \num{0.05}$ 
 and $n_\text{combi} \in \{1, 2, 3, 4 \}$, we add combinations of discrete features to the predictor. 
 We both include and exclude gene expression levels in the predictor.
@@ -164,7 +165,8 @@ demand further investigation.
 
 \paragraph{Lamis test}
 On the Lamis test data, $m^*$ is a very simple model: a logistic model that neither uses gene 
-expression levels nor combinations of discrete features ($n_\text{combi} = 1$). Here, $m^*$'s 
+expression levels nor combinations of discrete features ($n_\text{combi} = 1$). Notably, the model
+incorporates the Lamis score and group with decisively non-zero coefficient. Here, $m^*$'s 
 validated precision of \num{58.2}\% is more in line with the \num{45.9}\% on the test set.
 
 \subsection{Meta analysis}
@@ -175,11 +177,115 @@ validated and test error; as we laid out in section \ref{sec:train-val-test}, th
 best validated errors most likely have an underestimated test error and it is hard to fight this 
 effect qualitatively. However, we use several methods to calculate a validated error -- cross 
 validation, the pseudo cross validatio of Alg. \ref{alg:nested-pcv} and the OOB error of random 
-forests -- for every model architecture we tune different hyperparameters and a different number of 
-hyperparameter tuples. Hence, we want to investigate if there are systematic dependencies between 
-validation-test error discrepancy and the model architecture.
+forests -- and for every model architecture we tune different hyperparameters and a different 
+number of hyperparameter tuples. Both validation error and test error of a model are random 
+variables and it is hard to infer statistical properties of them based on a single realization of 
+these random variables; by grouping the models according to their hyperparameters we gain 
+statisticial power and look for patterns in the validation and test error as well as 
+discrepancies between them.
+
+\subsubsection{Models predicting from gene expression levels only}
+
+\input{figs/intra_val_test_geo.tex}
+
+\paragraph{Lamis test}
+Looking at Fig. \ref{fig:intra-val-test-geo}, we see that, for Lamis test, the models only using 
+gene expression levels cannot compete with IPI $\geq 4$. While the validated errors of these models are 
+below the \num{-36.4}\% negative precision of the IPI, the test errors all are above \num{-30}\%. 
+In all cases, the test error is at least 10 points higher than the validated error, a discrepancy 
+also indicated the fact that the identity line is outside the plot area. It is hard to imagine that 
+these models even if nested into another model can help outperform the IPI. Hence, for the 
+following, the analysis focuses on the other two data sets.
+
+\paragraph{Schmitz and Reddy}
+Also for the Schmitz and Reddy data, the dependence between validated and test error is far from 
+being monotonic; in both cases, the plot looks noisy and the correlation between validated and test 
+error is negative such that the model with the lowest validated error happens to have the highest 
+(Schmitz) or second highest (Reddy) test error. The plots do not show errors for all tried out 
+hyperparameter tuples in $H$, but only for a high-performing subset with $\lambda$ and $T$ already 
+optimized; this optimization was successful in the sense that even the worst models boast a test 
+error below that of IPI $\geq 4$.
+
+There is no model class reliably outperforming the others. Both data sets suggest that ridge 
+regularization yields models with a test error lower than that of LASSO regularization; validation, 
+however, does not reveal this difference. The picture on standardizing $X$ or not is mixed: on the 
+Schmitz data, models with non-standardized predictor fluctuate somewhat around the identiy line than 
+those with standardized predictor, meaning validation is more reliable for the former model group;
+on the Reddy data, meanwhile, we the same phenomenon with roles swapped.
+
+\subsubsection{Models with the full range of features}
+
+\input{figs/intra_val_test_more.tex}
+
+All analysis here is based on Fig. \ref{fig:intra-val-test-more}.
+
+\paragraph{Schmitz and Reddy}
+Again, we analyze the non-prospective, high-risk heavy Schmitz and Reddy data together. As we apply
+the full range of a priori selected features, validation and test error for these two data sets 
+stay out of touch. Partioning according to the model architecture reveals some patterns. 
+
+Models 
+nesting a Gauss model into a GLM as in Alg. \ref{alg:nested-pcv} all have low validated errors, on 
+the Reddy data, they even have lower validated error than any other model; the test error is 
+always higher than the validated error and usually it is \textit{much} higher. Alg. \ref{alg:nested-pcv} 
+yields way too optimistic validated errors if the late model is a GLM, prompting us to no longer 
+fit such models in the following experiments. Discarding Alg. \ref{alg:nested-pcv} once and for all
+would go too far: when nesting a Gauss model into a random forest, we get validated errors more in 
+line with test errors, especially on the Schmitz data. On both data sets, OOB predictions for 
+models consisting of a random forest alone very well estimate the test error. In all but one case 
+they even underestimate the test error. All in all, OOB predictions seem superior to 
+cross-validated predictions, which comes as no surprise when having a closer look at both 
+methods: A sample's cross-validated predictions come from one model and we have one model per 
+sample in the best case, a leave-one-out cross-validation (which we did for all models involved in 
+nested models). In contrast, a sample's OOB prediction comes from a whole forest of models with 
+expected size roughly $B/3$ because the probability of a sample not being in a bootrap sample 
+is
+\begin{align}
+    \left( 1 - \frac{1}{n} \right)^n \to \frac{1}{e} \approx \frac{1}{3} \quad \text{as } n \to 
+    \infty,
+\end{align}
+and we can scale it by scaling $B$, which is cheap as we have laid out in subsection 
+\ref{subsec:elastic-net}.
+
+As for feature selection, we see that including gene expression levels does not lead to greatly 
+improved models. Even the high-performing gene-expression-only models do not benefit very much if 
+we train them with additional features. On the Reddy data, the points belonging to models not using 
+gene-expression data are all close to or underneath the identity line, meaning the validation errors 
+catch the test errors well, their test errors are less widespread and on average lower than those 
+of the remaining models. This does not mean that gene expression levels do not provide important 
+information: all of the models that do not use the gene expression levels directly from our data 
+do so indirectly thanks to the Lamis. We have simply outsourced developing a gene-expression based 
+model to the Lamis authors, thereby getting rid of $p \gg n$ and ending up with a more accurate 
+validation.
+
+\paragraph{Lamis test}
+
+On the Lamis test data, the validated errors align better with the test errros. As with the two other 
+datasets, OOB-based test-error estimates are conservative leading to underestimated test errors 
+for models incorporating a random forest. As a result of highly correlated validation and test 
+errors, the best validated model is also the best tested model. Compared to above, the validated errors 
+of models nesting a Cox model into a GLM overestimate the test errors less; since the early Cox 
+model yields pretty inaccurate cross-validated predictions, we hypothesize that the training 
+algorithm of the late GLM is less inclined to put as much weight on these predictions as with the 
+two other data sets.
+
+Models profit a lot from not just predicting from the gene expression levels: all the 
+gene-expression-only cluster into a bulk with test errors higher than those of all other models. 
+Key to the success is again the molecular information condensed in the Lamis, which all the 
+high-performing models put heavy weight on.
 
 \section{Inter-trial experiments}
 
+The results of the intra-trial experiments are encouraging: we beat the precision of the IPI by 
+at least \num{9.5} points on three data sets, including two where the IPI already did a good job. 
+In the following analysis, we saw validated errors often being detached from test errors. To tackle 
+this issue, we decided to no longer train certain models. We also noticed that the Lamis is at least 
+as capable of catching the molecular information in the gene expression levels as the models
+\textit{we} trained for that purpose, but allows training more precise models and validating them 
+more accurately. Another way to close the validation-test gap is to increase the number of samples 
+in both the train and test cohort: it both makes overfitting the validated predictions to the 
+training cohort harder and makes it less likely that the test cohort includes cases biologically 
+not covered at all in the train cohort. We will now go along this path as we use every of the 
+three data sets in their entirety for training and validation and then test on the other two.
+
 \input{figs/inter_trial.tex}
-\input{figs/intra_val_test_geo.tex}
