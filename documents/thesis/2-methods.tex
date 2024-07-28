@@ -106,7 +106,10 @@ $m^*$ on the test cohort and estimate its performance on independent data via
 Taking into account the calculations in section \ref{sec:intro-mmml},
 we want to optimize the precision of the high-risk group, which must comprise at least 15\% of the 
 samples in our data. Since an error should be the lower, the better the model is, we choose 
-$\text{err}$ to be the minimum of the negative precisions with a prevalence of at least 17\%. 
+$\text{err}$ to be the minimum of the negative precisions with a prevalence of at least 17\%. We 
+add two percentage points to the prevalence as it should only cost us a small fraction of the 
+precision, increases statistical power and makes the error function more robust as we will see 
+next. 
 
 Usually, we need 
 to take a minimum over \textit{several} precisions because most models do not output the final 
@@ -132,10 +135,23 @@ test cohort during testing; this sounds delicate. The results however will show 
 choice for $t$ (or at least an 
 almost optimal choice) on both train and test cohort correponds to a prevalence of 
 slightly above 17\% such that one can agree on the following when it comes to the MMML-Predict data: 
-choose $t$ as the 17\%-quantile of the coninuous model output on the test cohort.
+choose $t$ as the 17\%-quantile of the continuous model output on the test cohort.
+
+Similarly, given a cohort, we threshold the IPI in such a way that it maximizes the precision under 
+the constraint of a prevalence of at least \num{10}\% on this cohort and call this veritable 
+binary classifier thresholded IPI, in short tIPI. Usually this amounts to thresholding the IPI via 
+$\text{IPI} \geq 4$. The IPI only needs to deliver the minimum 
+attention-triggering prevalence of \num{10}\% while its challengers, our models, need a somewhat 
+higher prevalence to gain statistical power against the IPI as explained before. Also optimizing 
+the IPI's threshold for a given cohort ensures a fair competition.
+
+In general, given data $(\mathbf{x}, y)$, we denote the prevalence of a model $m$ correspoding to 
+$\text{err}(y, m(\textbf{x}))$ by $\text{prev}_y(m)$ and the corresponding precision by $\text{prec}_y(m) = 
+-\text{err}(y, m(\textbf{x}))$. When it is clear from the context which data set or subset of a data set 
+we are talking about, we just write $\text{prev}(m)$ and $\text{prec}(m)$.
 
 \subsection{Inter-technical variability} 
-One could instead suggest to already optimize the output threshold on the cross-validated 
+One could instead suggest to already optimize the output threshold of our models on the cross-validated 
 predictions. While this promises a stricter train-test regime at first glance, fixing the output 
 threshold once and for all neglects inter-technical variability. An always-present problem in 
 Bioinformatics, inter-technical variability refers to the fact that one and the same sample 
