@@ -1,5 +1,7 @@
 # Models trained on Schmitz, Reddy, Lamis
 
+library(patroklos)
+
 # Basic (only expression data)
 
 models <- list()
@@ -108,7 +110,22 @@ ei <- c(ei, rf)
 
 # No late integration: overfitting on validated predictions
 
-models <- c(models, ei)
+models <- c(models, ei, readRDS("models/ipi/model.rds"))
+
+# IPI
+ipi <- Model$new(
+    name = "ipi",
+    directory = "ipi",
+    fitter = projection_on_feature,
+    time_cutoffs = 2,
+    val_error_fun = neg_prec_with_prev_greater(0.17),
+    hyperparams = list(feature = "ipi"),
+    include_from_continuous_pheno = "ipi",
+    include_from_discrete_pheno = NULL,
+    include_expr = FALSE,
+    enable_imputation = FALSE
+)
+models <- c(models, ipi)
 
 # Major lazer: light it up
 

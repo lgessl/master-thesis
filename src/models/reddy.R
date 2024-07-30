@@ -145,4 +145,4 @@ for (model in ei_li) {
 
 models <- c(basic, ei_li)
 names(models) <- sapply(models, function(x) x$name)
-prepend_to_directory(models, "models/reddy")
+prepend_to_directory(models[names(models) != "ipi"], "models/reddy")

@@ -143,4 +143,4 @@ for (model in all_combo) {
 # Put them all together
 models <- c(basic, all_combo)
 names(models) <- sapply(models, function(x) x$name)
-prepend_to_directory(models, "models/schmitz")
+prepend_to_directory(models[names(models) != "ipi"], "models/schmitz")

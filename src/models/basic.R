@@ -1,5 +1,7 @@
 # BASIC models (only genomic data)
 
+library(patroklos)
+
 # COX
 # vanilla
 cox = Model$new(
@@ -117,6 +119,21 @@ for (i in seq_along(models)) {
     ridge_models[[i]] <- model
 }
 models <- c(models, ridge_models)
+
+# Projection on IPI
+ipi <- Model$new(
+    name = "ipi",
+    directory = "ipi",
+    fitter = projection_on_feature,
+    time_cutoffs = 2,
+    val_error_fun = neg_prec_with_prev_greater(0.17),
+    hyperparams = list(feature = "ipi"),
+    include_from_continuous_pheno = "ipi",
+    include_from_discrete_pheno = NULL,
+    include_expr = FALSE,
+    enable_imputation = FALSE
+)
+models <- c(models, ipi)
 
 # Model for new data sets where you cannot try out everything
 general <- list()
