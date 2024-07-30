@@ -9,5 +9,4 @@ data$cohort <- "train"
 source("src/models/lamis_test2.R")
 # models <- basic
 
-prepend_to_directory(models, "models/lamis_test2") 
-training_camp(models, data, skip_on_error = TRUE)
+training_camp(models, data, skip_on_error = TRUE, update_model_shell = TRUE)
