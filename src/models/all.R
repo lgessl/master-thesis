@@ -110,7 +110,7 @@ ei <- c(ei, rf)
 
 # No late integration: overfitting on validated predictions
 
-models <- c(models, ei, readRDS("models/ipi/model.rds"))
+models <- c(models, ei)
 
 # IPI
 ipi <- Model$new(

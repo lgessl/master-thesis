@@ -9,4 +9,4 @@ data$cohort <- "train"
 source("src/models/reddy.R")
 # models <- basic
 
-training_camp(models, data, skip_on_error = TRUE, update_model_shell = TRUE)
+training_camp(models, data, skip_on_error = TRUE, update_model_shell = FALSE)

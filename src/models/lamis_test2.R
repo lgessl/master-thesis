@@ -143,4 +143,4 @@ for (model in ei_li) {
 
 models <- c(basic, ei_li)
 names(models) <- sapply(models, function(x) x$name)
-prepend_to_directory(models[names(models) != "ipi"], "models/lamis_test2")
+prepend_to_directory(models, "models/lamis_test2")
