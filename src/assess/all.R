@@ -17,12 +17,11 @@ val_vs_test(
     model_list = models,
     data = data,
     error_fun = neg_prec_with_prev_greater(0.17),
-    spotlight_regex = ".",
     file = "results/all/lamis_vs_schmitz.jpeg",
-    plot_theme = theme,
+    plot_theme = plot_themes[["presentation"]],
     colors = colors[2]
 )
-models <- models[val_tbl[["model"]][1]]
+models <- models[c(val_tbl[["model"]][1], "ipi")]
 
 # Assess this model on schmitz
 data$cohort <- "schmitz"
@@ -40,7 +39,7 @@ prepend_to_directory(models, "models/all/on_schmitz")
 data$cohort <- "val_predict"
 pan_ass_scalar$file <- "results/all/schmitz_val_predict.csv"
 val_tbl <- pan_ass_scalar$assess_center(data, models)
-models <- models[val_tbl[["model"]][1]]
+models <- models[c(val_tbl[["model"]][1], "ipi")]
 
 # Assess this model on the lamis
 data$cohort <- "lamis"
@@ -63,12 +62,11 @@ val_vs_test(
     model_list = models,
     data = data,
     error_fun = neg_prec_with_prev_greater(0.17),
-    spotlight_regex = ".",
     file = "results/all/reddy_vs_lamis.jpeg",
-    plot_theme = theme,
+    plot_theme = plot_themes[["thesis"]],
     colors = colors[2]
 )
-# models <- models[val_tbl[["model"]][1]]
+models <- models[c(val_tbl[["model"]][1], "ipi")]
 
 # Assess this model on the lamis
 data$cohort <- "lamis"

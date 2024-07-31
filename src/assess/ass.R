@@ -55,12 +55,16 @@ plot_themes[["thesis"]] <- ggplot2::theme_light() +
         legend.spacing.y = grid::unit(-0.2, "cm"),
         legend.spacing.x = grid::unit(-0.5, "cm"),
         legend.key.height = ggplot2::unit(0.55, "lines"),
-        plot.title = ggplot2::element_text(size = 9),
+        plot.title = ggplot2::element_text(size = 8),
         axis.title = ggplot2::element_text(size = 7),
         # axis.text = element_text(size = 8),
         legend.title = ggplot2::element_text(size = 7, margin = ggplot2::margin(b = 0.1, unit = "cm")),
         legend.box.spacing = grid::unit(0.0, "cm"),
         legend.text = ggplot2::element_text(margin = ggplot2::margin(l = -0.1, unit = "cm"))
+    )
+plot_themes[["patchwork_title"]] <- plot_themes[["thesis"]] +
+    ggplot2::theme(
+        plot.title = ggplot2::element_text(size = 9)
     )
 
 rpp_prec_as2 <- Ass2d$new(
@@ -132,10 +136,13 @@ auc_ass_scalar <- AssScalar$new(
 )
 
 pan_ass_scalar <- AssScalar$new(
-    metrics = c("precision", "prevalence", "auc", "logrank", "accuracy", "threshold", 
-        "n_samples", "perc_true"),
+    metrics = c("precision", "prevalence", "precision_ci_ll", "hr", "hr_ci_ll", "hr_ci_ul", 
+        "hr_p", "auc", "logrank", "accuracy", 
+        "threshold", "n_samples", "perc_true"),
     prev_range = c(0.17, 1),
-    file = "panta.csv"
+    round_digits = 5, 
+    file = "panta.csv",
+    benchmark = list(name = "ipi", "prev_range" = c(0.10, 1))
 )
 
 ass_scalar_list <- list(
