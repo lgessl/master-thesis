@@ -86,6 +86,16 @@ zero-sum property, we apply the Lamis unchanged on the two other data sets; acco
 \eqref{eq:inter-tech}, the Lamis scores have a data-set-dependent shift. We also add the Lamis 
 group by dichotomizing the Lamis scores at the 75\%-quantile of the respective data set.
 
+\paragraph{Combined data}
+
+We will conduct inter-trial experiments on a big data set consisting of the samples in the Schmitz, 
+Reddy and Lamis test data. As for the gene expression features, we map the Ensemble gene IDs used 
+in the Reddy data to HGNC gene symbols with the help of the \texttt{BiomaRt} R package \cite{biomart}
+to end up with the same gene nomenclature in all three data sets. Intersecting the gene expression 
+features leaves us with gene expression levels for \num{119} genes and the features gender, age, 
+the five thresholded IPI features, the IPI score, the IPI group, the Lamis score and the Lamis 
+group. The resulting data set is \num{1299} samples strong.
+
 \section{Intra-trial experiments}
 
 To gain first insights on our methods, we conduct intra-trial experiments sepratetly on the 
@@ -93,8 +103,7 @@ Schmitz, Reddy and Lamis test data. To this end, we split every data set into a 
 cohort. We do so uniformly at random, with two constraints: first, a ratio of 3 to 1 between train 
 and test cohort and, second, the ratio between high-risk and low-risk patients in train cohort, 
 test cohort and overall data set is the same. As shown in Table \ref{table:intra-trial}, the 
-performance of the IPI score thresholded at 4 to classify high risk notably differ between the whole
-data set and the subsampled test cohort. 
+performance of the tIPI notably differs between the whole data set and the subsampled test cohort. 
 
 \input{figs/intra_trial.tex}
 
@@ -190,7 +199,7 @@ discrepancies between them.
 
 \paragraph{Lamis test}
 Looking at Fig. \ref{fig:intra-val-test-geo}, we see that, for Lamis test, the models only using 
-gene expression levels cannot compete with IPI $\geq 4$. While the validated errors of these models are 
+gene expression levels cannot compete with $\text{tIPI}$. While the validated errors of these models are 
 below the \num{-36.4}\% negative precision of the IPI, the test errors all are above \num{-30}\%. 
 In all cases, the test error is at least 10 points higher than the validated error, a discrepancy 
 also indicated by the fact that the identity line is outside the plot area. It is hard to imagine that 
@@ -204,7 +213,7 @@ error is negative such that the model with the lowest validated error happens to
 (Schmitz) or second highest (Reddy) test error. The plots do not show errors for all tried out 
 hyperparameter tuples in $H$, but only for a high-performing subset with $\lambda$ and $T$ already 
 optimized; this optimization was successful in the sense that even the worst models boast a test 
-error below that of IPI $\geq 4$.
+error below that of $\text{tIPI}$.
 
 There is no model class reliably outperforming the others. Both data sets suggest that ridge 
 regularization yields models with a test error lower than that of LASSO regularization; validation, 
@@ -281,11 +290,71 @@ at least \num{7} points on three data sets, including two where the IPI already 
 In the following analysis, we saw validated errors often being detached from test errors. To tackle 
 this issue, we decided to no longer train certain models. We also noticed that the Lamis is at least 
 as capable of catching the molecular information in the gene expression levels as the models
-\textit{we} trained for that purpose, but allows training more precise models and validating them 
+we trained for that purpose ourselves, but allows training more precise models and validating them 
 more accurately. Another way to close the validation-test gap is to increase the number of samples 
 in both the train and test cohort: it both makes overfitting the validated predictions to the 
 training cohort harder and makes it less likely that the test cohort includes cases biologically 
 not covered at all in the train cohort. We will now go along this path as we use every of the 
 three data sets in their entirety for training and validation and then test on the other two.
+
+\subsection{Model architectures}
+
+Here, we want to sketch the architectures of the candidate models and take a closer look at the 
+best validated model $m_i^*$ trained on every data set.
+
+\subsubsection{Candidates}
+
+Even with combined discrete features, the number of features the model in this section predict from 
+never exceeds \num{300} meaning computation is comparatively cheap. Consequently, we can afford 
+a leave-one-out cross-validation for every model that is not a random forest and \num{1000} trees 
+for every random forest.
+
+\paragraph{Gene-expression levels only}
+This time, we demand that every Gauss, logistic and Cox models fulfill the zero-sum constraint for 
+the gene-expression levels it deals with as features since every data set has its own protocol for 
+measuring gene-expression levels. We have gene-expression levels for \num{119} genes in the 
+combined data and these genes are a subset of the \num{145} genes for which the Lamis test data 
+includes gene-expression levels; even though the gene-expression only models trained on the Lamis 
+data disappointed in both validation and testing, we once more train LASSO-regularized Gauss, 
+logistic and Cox models predicting only from gene-expression levels hoping they can exploit the 
+improved data situation with more samples. In line with the zero-sum idea, we do not standardize 
+the predictor and have $T$ range from \num{1} to \num{2.6} years in steps of \num{0.2} years for 
+models trained on the Schmitz and Lamis-test samples; for the Reddy samples, here and for the rest 
+of this section, we shift $T$ by
+\num{0.5} years to the future accounting for the fact that on the Reddy data, absent PFS, we need 
+to classify OS below \num{2.5} years as opposed to PFS below \num{2} years.
+
+\paragraph{Core models with other features}
+As in the intra-trial experiments, we generously add all remaining features to the predictor. Only 
+for the Lamis, we vary its format and add just the score, just the group or both. We augment the 
+predictor with combinations of discrete features according to $s_\text{min} = \num{0.05}$ and 
+$n_\text{combi} \in \{ 1, 2, 3 \}$. We restrict the training survival cutoff $T$ to range between 
+\num{1.4} and \num{2} years in steps of \num{0.2} years for the Schmitz and Lamis test data. We 
+both include and exclude the expression levels in the predictor of the Gauss, logistic and Cox 
+models we fit for all combinations of these values for the hyperparameters.
+
+Random forests have trouble dealing with features systematically shifted features between data sets, so 
+we always exclude the gene-expression levels from the predictor and of the Lamis formats only 
+include the Lamis group in the predictor. Moreover, random forests can realize combinations of 
+categorical features themselves, so we set $n_\text{combi} = 1$ for them.
+
+\subsubsection{Best validated models}
+
+Table \ref{table:inter-trial} presents the performance of the best models validated and trained on 
+every cohort, $m_i^*$, $i \in \{ \text{Schmitz}, \text{Reddy}, \text{Lamis test} \}$. We now cycle 
+through $i$.
+
+\paragraph{Schmitz}
+$m^i_\text{Schmitz}$ is a Cox model predicting from discrete features and combinations of up to 
+three of them; in particular, no gene-expression levels are directly involved and the model confines 
+itself with the Lamis \text{group}. All in all, the sparse model uses \num{7} features. During 
+training, we provided the model with a fairly low survival cutoff of \num{1.4} years.
+
+When tested on the Reddy data, $m^*_\text{Schmitz}$ beats the IPI's precision by 5 points. This 
+is not enough to show significant superiority in the sense that the \num{95}\%-confidence interval 
+of our model's precision does not include the precision of the IPI.
+
+On the Lamis test set, meanwhile, $m^*_\text{Schmitz}$ accomplishes all objectives: it tops the 
+IPI's precision by more than 12 points, 
 
 \input{figs/inter_trial.tex}

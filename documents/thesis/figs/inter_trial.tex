@@ -30,7 +30,7 @@
             \hline
         \end{tabular}
         \caption{Lower limit of \num{95}\%-confidence interval of the precision.
-            Diagonal entries again hold the precision of the $\text{tIPI}$ on cohort $i$. Off-diagonal 
+            Diagonal entries hold the precision of the $\text{tIPI}$ on cohort $i$. Off-diagonal 
             entries hold the lower limit of the \num{95}\%-confidence interval of the precision on 
             cohort $j$ of the best model trained and validated on cohort $i$, $m_i^*$.}
             \label{subtab:inter-prec-ci}
@@ -43,18 +43,22 @@
             \hline
             & \textbf{Schmitz} & \textbf{Reddy} & \textbf{Lamis test} \\
             \hline
-            \textbf{Schmitz} & \num{0} & \num{1.62},\num{1.45}-\num{1.80}, \num{0} & 
+            \textbf{Schmitz} & \num{1.61}, \num{1.37}-\num{1.91}, \num{0} & 
+                \num{1.62},\num{1.45}-\num{1.80}, \num{0} & 
                 \num{1.59}, \num{1.39}-\num{1.83}, 0 \\
-            \textbf{Reddy} & \num{53.36}, \num{18.73}-\num{152.08}, 0 & \num{0} & 
+            \textbf{Reddy} & \num{53.36}, \num{18.73}-\num{152.08}, 0 & 
+                \num{1.58}, \num{1.40}-\num{1.78}, \num{0} & 
                 \num{23.87}, \num{9.89}-\num{57.61}, 0 \\
             \textbf{Lamis test} & \num{1.46}, \num{1.32}-\num{1.60}, 0 & 
-                \num{1.32}, \num{1.24}-\num{1.41} & \num{0} \\
+                \num{1.32}, \num{1.24}-\num{1.41}, \num{0} & 
+                \num{1.46}, \num{1.25}-\num{1.70}, \num{0} \\
             \hline
         \end{tabular}
         \caption{Hazard ratio, its \num{95}\%-confidence interval and p-value for the null 
             hypothesis of the hazard ratio being equal to one. Diagonal entries show these 
             properties for the $\text{tIPI}$, off-diagonal entries for the best model trained and 
-            validated on cohort $i$, $m_i^*$.}
+            validated on cohort $i$, $m_i^*$. All p-values are below 
+            \num[scientific-notation]{5e-6}.}
             \label{subtab:inter-hr}
     \end{subtable}
     \caption{Statistics of inter-trial experiments. Rows $i$ always refer to the training cohort, 
