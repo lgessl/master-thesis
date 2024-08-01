@@ -68,19 +68,15 @@ plot_themes[["patchwork_title"]] <- plot_themes[["thesis"]] +
     )
 
 rpp_prec_as2 <- Ass2d$new(
-    file = "precision.jpeg",
     x_metric = "rpp",
     y_metric = "prec",
-    benchmark = "ipi",
-    xlim = c(0, .5),
-    x_lab = "rate of positive predictions",
+    xlim = c(0.10, 0.50),
+    x_lab = "prevalence",
     y_lab = "precision",
-    text_size = 3,
-    fellow_csv = FALSE,
-    smooth_method = "loess",
-    alpha = .075,
+    alpha = 1,
     colors = colors,
-    theme = plot_themes[["thesis"]]
+    theme = plot_themes[["thesis"]],
+    title = NULL
 )
 
 logrank_as2 <- Ass2d$new(
@@ -143,6 +139,14 @@ pan_ass_scalar <- AssScalar$new(
     round_digits = 5, 
     file = "panta.csv",
     benchmark = list(name = "ipi", "prev_range" = c(0.10, 1))
+)
+
+prec_ass_scalar <- AssScalar$new(
+    metric = "precision",
+    prev_range = c(0.17, 1),
+    round_digits = 5,
+    file = NULL,
+    benchmark = NULL
 )
 
 ass_scalar_list <- list(
