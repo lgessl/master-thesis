@@ -2,7 +2,7 @@ library(patroklos)
 library(patchwork)
 
 make_plot1 <- FALSE
-make_plot2 <- TRUE
+make_plot2 <- FALSE
 make_plot3 <- TRUE
 
 generate_plot_list <- function(
@@ -181,17 +181,17 @@ if (make_plot3) {
 
 all_data <- readRDS("data/all/data.rds")
 
-mclass_regex <- c("rf", "log", "gauss", "^ipi$")
-mclass_name <- c("RF", "Logistic", "Gauss", "tIPI")
-# ge_regex <- c("no expr", "lamis", ".")
-# ge_name <- c("no GE", "GE & more", "GE only")
+mclass_regex <- c("rf", "cox", "log", "gauss", "^ipi$")
+mclass_name <- c("RF", "Cox", "Logistic", "Gauss", "tIPI")
+ge_regex <- c("no expr", "lamis", ".")
+ge_name <- c("no GE", "GE & more", "GE only")
 # lamis_regex <- c("high\\+score", "high", "score")
 # lamis_name <- c("high & score", "high only", "score only")
 
 regex1_list <- list(mclass_regex) # , ge_regex)
-regex2_list <- list(NULL) # , lamis_regex)
+regex2_list <- list(ge_regex) # , lamis_regex)
 name1_list <- list(mclass_name) # , ge_name)
-name2_list <- list(NULL) # , lamis_name)
+name2_list <- list(ge_name) # , lamis_name)
 
 data_sets <- list(all = all_data, all = all_data, all = all_data)
 cohort_list <- list(c("reddy", "schmitz", "schmitz"), c("lamis", "lamis", "reddy"))
@@ -208,11 +208,11 @@ for (i in seq_along(cohort_list)) {
         data_cohorts = cohort_triple,
         models_subset = TRUE,
         regex1_list = list(mclass_regex),
-        regex2_list = list(NULL),
+        regex2_list = regex2_list,
         name1_list = list(mclass_name),
-        name2_list = list(NULL),
+        name2_list = name2_list,
         legendtitle1_list = list("architecture"),
-        legendtitle2_list = list(NULL),
+        legendtitle2_list = list("features"),
         prepend_to_model_dir = c("models/all/on_schmitz", "models/all/on_reddy", 
             "models/all/on_lamis"),
         titles = titles
