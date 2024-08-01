@@ -330,7 +330,7 @@ for the Lamis, we vary its format and add just the score, just the group or both
 predictor with combinations of discrete features according to $s_\text{min} = \num{0.05}$ and 
 $n_\text{combi} \in \{ 1, 2, 3 \}$. We restrict the training survival cutoff $T$ to range between 
 \num{1.4} and \num{2} years in steps of \num{0.2} years for the Schmitz and Lamis test data. We 
-both include and exclude the expression levels in the predictor of the Gauss, logistic and Cox 
+both include and exclude the expression levels in the predictor of the Cox and logistic 
 models we fit for all combinations of these values for the hyperparameters.
 
 Random forests have trouble dealing with features systematically shifted features between data sets, so 
@@ -344,8 +344,10 @@ Table \ref{table:inter-trial} presents the performance of the best models valida
 every cohort, $m_i^*$, $i \in \{ \text{Schmitz}, \text{Reddy}, \text{Lamis test} \}$. We now cycle 
 through $i$.
 
+\input{figs/inter_trial.tex}
+
 \paragraph{Schmitz}
-$m^i_\text{Schmitz}$ is a Cox model predicting from discrete features and combinations of up to 
+$m^*_\text{Schmitz}$ is a Cox model predicting from discrete features and combinations of up to 
 three of them; in particular, no gene-expression levels are directly involved and the model confines 
 itself with the Lamis \text{group}. All in all, the sparse model uses \num{7} features. During 
 training, we provided the model with a fairly low survival cutoff of \num{1.4} years.
@@ -354,7 +356,100 @@ When tested on the Reddy data, $m^*_\text{Schmitz}$ beats the IPI's precision by
 is not enough to show significant superiority in the sense that the \num{95}\%-confidence interval 
 of our model's precision does not include the precision of the IPI.
 
-On the Lamis test set, meanwhile, $m^*_\text{Schmitz}$ accomplishes all objectives: it tops the 
-IPI's precision by more than 12 points, 
+On the Lamis test set, meanwhile, $m^*_\text{Schmitz}$ accomplishes all objectives: with 
+\num{50.7}\% precision, it tops the IPI's precision by more than 12 points, narrowly surpassess the 
+pychologically important \num{50}\% threshold, and the \num{95}\%-confidence interval of our model's 
+precision excludes the IPI's precision. It is remarkable that the $m^*_\text{Schmitz}$, coming from 
+the high-risk, non-prospective, RNA-seq environment of the Schmitz data with the Lamis measured with the 
+RNA-seq technology, well adapts to the prospective, NanoString regime of the Lamis test data and 
+does so better than the models we trained in the previous section on part of the Lamis test data.
 
-\input{figs/inter_trial.tex}
+\paragraph{Reddy}
+$m^*_\text{Reddy}$ looks quite similar to $m^*_\text{Schmitz}$. Instead of the Lamis group, the 
+logistic model uses the Lamis score making it its only continuous feature. Its predictor contains 
+combinations of up to two discrete features. Hyperparameter tuning yielded a training survival 
+cutoff of \num{2.3} years, somewhat below the \num{2.5} cutoff separating patients into high-risk 
+and low-risk DLBCLs. 
+
+On the Schmitz data, $m^*_\text{Reddy}$ is more precise than the IPI, but fails to outperform the 
+IPI significantly. It yields a fairly high hazard ratio of \num{53.4} 
+(\num{95}\%-CI \num{18.7}-\num{152.1}).
+
+On the Lamis test set, $m^*_\text{Reddy}$ boasts a precision of \num{53.2} that is by \num{2.5} 
+points higher than that of $m^*_\text{Schmitz}$ and by \num{15} points higher than that of the IPI. 
+Consequently, the lower boundary \num{95}\%-confidence interval of its precision at \num{41.5}\% is 
+clearly above the IPI's precision and the hazard ratio rises to a considerable \num{23.9}
+(\num{95}\%-CI \num{9.9}-\num{57.6}). Even more than $m^*_\text{Schmitz}$, $m^*_\text{Reddy}$ 
+defies systematic differences between data sets: comparing the Reddy to the Lamis test data, we 
+notice the contrasts non-prospective versus prospective, 
+RNA-seq versus NanoString nCounter technology to measure gene expression levels and, most strikingly, 
+classifying OS below \num{2.5} years versus PFS below \num{2} years.
+
+\paragraph{Lamis test}
+The simplest of the three picked models is $m^*_\text{Lamis test}$. A Cox model, it predicts from 
+the Lamis score and five more discrete features -- no combinations of discrete features involved, 
+$n_\text{combi} = 1$. With $T = \num{1.4}$, it uses the same low training survival cutoff as 
+$m^*_\text{Schmitz}$.
+
+On the Reddy data, our model's precision at \num{50.7}\% stays below the IPI's at \num{54.1}\%. 
+Speaking for the whole thesis, this renders the Reddy data a challenging test cohort with a 
+hard-to-beat IPI, but -- as we have just seen -- a very helpful training cohort.
+
+Meanwhile on the Schmitz data, the precision of $m^*_\text{Lamis test}$ at \num{75.7}\% exceeds that 
+of the IPI by more than \num{10}\%, but falls short of outrivaling the IPI significantly. Still, 
+this demonstrates that transferring models between the Schmitz and Lamis data works in both 
+directions.
+
+\subsection{Meta analysis}
+
+We again freeze all of our models and unlock the test for all of them to analyze the discrepancy 
+between validated and test error and to gain insights on how stable thresholding the models on the 
+test cohort is.
+
+\subsubsection{Validated and test errors}
+
+\input{figs/inter_trial_val_test.tex}
+
+Fig. \ref{fig:inter-val-test} compares validation to test error for all candidate models 
+participating in the inter-trial experiments; note that again several hyperparameters have already 
+been optimized. 
+
+We have emphasized that the risk profiles of the three data sets differ, especially when comparing 
+the Schmitz and Reddy to the Lamis test data, so we cannot expect the validation-test-error tuples 
+to perfectly align at the identity line. The motivation to increase the sample size was rather 
+to observe test errors that are more monotonic in their validation errors. Indeed, Fig. 
+\ref{fig:inter-val-test} shows test errors that way more correlated with their validation errors 
+than in the intra-trial experiments. As a result, the model with minimal validation error in all 
+cases is close to being the one with minimal test error. In more detail, with the exception of 
+the models trained on the Lamis test and tested on the Reddy data, the precision of the best 
+validated model and that of the best tested model deviate by no more than \num{2}\% points and in 
+three of the six cases the best validated and tested model coincide. This is a solid foundation 
+to train and validate more models.
+
+As for the model class, we see that no model class prevails clearly. Ignoring the tIPI, the random 
+forest always finishes last in validation and never reaches a top position in testing; in fact, 
+it claims the last testing place in four out of the six plots. At the top positions, Cox and 
+logistic models compete closely: Among the models trained on the Reddy data, a logistic model 
+narrowly secures the pole position in validation; testing on both the Schmitz and Lamis test 
+data reveals how crucial this victory was as the closest validation competitors of 
+$m^*_\text{Reddy}$ cleary lag begind in terms of the test error. Among the models trained on the 
+Lamis test data, the same holds true with roles of Cox and logistic swapped. This shows that it 
+was crucial to try out both Cox and logistic models although they are closely related; thanks to 
+more correlated validation and errors, we need to worry less about overfitted validated 
+predictions and might even consider sending analogous Gauss models into the race.
+
+Regarding the question if the predictor should directly contain the gene-expression levels or not,
+Fig. \ref{fig:inter-val-test} speaks a plain language. In testing, the top ranking models are 
+always such models that do not use gene-expression levels; often the test errors of the models whose 
+predictor excludes gene-expression features separate from the rest (cf.\ plots A.1, A.2, B.1). In 
+validation however, this distinction can be less obvious, especially for those models trained on 
+the Reddy data (cf.\ plots B.1, B.2). In summary, we suffer a lot from the curse of high dimensions 
+if we include gene-expression features in the predictor, but gain nothing in terms of test 
+performance. Indeed, the models that make the choice of the best validated model on the Reddy data 
+close and lucky with regard to testing all use gene-expression features. As the Lamis does a very 
+good job at capturing gene-expression information and was trained on an independent data set, we 
+conclude that we should just include the Lamis -- and maybe other widely accepted molecular 
+signatures -- as an ordinary feature in the predictor and leave aside any other gene-expression 
+levels.
+
+\subsubsection{Output thresholding}
