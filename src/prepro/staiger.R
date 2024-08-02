@@ -10,7 +10,7 @@ library(patroklos)
 
 set.seed(115)
 
-data_dir <- "data/lamis_test2"
+data_dir <- "data/staiger"
 clean <- FALSE
 training_prop <- 0.75 
 pivot_time_cutoff <- 2
@@ -39,7 +39,7 @@ if(!dir.exists(data_dir)){
 }
 
 cat("Reading in data\n")
-df <- toscdata::lamis_test2_v2
+df <- toscdata::staiger_v2
 
 cat("Cutting out pheno and expression data\n")
 pheno_tbl <- tibble::as_tibble(df, rownames = "patient_id")[, 1:26]

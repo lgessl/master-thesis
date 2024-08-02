@@ -1,10 +1,10 @@
-# Unite Schmitz, Reddy and Lamis data into one dataset
+# Unite Schmitz, Reddy and Staiger into one dataset
 
 library(patroklos)
 
 schmitz <- readRDS("data/schmitz/data.rds")$read()
 reddy <- readRDS("data/reddy/data.rds")$read()
-lamis <- readRDS("data/lamis_test2/data.rds")$read()
+staiger <- readRDS("data/staiger/data.rds")$read()
 
 # Map gene names to HGCN (only need to do this for Reddy)
 ensemble <- biomaRt::useMart("ensembl", dataset = "hsapiens_gene_ensembl")
@@ -17,10 +17,10 @@ colnames(reddy$expr_mat) <- mapping[["hgnc_symbol"]]
 # Unite expr_mat and pheno_tbl
 colnames(schmitz$pheno_tbl)[colnames(schmitz$pheno_tbl) == "pfs_years"] <- "survival_years"
 colnames(reddy$pheno_tbl)[colnames(reddy$pheno_tbl) == "os_years"] <- "survival_years"
-colnames(lamis$pheno_tbl)[colnames(lamis$pheno_tbl) == "pfs_years"] <- "survival_years"
+colnames(staiger$pheno_tbl)[colnames(staiger$pheno_tbl) == "pfs_years"] <- "survival_years"
 common_genes <- colnames(schmitz$expr_mat)
 common_pheno_feat <- colnames(schmitz$pheno_tbl)
-for (dset in list(reddy, lamis)) {
+for (dset in list(reddy, staiger)) {
     common_genes <- intersect(common_genes, colnames(dset$expr_mat))
     common_pheno_feat <- intersect(common_pheno_feat, colnames(dset$pheno_tbl))
 }
@@ -29,7 +29,7 @@ colnames(expr_mat) <- common_genes
 pheno_mat <- matrix(nrow = 0, ncol = length(common_pheno_feat))
 colnames(pheno_mat) <- common_pheno_feat
 pheno_tbl <- tibble::as_tibble(pheno_mat)
-dsets <- list(schmitz = schmitz, reddy = reddy, lamis = lamis)
+dsets <- list(schmitz = schmitz, reddy = reddy, staiger = staiger)
 for (i in seq_along(dsets)) {
     dsets[[i]]$pheno_tbl[["patient_id"]] <- paste0(names(dsets)[[i]], "_", 
         dsets[[i]]$pheno_tbl[["patient_id"]])
@@ -62,7 +62,7 @@ for(i in seq_along(pheno_tbl)) {
 
 # Pack into Data object
 data <- Data$new(
-    name = "Schmitz & Reddy & Lamis",
+    name = "Schmitz & Reddy & Staiger",
     directory = "data/all",
     pivot_time_cutoff = 2,
     cohort = ".",

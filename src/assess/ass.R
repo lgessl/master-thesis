@@ -67,68 +67,35 @@ plot_themes[["patchwork_title"]] <- plot_themes[["thesis"]] +
         plot.title = ggplot2::element_text(size = 9)
     )
 
-rpp_prec_as2 <- Ass2d$new(
+prev_prec_as2 <- Ass2d$new(
     x_metric = "rpp",
     y_metric = "prec",
     xlim = c(0.10, 0.50),
     x_lab = "prevalence",
     y_lab = "precision",
-    alpha = 1,
-    colors = colors,
-    theme = plot_themes[["thesis"]],
-    title = NULL
+    theme = plot_themes[["thesis"]]
 )
 
 logrank_as2 <- Ass2d$new(
-    file = "logrank.jpeg",
     x_metric = "rpp",
     y_metric = "logrank",
-    benchmark = "ipi",
     xlim = c(0, .5),
     ylim = c(1e-4, 1), # try with 0 in the future
     x_lab = "rate of positive predictions",
     y_lab = "p-value (logrank test)",
-    text_size = 3,
-    fellow_csv = FALSE,
-    smooth_method = "loess",
     scale_y = "log10",
-    hline = list(yintercept = .05, linetype = "dashed", color = "black"),
-    text = list(ggplot2::aes(x = .48, y = .05, label = "p = 0.05"), 
-        inherit.aes = FALSE, size = 3, family = font_family),
-    alpha = .075,
     colors = colors,
     theme = plot_themes[["thesis"]]
 )
 
 prec_ci_as2 <- Ass2d$new(
-    file = "precision_ci.jpeg",
     x_metric = "rpp",
     y_metric = "precision_ci",
-    benchmark = NULL,
-    xlim = c(0, .5),
+    xlim = c(0.10, 0.50),
     x_lab = "rate of positive predictions",
-    y_lab = "precision 95%-CI boundary",
-    text_size = 3,
-    fellow_csv = FALSE,
-    smooth_method = "loess",
-    hline = list(yintercept = 0.351, linetype = "dashed", color = "black"),
-    text = list(ggplot2::aes(x = .4, y = .351, label = "IPI-45 (DSNHNL)"),
-        inherit.aes = FALSE, size = 3, family = font_family),
-    alpha = .075,
-    colors = colors,
-    theme = plot_themes[["thesis"]]
-)
-
-ass2d_list <- list(
-    "rpp_prec" = rpp_prec_as2,
-    "logrank_as2" = logrank_as2,
-    "prec_ci_as2" = prec_ci_as2
-)
-
-auc_ass_scalar <- AssScalar$new(
-    metrics = "auc",
-    prev_range = c(0.15, 1),
-    file = "auc.csv"
+    y_lab = "lower limit of precision CI",
+    theme = plot_themes[["thesis"]],
+    ci_level = 0.95
 )
 
 pan_ass_scalar <- AssScalar$new(
@@ -147,9 +114,4 @@ prec_ass_scalar <- AssScalar$new(
     round_digits = 5,
     file = NULL,
     benchmark = NULL
-)
-
-ass_scalar_list <- list(
-    auc_ass_scalar,
-    pan_ass_scalar
 )

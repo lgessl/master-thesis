@@ -56,9 +56,9 @@ source("src/assess/ass.R")
 
 schmitz <- readRDS("data/schmitz/data.rds")
 reddy <- readRDS("data/reddy/data.rds")
-lamis_test2 <- readRDS("data/lamis_test2/data.rds")
-data_sets <- list(schmitz = schmitz, reddy = reddy, lamis_test2 = lamis_test2)
-lamis_sets <- list(lamis_test2 = lamis_test2, lamis_test2 = lamis_test2, lamis_test2 = lamis_test2)
+staiger <- readRDS("data/staiger/data.rds")
+data_sets <- list(schmitz = schmitz, reddy = reddy, staiger = staiger)
+staiger_sets <- list(staiger = staiger, staiger = staiger, staiger = staiger)
 
 if (make_plot1){
 # GE only
@@ -98,7 +98,7 @@ row1 <- wrap_elements(plt_list[[1]] + plt_list[[2]] + plot_annotation(title = "A
     theme = plot_themes[["thesis"]]))
 row2 <- wrap_elements(plt_list[[3]] + plt_list[[4]] + plot_annotation(title = "B \u2013 Reddy", 
     theme = plot_themes[["thesis"]]))
-row3 <- wrap_elements(plt_list[[5]] + plt_list[[6]] + plot_annotation(title = "C \u2013 Lamis test", 
+row3 <- wrap_elements(plt_list[[5]] + plt_list[[6]] + plot_annotation(title = "C \u2013 Staiger", 
     theme = plot_themes[["thesis"]]))
 
 # Combine the sub-grids into the final patchwork grid with titles for each row
@@ -139,8 +139,8 @@ plt_list <- generate_plot_list(
     legendtitle2_list = legendtitle2_list
 )
 
-# Lamis test
-data_sets <- list(lamis_test2 = lamis_test2)
+# Staiger
+data_sets <- list(staiger = staiger)
 # (a) model architecture, just one spot
 model_arch <- c("cox-(gauss|log|cox)", "cox-rf", "rf ei", "log", "cox", "gauss", "^ipi$")
 model_arch_name <- c("Cox-GLM", "Cox-RF", "RF", "Logistic", "Cox", "Gauss", "tIPI")
@@ -165,7 +165,7 @@ row1 <- wrap_elements(plt_list[[1]] + plt_list[[2]] + plot_annotation(title = "A
     theme = plot_themes[["thesis"]]))
 row2 <- wrap_elements(plt_list[[3]] + plt_list[[4]] + plot_annotation(title = "B \u2013 Reddy", 
     theme = plot_themes[["thesis"]]))
-row3 <- wrap_elements(plt_list[[5]] + plt_list[[6]] + plot_annotation(title = "C \u2013 Lamis test", 
+row3 <- wrap_elements(plt_list[[5]] + plt_list[[6]] + plot_annotation(title = "C \u2013 Staiger", 
     theme = plot_themes[["thesis"]]))
 
 # Combine the sub-grids into the final patchwork grid with titles for each row
@@ -194,7 +194,7 @@ name1_list <- list(mclass_name) # , ge_name)
 name2_list <- list(ge_name) # , lamis_name)
 
 data_sets <- list(all = all_data, all = all_data, all = all_data)
-cohort_list <- list(c("reddy", "schmitz", "schmitz"), c("lamis", "lamis", "reddy"))
+cohort_list <- list(c("reddy", "schmitz", "schmitz"), c("staiger", "staiger", "reddy"))
 
 plt_list <- list()
 for (i in seq_along(cohort_list)) {
@@ -202,7 +202,7 @@ for (i in seq_along(cohort_list)) {
     if (i == 1) titles <- paste0(c("A", "B", "C"), ".", i, " \u2013 Tested on ", 
         c("Reddy", "Schmitz", "Schmitz"))
     else titles <- paste0(c("A", "B", "C"), ".", i, " \u2013 Tested on ", 
-        c("Lamis", "Lamis", "Reddy"))
+        c("Staiger", "Staiger", "Reddy"))
     plt_list <- c(plt_list, generate_plot_list(
         data_sets = data_sets,
         data_cohorts = cohort_triple,
@@ -214,7 +214,7 @@ for (i in seq_along(cohort_list)) {
         legendtitle1_list = list("architecture"),
         legendtitle2_list = list("features"),
         prepend_to_model_dir = c("models/all/on_schmitz", "models/all/on_reddy", 
-            "models/all/on_lamis"),
+            "models/all/on_staiger"),
         titles = titles
     ))
 }
@@ -225,7 +225,7 @@ row1 <- wrap_elements(plt_list[[1]] + plt_list[[4]] +
 row2 <- wrap_elements(plt_list[[2]] + plt_list[[5]] + 
     plot_annotation(title = "B \u2013 Trained on Reddy", theme = plot_themes[["patchwork_title"]]))
 row3 <- wrap_elements(plt_list[[3]] + plt_list[[6]] + 
-    plot_annotation(title = "C \u2013 Trained on Lamis test", theme = plot_themes[["patchwork_title"]]))
+    plot_annotation(title = "C \u2013 Trained on Staiger", theme = plot_themes[["patchwork_title"]]))
 
 # Combine the sub-grids into the final patchwork grid with titles for each row
 pw <- row1 / row2 / row3
