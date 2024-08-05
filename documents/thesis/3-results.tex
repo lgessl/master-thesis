@@ -11,7 +11,7 @@ better for the future. This future plays out in the last part as we train and va
 the three data sets and test on another and deal with cross-platform variability in inter-trial 
 experiments.
 
-\section{The data}
+\section{The data}\label{sec:data}
 
 Our DLBCL data sets are taken from papers by Schmitz et al.\ \cite{schmitz18}, Reddy et al.\ 
 \cite{reddy17} and Staiger et al.\ \cite{staiger20}; see Table \ref{table:data} for key properties 
@@ -100,7 +100,7 @@ features leaves us with gene-expression levels for \num{119} genes and the featu
 the five thresholded IPI features, the IPI score, the IPI group, the Lamis score and the Lamis 
 group. The resulting data set is \num{1299} samples strong.
 
-\section{Intra-trial experiments}
+\section{Intra-trial experiments}\label{sec:intra-trial}
 
 To gain first insights into our methods, we conduct intra-trial experiments separately on the 
 Schmitz, Reddy and Staiger data. To this end, we split every data set into a train and test 
@@ -289,7 +289,7 @@ gene-expression-only models form a bulk with test errors higher than those of al
 Key to the success is again the molecular information condensed in the Lamis, which all the 
 high-performing models put heavy weight on.
 
-\section{Inter-trial experiments}
+\section{Inter-trial experiments}\label{sec:inter-trial}
 
 The results of the intra-trial experiments are encouraging: we beat the precision of the IPI by 
 at least \num{7} points on three data sets, including two where the IPI already did a good job. 
@@ -356,7 +356,7 @@ through $i$.
 \paragraph{Schmitz}
 $m^*_\text{Schmitz}$ is a Cox model predicting from discrete features and combinations of up to 
 three of them; in particular, no gene-expression levels are directly involved and the model confines 
-itself with the Lamis \text{group}. All in all, the sparse model uses \num{7} features. During 
+itself with the Lamis \textit{group}. All in all, the sparse model uses \num{7} features. During 
 training, we provided the model with a fairly low survival cutoff of \num{1.4} years.
 
 When tested on the Reddy data, $m^*_\text{Schmitz}$ beats the IPI's precision by 5 points. This 
@@ -417,7 +417,7 @@ test cohort is.
 
 \input{figs/inter_trial_val_test.tex}
 
-Fig.\ \ref{fig:inter-val-test} compares validation to test error for all candidate models 
+Fig.\ \ref{fig:inter-val-test} compares the validation to the test error for all candidate models 
 participating in the inter-trial experiments; note that again several hyperparameters have already 
 been optimized. 
 
@@ -425,11 +425,11 @@ We have emphasized that the risk profiles of the three data sets differ, especia
 the Schmitz and Reddy to the Staiger data, so we cannot expect the validation-test-error tuples 
 to perfectly align at the identity line. The motivation to increase the sample size was rather 
 to observe test errors that are more monotonic in their validation errors. Indeed, Fig.\ 
-\ref{fig:inter-val-test} shows test errors that way more correlated with their validation errors 
+\ref{fig:inter-val-test} shows test errors that are way more correlated with their validation errors 
 than in the intra-trial experiments. As a result, the model with minimal validation error in all 
 cases is close to being the one with minimal test error. In more detail, with the exception of 
 the models trained on the Staiger and tested on the Reddy data, the precision of the best 
-validated model and that of the best tested model deviate by no more than \num{2}\% points and in 
+validated model and that of the best tested model deviate by no more than \num{2} points and in 
 three of the six cases the best validated and tested model coincide. This is a solid foundation 
 to train and validate more models.
 
@@ -465,32 +465,35 @@ levels.
 \input{figs/inter_output_prec_ci.tex}
 
 For all $i$, the best validated model $m_i^*$ outputs a continuous score and we need to threshold 
-them in a protocol-dependent manner to obtain a binary classifier. As a reminder, the errors we 
-presented so far are all optimized on the respective cohort: the maximum precision under the 
+these scores in a protocol-dependent manner to obtain a binary classifier. As a reminder, the errors 
+we presented so far are all optimized on the respective cohort: the maximum precision under the 
 constraint to have a prevalence of at least \num{15}\% for our models and of at least \num{10}\% 
 for the IPI. When given a new data set with blinded outcome, we suggested to threshold a model at 
 the \num{15}\%-quantile of its continuous output on this data set. This, by definition, leads to 
 higher test errors than with the optimization procedure. The question is by how much the test error 
-of the optimally thresholded models and the \num{15}\%-quantile-thresholded model will differ.
+of the optimally thresholded model and the \num{15}\%-quantile-thresholded model will differ.
 
 If we rank patients by the scores a good model assigns them, high-risk patients accumulate at the 
-top of the ranking and low-risk patients at the bottom. As a result, the group of patients with a
-score above a threshold tends to comprise a lower and lower proportion of high-risk patients as 
-we decrease the threshold. Stated differently, for good models the precision tends to drop as the 
+top of the ranking and low-risk patients at the bottom. As a result, as we decreases the threshold, 
+the group of patients with a score above a threshold tends to comprise a lower and lower proportion 
+of high-risk patients. Stated differently, for good models the precision tends to drop as the 
 threshold drops and the relationship between prevalence and precision is rougly monotonic. In the 
 case of a perfectly monotonic dependence between prevalence and precision, an optimal threshold 
 with a prevalence of at least $\alpha$ would therefore \textit{exactly} be the $\alpha$-quantile. 
 In the case of a somewhat violated monotonicity, we still have reason to hope that the 
 $\alpha$-quantile is a near-optimal threshold.
 
-To check this out, we plotted prevalence versus precision for every possibility to threshold 
-$m^*_i$ for all $i$ and test cohorts in Fig.\ \ref{fig:inter-output-prec}. Indeed, all plots reveal 
-a clearly decreasing overall trend for prevalences $\geq \num{15}\%$; with the exception of plots 
-B.2 and C.2 this overall trend is never seriously compromised over smaller prevalence intervals. 
-This means, the \num{15}\%-quantile of the model output is a near optimal choice in all six cases -- 
-as expected.
+To check this out in practice, we plotted prevalence versus precision for every possibility to 
+threshold $m^*_i$ for all $i$ and test cohorts in Fig.\ \ref{fig:inter-output-prec}. For a given 
+cohort of $n$ samples, a GLM with a non-zero coefficient $\beta_j$, $j > 0$, almost surely 
+outputs $n$ different scores. This leads to $n$ possible thresholds if we demand that at least one 
+sample be in the positive group. Indeed, all 
+plots reveal a clearly decreasing overall trend for prevalences $\geq \num{15}\%$; with the 
+exception of plots B.2 and C.2 this overall trend is never seriously compromised over smaller 
+prevalence intervals. This means, the \num{15}\%-quantile of the model output is a near optimal 
+choice in all six cases -- as expected.
 
-In plots B.1-2 and C.1-2, the curve falls sharply for prevalences between \num{10}\% and \num{15}\%. 
+In plots B.1--2 and C.1--2, the curve falls sharply for prevalences between \num{10}\% and \num{15}\%. 
 We might wonder if the sharply increasing precision as we reduce the prevalence from \num{15}\% 
 down to \num{10}\% overcompensates for the lost statistical power that we need to significantly 
 outperform the IPI. Fig.\ \ref{fig:inter-output-prec-ci} answers this question with a clear yes.
@@ -500,6 +503,6 @@ for $m^*_\text{Staiger}$.
 
 This makes $m^*_\text{Reddy}$ a transferable, versatile model that is 
 able to perform in both a representative and high-risk setting for predicting PFS despite being 
-trained to predict OS. Vice versa, for $m^*_\text{Schmitz}$ and $m^\text{Staiger}$, the Reddy data 
+trained to predict OS. Vice versa, for $m^*_\text{Schmitz}$ and $m^*_\text{Staiger}$, the Reddy data 
 stays challenging and the only data set where a best validated model $m^*_i$ fails to significantly 
 surpass the precision of the IPI.

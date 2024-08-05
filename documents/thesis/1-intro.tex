@@ -102,21 +102,21 @@ we do not overfit the data. While we should be able to tackle the first problem 
 for the latter one we need a trustworthy internal validation strategy and, most importantly, we 
 must not validate too many models in the first place.
 
-Since, as of July 2024, the MMML-Predict train cohort hasn't yet arrived in Regensburg, this thesis
+Since, as of July 2024, the MMML-Predict train cohort has not yet arrived in Regensburg, this thesis
 will imitate the train-test scenario of MMML-Predict on already-available DLBCL data sets. This thesis 
-has two main goals:
-\begin{enumerate}
-    \item We want to show that with data including traditional clinical and modern 
-        molecular features, both possibly already condensed to signatures, we can indeed deliver 
-        the desired model, which yields a larger and more precise high-risk group of DLBCL patients.
-        With an eye to rolling out the MMML-Predictor in clinical practice, we want to demonstrate 
-        that we can design this model in such a way that one can transfer it from one platform to
-        another without losing its predictive power.
-    \item We want to develop heuristics and recommendations to answer the question which candidate 
-        models (including their hyperparameters) are worth training and validating and -- more 
-        importantly -- which are not. For this, we need to infer which models we can reliably validate 
-        and which perform well on independent test data. These findings will guide us on how to keep 
-        the number of candidate models we fit to the MMML-Predict training data low, thereby helping 
-        us to avoid overfitting in the internal validation and to submitting a model that convinces 
-        in the validation, but disappoints on the test cohort in Leipzig.
-\end{enumerate}
+has two main goals.
+
+First, we want to show that with data including traditional clinical and modern 
+molecular features, both possibly already condensed to signatures, we can indeed deliver 
+the desired model, which yields a larger and more precise high-risk group of DLBCL patients.
+With an eye to rolling out the MMML-Predictor in clinical practice, we want to demonstrate 
+that we can design this model in such a way that one can transfer it from one platform to
+another without losing its predictive power.
+
+Second, we want to develop heuristics and recommendations to answer the question which candidate 
+models (including their hyperparameters) are worth training and validating and -- more 
+importantly -- which are not. For this, we need to infer which models we can reliably validate 
+and which perform well on independent test data. These findings will guide us on how to keep 
+the number of candidate models we fit to the MMML-Predict training data low, thereby helping 
+us to avoid overfitting in the internal validation and to submitting a model that convinces 
+in the validation, but disappoints on the test cohort in Leipzig.

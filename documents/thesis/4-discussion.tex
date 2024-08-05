@@ -1,1 +1,79 @@
 \chapter{Discussion} \label{chap:discussion}
+
+The previous chapter showed that our best models can significantly outperform the IPI in both 
+a high-risk and representative-risk setting. Moreover, we demonstrated that can reliably validate 
+our trained models and pick a high-performing one if we restrict the methods from chapter 
+\ref{chap:methods} appropriately.
+
+\section{Heuristics for candidate models}
+
+Key to ensuring realistic validated errors is excluding those candidate models from $H$ that sneak 
+in a validated error considerably below their test error. In this thesis, we developed a series 
+of heuristics that aim to do precisely that.
+
+\paragraph{Nesting models}
+We have seen that we should nest models predicting from hundreds or even thousands of 
+gene-expression levels together with more features into another model with care. Our way to do 
+this, which uses the cross-validated predictions of the early model to train the late model, 
+delivers way too optimistic validated errors for the late model. The early model, usually involving 
+much more features than training samples, has plenty of freedom to overfit and it will exploit this 
+freedom when we tune its hyperparameters in cross-validation. The algorithm of the late model then 
+recognizes the output of the early model as a very predictive features and is misled to make it 
+a prominent feature in the final model. On independent test data, the input for the late model 
+systematically differs from the training, causing it to generalize poorly.
+
+Instead, we need to present the late model training data identically distributed to the test 
+data. An easy and successful way to this is to not train and tune the early model ourselves, but have 
+other people do this on an independent data set. In other words, we use already existent signatures. 
+Specifically, we did this with cell of origin and the Lamis. The Lamis signature fulfills the 
+zero-sum constraint such that transferring it to a new data set with gene-expression levels 
+measured under another protocol only results in a constant shift. When using the output of such 
+a signature as a feature for one of our models, we have two options regarding its format.
+First, we can threshold the signature -- as with cell of origin into ABC and GCB or the Lamis into 
+a high and low group --, thereby rendering the signature protocol-independent and ready to input 
+into any late model; this, of course, also works with violated zero-sum constaint and 
+$m^*_\text{Schmitz}$ from section \ref{sec:inter-trial} 
+does this quite successfully. Second, we can leave the signature output untouched and provide it as a 
+continuous feature to a GLM, for whose linear predictor a constant shift in an input feature results 
+in constant shift of its output. The most convincing model of this thesis, $m^*_\text{Reddy}$ does 
+this with the Lamis score.
+
+\paragraph{Gene-expression levels}
+As a result, we refrain from incorporating gene-expression levels directly into the models trained 
+by us, but only use their valuable information condensed into the output of alredy-existent models. 
+With the curse of high dimensions gone, we have observed much more trustworthy validated errors. 
+Furthermore, this reduces the training time and enables us to use more complex models.
+
+\paragraph{More heuristics}
+
+The inter-trial experiments suggest that model performance benefits from using a lower training 
+survival cutoff $T$. Random forests, whose OOB predictions proved to yield a very accurate estimate 
+of the test error, fare worse than GLMs; unlike GLMs, they cannot deal with systemically shifted 
+features, which makes them unsuited to handle the continuous output of gene-expression signatures
+across protocols.
+
+\section{Increasing the sample size}
+
+In addition to restricting the hyperparameter-tuple space $H$ carefully, we raised the number of 
+samples by combining the three data sets. We hoped to get both more representative train and test 
+cohorts with less systematic differences and hence turn validated errors into better estimates 
+for test errors. Whatever the reason, in the latter we succeeded. To combine the data, we had to 
+make sacrifices: we discarded the features that are 
+not present in all threee data -- and this included valuable features like MYC translocations -- 
+and we often trained models to predict PFS and then tested them on OS or vice versa. Still, our 
+best validated models defied this together with systematic, especially technological and prognostic 
+differences between the data sets and, at roughly \num{15}\% prevalence, outperformed the IPI 
+significantly on the prospective Staiger data.
+
+In the inter-trial experiments, with more samples in the test cohort, we could lower the prevalence 
+of our selected models to \num{10}\%, drastically raise the precision and still retain enough 
+statistical power to significantly defeat the IPI in even more cases. For the best validated models, 
+we have seen an overwhelmingly monotonic relationship between the prevalence and the precision, 
+which made the \num{15}\%- or -- even better -- \num{10}\%-quantile of the model output a 
+near-optimal threshold, respectively. 
+
+The results of this thesis strongly suggest that sample size is a crucial factor 
+for our problem. Furthermore, we should be ready to make sacrifices -- less features, 
+even a different kind of the response -- to increase it. 
+
+\section{Future models}

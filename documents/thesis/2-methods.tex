@@ -61,14 +61,14 @@ are notoriously unstable in the sense that for all $t \in \RR$ with $P(X_1 \geq 
     \text{as } n \to \infty.
 \end{align}
 
-While not all $\text{err}(y_\text{train}, \text{cv}(h)), h \in H$, are i.i.d. -- after all, they 
+While not all $\text{err}(y_\text{train}, \text{cv}(h)), h \in H$, are i.i.d.\ -- after all, they 
 all depend on 
 $(\mathbf{x}_\text{train}, y_\text{train})$ and some model are better suited for the problem than others --,
-we can have situations where at least a subset of $H$ delivers validation errors close to being i.i.d.
+we can have situations where at least a subset of $H$ delivers validation errors close to being i.i.d.\
 
 \paragraph{Models merely guessing}
 Imagine models not suited to deal with the problem at all. Their cross-validated predictions are 
-merely guesses on $y_\text{train}$ and therefore i.i.d. There is a non-zero probability to guess
+merely guesses on $y_\text{train}$ and therefore i.i.d.\ There is a non-zero probability to guess
 all true outcomes on the train cohort correctly and hence it is only a matter of the number of 
 such merely guessing models until which get the minimal possible error for one of them. The number of 
 such models can indeed grow large e.g. if we keep trying ever new hyperparameters for a model class 
@@ -290,13 +290,17 @@ Defining a patient as high-risk if and only if the progression-free survival is 
 is clinically accepted, yet quite arbitrary decision. It may not be the time cutoff that 
 separates patients' survival 
 best from a biological point of view. Therefore we can provide the fitting 
-algorithm a modified response $y$, governed by the time cutoff $T > 0$.
+algorithm a modified response $y$, governed by the time cutoff $T > 0$, which we will refer to as 
+training survival cutoff.
 \begin{itemize}
     \item For binary response $y \in \{0, 1\}^n$, we set $y_i = 1$ if the progression-free survival 
         of patient $i$ is less than $T$ and $y_i = 0$ otherwise.
     \item For response $y \in (\RR \times \{0, 1\})^n$ with time to event and censoring, we censor 
         all samples with time to event exceeding $T$ at $T$.
 \end{itemize}
+Patients may separate much more clearly for some $T \neq 2$ and as long as we come up 
+with a positive cohort that comprises at least 15\% of the samples, this allows us to fulfill our 
+task more easily.
 
 \subsection{Core models}\label{subsec:core-models}
 
@@ -313,7 +317,7 @@ specify any further because we only get in touch with two random variables
 the predictor and the response, respectively. More 
 precisely, we observe independent training samples $(x_i, y_i) \in \RR^{p+1}, i = 1, \ldots, n$, 
 distributed according to $(X, Y)$; $x_i$ is the $i$-th row of the predictor matrix $\mathbf{x}$ and
-$y_i$ is the $i$-th entry of the response vector $y$. The i.i.d. test samples follow the same 
+$y_i$ is the $i$-th entry of the response vector $y$. The i.i.d.\ test samples follow the same 
 distribution as the training samples, but in this subsection everything is about the training and 
 hence the training samples; if we say samples in this subsection, we always refer to the training   
 samples.
@@ -367,7 +371,7 @@ $p$ and $\mu_i$, respectively. The log-likelihood of $\mu_i$ is
 \paragraph{}
 Using $\mu_i = g^{-1}(\beta_0 + x_i^T \beta)$, in both cases we can express the 
 log-likelihood 
-for $(\beta_0, \beta)$. For our i.i.d. samples $(x_i, y_i)_{i = 1, \ldots, n}$, we therefore obtain 
+for $(\beta_0, \beta)$. For our i.i.d.\ samples $(x_i, y_i)_{i = 1, \ldots, n}$, we therefore obtain 
 \begin{align}
     L(\beta_0, \beta) &= \sum_{i=1}^n \ell(\mu_i; y_i) 
     = \sum_{i=1}^n \ell\left( g^{-1}\left( \beta_0 + x_i^T \beta \right); y_i \right).
@@ -523,11 +527,11 @@ job for us. The elastic net generalizes two well-established regularization meth
         which forces $\beta$ to stay inside a diamont centered at the origin by limiting the 
         $\ell_1$ norm of the parameters,
 \end{itemize}
-by combining them with weight factor $\alpha \in [0, 1]$ into 
+by combining them with a weight factor $\alpha \in [0, 1]$ into 
 \begin{align}
     p_{\text{enet}, \alpha}(\beta) = \frac{1-\alpha}{2} |\beta|_2^2 + \alpha |\beta|_1.
 \end{align}
-Muliplited with the regularization strength $\lambda \geq 0$ we can add it to the negative 
+Muliplited with the regularization strength $\lambda \geq 0$, we can add it to the negative 
 log-likelihood to obtain the regularized loss function
 \begin{align}
     \mathcal{L}(\beta_0, \beta) = -L(\beta_0, \beta) + \lambda p_{\text{enet}, \alpha}(\beta).
@@ -633,7 +637,7 @@ tree in Alg. \ref{alg:tree}.
 \paragraph{Forests}
 Trees are known to be notoriously noisy, meaning if we fix $x \in \RR^p$ the variance 
 $V_\mathbf{z}(T(x))$ is quite high; the index $\mathbf{z}$ makes explicit that we consider $T(x)$ as 
-a function -- or better: random variable -- of i.i.d. drawing training samples $\mathbf{z}$ (and 
+a function -- or better: random variable -- of i.i.d.\ drawing training samples $\mathbf{z}$ (and 
 then fitting a tree to them according to Alg. \ref{alg:tree}). On the other hand, if grown deep,
 trees have pretty low bias, meaning for fixed $x \in \RR^p$ the expectation $E_\mathbf{z}(T(x))$ 
 is close to $E(Y \cond x)$. High variance and low bias makes trees 
@@ -650,7 +654,7 @@ leaves the bias unchanged. Consequently, our hope rests on reducing the variance
 $T_b(x)$ -- again understood as a random variable dependent on sampling the training data -- has 
 variance $\sigma^2$. If the $T_b(x)$ are independent, the variance is additive and we have 
 $V_\mathbf{z}(\overline{T}(x)) = \sigma^2/B$, which tends to zero as $B \to \infty$. In practice, 
-the $T_b(x)$ are not totally independent as they have training samples in common: we do not i.i.d. 
+the $T_b(x)$ are not totally independent as they have training samples in common: we do not i.i.d.\ 
 sample from the whole population $(X, Y)$, but draw a bootstrap sample of size $n$ from our training 
 data $(x_i, y_i)$, $i = 1, \ldots, n$; providing every 
 tree its own separate, tiny set of training samples would seriously increase the bias. Bootstrapping 
