@@ -81,7 +81,7 @@ logrank_as2 <- Ass2d$new(
     y_metric = "logrank",
     xlim = c(0, .5),
     ylim = c(1e-4, 1), # try with 0 in the future
-    x_lab = "rate of positive predictions",
+    x_lab = "prevalence",
     y_lab = "p-value (logrank test)",
     scale_y = "log10",
     colors = colors,
@@ -92,7 +92,7 @@ prec_ci_as2 <- Ass2d$new(
     x_metric = "rpp",
     y_metric = "precision_ci",
     xlim = c(0.10, 0.50),
-    x_lab = "rate of positive predictions",
+    x_lab = "prevalence",
     y_lab = "lower limit of precision CI",
     theme = plot_themes[["thesis"]],
     ci_level = 0.95

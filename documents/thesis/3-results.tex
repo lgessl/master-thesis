@@ -3,7 +3,7 @@
 In this triune chapter, we start with introducing three DLBCL data sets that include 
 survival, clinical and molecular features. Next, in intra-trial experiments, we split every of these 
 three data sets into 
-a train and test cohort, fit models for a variety of candidate models to the training 
+a train and test cohort, fit a variety of candidate models to the training 
 cohort, validate them on the same and test the best on the test cohort; this is less about presenting a 
 high-performing model, but more about analyzing validated and tested errors to make the set of tried 
 out hyperparameter tuples $H$ slimmer and 
@@ -25,11 +25,12 @@ By heuristically optimizing a novel genetic distinctiveness metric, Schmitz et a
 clustered \num{574} DLBCL biopsy samples into four subtypes, called MCD, BN2, N1, EZB and ``other''. They 
 unblinded the survival data only after the clustering was complete and the 
 model was frozen \cite[Appendix 1, pp. 16--18]{schmitz18}. The following, independent survival analysis 
-unveiled significantly differing PFS between the four subtypes (excluding 
+on a subset of \num{229} patients, for who survivial data was available and who had undergone R-CHOP 
+or CHOP-like treatment, unveiled significantly differing PFS between the four subtypes (excluding 
 ``other'') according to a logrank test; BN2 and EZB subtypes have far better prognosis than MCD and 
 N1 (2-year PFS rate of \num{81}\% and \num{75}\% as opposed to \num{39}\% and 
 \num{20}\%, respectively). The IPI score did not vary significantly between the subtypes, 
-indicating that the new classifier gives us additional information to predict survival.
+indicating that their new classifier gives us additional information to predict survival.
 
 There are two caveats: First, the genetic classifier saw the entire data set during training and 
 this runs afoul of a strict train-test regime even if training was 
@@ -47,12 +48,13 @@ but we want to see if we can do even better in such a high-risk regime.
 
 \paragraph{Reddy data}
 
-Compared to a prospective study, also the Reddy data is enriched for high-risk patients and the 
-IPI boasts a performance that already satisfies the MMML-Predict goals, even if a bit less 
+Compared to a prospective study, also the Reddy data, comprised of \num{604} patients treaed with 
+rituximab-containing regimens, is enriched for high-risk patients. The 
+IPI has a performance that already satisfies the MMML-Predict goals, even if a bit less 
 convincingly than on the Schmitz data. After identifying \num{150} DLBCL driver genes, Reddy et al.\ 
 trained a Cox model, named genomic risk model,
 that predicts overall survival (OS) from combinations of genetic events and gene-expression markers 
-(cell of origin, MYC, and BCL2) and thresholded its output into low, intermediate and low risk. This is a
+(cell of origin, MYC, and BCL2) and thresholded its output into low, intermediate and high risk. This is a
 model whose predictions we cannot use because their split into the train and test cohort is not 
 clear, but that inspired us to use combinations of discrete features, cf.\ subsection 
 \ref{subsec:model-agnostic}. Nevertheless, with high expression and translocation of MYC, BCL2 and 
@@ -63,7 +65,8 @@ loss being simultaneously present.
 
 \paragraph{Staiger data}
 
-The Staiger data is composed of \num{466} patients enrolled in prospective clinical trials. 
+The Staiger data is composed of \num{466} patients treated with CHOP-like and R-CHOP-like regimens 
+and enrolled in prospective clinical trials. 
 Staiger et al.\ first determined \num{731} gene pairs with highly correlated gene-expression levels 
 between their train cohort -- \num{233} DLBCLs with gene-expression levels built from the Affymetrix 
 GeneChip technology -- and the Staiger data -- \num{466} DLBCLs with gene-expression levels built 
@@ -117,13 +120,13 @@ best one, $m^*$, on every data set.
 
 \paragraph{Gene-expression levels only}
 Models trained in a leave-one-out cross-validation only on the gene-expression levels include the 
-Gaussian, logistic and Cox model. Regarding noteworthy hyperparameter decisions, we both apply and 
+Gauss, logistic and Cox model. Regarding noteworthy hyperparameter decisions, we both apply and 
 do not apply standardization of the predictor; we do not demand the zero-sum constraint 
 because we do not want to transfer our model to other data sets and want to safe computation time;
 we regularize with elastic-net penalty factor $\alpha \in \{ \num{0.1}, 1 \}$; as throughout this 
 chapter, we have the \texttt{zeroSum} package calculate a sequence of \num{100} regularization strengths 
 $\lambda$ for us and stop early if the cross-validated error does not improve for \num{10} 
-consecutive decreasing $\lambda$ values; we try out a whole bunch of time cutoffs $T$.
+consecutive decreasing $\lambda$ values.
 
 We train and validate a model for every combination of these hyperparameters.
 Not taking into account the values of $\lambda$ (which are hard to foresee due to early stopping), 
@@ -137,26 +140,26 @@ models only predicting from gene-expression levels, we do not standardize the pr
 
 \paragraph{Core models with other features}
 We now add all available remaining features: for the 
-IPI, we either add the five continuous features (if available), the five threholded features, the 
-score as a continuous feature or all of these threee; for the Lamis, % here and for the rest of thesis 
+IPI, we either add the five threholded features, the score as a continuous feature, the group or 
+all of these three; for the Lamis, % here and for the rest of thesis 
 we add the score as a continuous and the group as a discrete feature. For $s_\text{min} = \num{0.05}$ 
 and $n_\text{combi} \in \{1, 2, 3, 4 \}$, we add combinations of discrete features to the predictor. 
 We both include and exclude gene-expression levels in the predictor.
 
 As for the model class, we build on our experience gained from the gene-expression-only models and 
-just use the top performing model class of these models for such models that also use gene 
+just use the two top performing model classes of these models for such models that use gene 
 expression levels. For models not predicting from gene-expression levels, we have no prior 
-knowledge and thus deploy the full range of core models: Gaussian, logistic, Cox models and random 
+knowledge and thus deploy the full range of core models: Gauss, logistic, Cox models and random 
 forests. As all of these models need to deal with features on different scales, we always 
 standardize the predictor.
 
 
 \paragraph{Nested models}
 We nest models according to Alg. \ref{alg:nested-pcv}, where the early model $f_1$ is the best 
-validated model among the gene-expression-only models and $f$ has the model class of $f_1$ or is 
-a random forest. If $f$ has the same model class as $f_1$, we still tune the LASSO regularization 
-strengtht for $f_1$ because we may end up adding several hundreds combined disrete featuers to the 
-predictor. As for a-priori feature selection, dito as above.
+validated model among the gene-expression-only models. If the late model $f$ is a GLM,
+we regularize with it the LASSO, because we may end up adding several 
+hundreds combined disrete featuers to the predictor. We select fetures a priori as in the previous 
+paragraph.
 
 \subsubsection{Best validated models}
 
@@ -175,9 +178,9 @@ demand further investigation.
 
 \paragraph{Staiger}
 On the Staiger data, $m^*$ is a very simple model: a logistic model that neither uses gene 
-expression levels nor combinations of discrete features ($n_\text{combi} = 1$). Notably, the model
+expression levels nor combinations of discrete features ($n_\text{combi} = 1$). Of note, the model
 incorporates the Lamis score and group with decisively non-zero coefficient. Here, $m^*$'s 
-validated precision of \num{58.2}\% is more in line with the \num{45.9}\% on the test set.
+validated precision of \num{58.2}\% is more in line with the \num{45.9}\% precision on the test set.
 
 \subsection{Meta analysis}
 
@@ -186,7 +189,7 @@ evaluate the test performance of more models. Our main focus rests on the discre
 validated and test error; as we laid out in section \ref{sec:train-val-test}, the models with the 
 best validated errors most likely have an underestimated test error and it is hard to fight this 
 effect qualitatively. However, we use several methods to calculate a validated error -- cross 
-validation, the pseudo cross validatio of Alg. \ref{alg:nested-pcv} and the OOB error of random 
+validation, the pseudo cross validation of Alg. \ref{alg:nested-pcv} and the OOB error of random 
 forests -- and for every model architecture we tune different hyperparameters and a different 
 number of hyperparameter tuples. Both validation error and test error of a model are random 
 variables and it is hard to infer statistical properties of them based on a single realization of 
@@ -212,8 +215,9 @@ Also for the Schmitz and Reddy data, the dependence between validated and test e
 being monotonic; in both cases, the plot looks noisy and the correlation between validated and test 
 error is negative such that the model with the lowest validated error happens to have the highest 
 (Schmitz) or second highest (Reddy) test error. The plots do not show errors for all tried out 
-hyperparameter tuples in $H$, but only for a high-performing subset with $\lambda$ and $T$ already 
-optimized; this optimization was successful in the sense that even the worst models boast a test 
+hyperparameter tuples in $H$, but only for a high-performing subset with $\lambda$, $T$ and 
+$n_\text{combi}$ already 
+optimized; this optimization was successful in the sense that even the worst models post a test 
 error below that of $\text{tIPI}$.
 
 There is no model class reliably outperforming the others. Both data sets suggest that ridge 
@@ -221,7 +225,7 @@ regularization yields models with a test error lower than that of LASSO regulari
 however, does not reveal this difference. The picture on standardizing $X$ or not is mixed: on the 
 Schmitz data, models with non-standardized predictor fluctuate less around the identiy line than 
 those with standardized predictor, meaning validation is more reliable for the former model group;
-on the Reddy data, meanwhile, we the same phenomenon with roles swapped.
+on the Reddy data, meanwhile, we observe the same phenomenon with roles swapped.
 
 \subsubsection{Models with the full range of features}
 
@@ -230,13 +234,13 @@ on the Reddy data, meanwhile, we the same phenomenon with roles swapped.
 All analysis here is based on Fig. \ref{fig:intra-val-test-more}.
 
 \paragraph{Schmitz and Reddy}
-Again, we analyze the non-prospective, high-risk heavy Schmitz and Reddy data together. As we apply
-the full range of a priori selected features, validation and test error for these two data sets 
+Again, we analyze the non-prospective, high-risk-heavy Schmitz and Reddy data together. When we apply
+the full range of a-priori selected features, validation and test error for these two data sets 
 stay out of touch. Partioning according to the model architecture reveals some patterns. 
 
 Models 
-nesting a Gauss model into a GLM as in Alg. \ref{alg:nested-pcv} all have low validated errors, on 
-the Reddy data, they even have lower validated error than any other model; the test error is 
+nesting a Gauss model into a GLM as in Alg. \ref{alg:nested-pcv} all have low validated errors; on 
+the Reddy data, their validated errors are lower than those of all other models. The test error is 
 always higher than the validated error and usually it is \textit{much} higher. Alg. \ref{alg:nested-pcv} 
 yields way too optimistic validated errors if the late model is a GLM, prompting us to no longer 
 fit such models in the following experiments. Discarding Alg. \ref{alg:nested-pcv} once and for all
@@ -245,7 +249,7 @@ line with test errors, especially on the Schmitz data. On both data sets, OOB pr
 models consisting of a random forest alone very well estimate the test error. In all but one case 
 they even underestimate the test error. All in all, OOB predictions seem superior to 
 cross-validated predictions, which comes as no surprise when having a closer look at both 
-methods: A sample's cross-validated predictions come from one model and we have one model per 
+methods: A sample's cross-validated prediction comes from one model and we have one model per 
 sample in the best case, a leave-one-out cross-validation (which we did for all models involved in 
 nested models). In contrast, a sample's OOB prediction comes from a whole forest of models with 
 expected size roughly $B/3$ because the probability of a sample not being in a bootrap sample 
@@ -260,7 +264,8 @@ and we can scale it by scaling $B$, which is cheap as we have laid out in subsec
 As for feature selection, we see that including gene-expression levels does not lead to greatly 
 improved models. Even the high-performing gene-expression-only models do not benefit very much if 
 we train them with additional features. On the Reddy data, the points belonging to models not using 
-gene-expression data are all close to or underneath the identity line, meaning the validation errors 
+gene-expression data are all close to or underneath the identity line; this means the validation 
+errors 
 catch the test errors well, their test errors are less widespread and on average lower than those 
 of the remaining models. This does not mean that gene-expression levels do not provide important 
 information: all of the models that do not use the gene-expression levels directly from our data 
@@ -275,12 +280,12 @@ datasets, OOB-based test-error estimates are conservative leading to underestima
 for models incorporating a random forest. As a result of highly correlated validation and test 
 errors, the best validated model is also the best tested model. Compared to above, the validated errors 
 of models nesting a Cox model into a GLM overestimate the test errors less; since the early Cox 
-model yields pretty inaccurate cross-validated predictions, we hypothesize that the training 
-algorithm of the late GLM is less inclined to put as much weight on these predictions as with the 
+model yields pretty poor cross-validated predictions, we hypothesize that the training 
+algorithm of the late GLM is less tempted to put as much weight on these predictions as with the 
 two other data sets.
 
 Models profit a lot from not just predicting from the gene-expression levels: all the 
-gene-expression-only cluster into a bulk with test errors higher than those of all other models. 
+gene-expression-only models form a bulk with test errors higher than those of all other models. 
 Key to the success is again the molecular information condensed in the Lamis, which all the 
 high-performing models put heavy weight on.
 
@@ -333,7 +338,7 @@ predictor with combinations of discrete features according to $s_\text{min} = \n
 $n_\text{combi} \in \{ 1, 2, 3 \}$. We restrict the training survival cutoff $T$ to range between 
 \num{1.4} and \num{2} years in steps of \num{0.2} years for the Schmitz and Staiger data. We 
 both include and exclude the expression levels in the predictor of the Cox and logistic 
-models we fit for all combinations of these hyperparameter values.
+models, which we fit for all combinations of these hyperparameter values.
 
 Random forests have trouble dealing with features systematically shifted features between data sets, so 
 we always exclude the gene-expression levels from the predictor and of the Lamis formats only 
@@ -343,7 +348,7 @@ categorical features themselves, so we set $n_\text{combi} = 1$ for them.
 \subsubsection{Best validated models}
 
 Table \ref{table:inter-trial} presents the performance of the best models validated and trained on 
-every cohort, $m_i^*$, $i \in \{ \text{Schmitz}, \text{Reddy}, \text{Staiger} \}$. We now cycle 
+every cohort, $m_i^*$, $i \in \{ \text{Schmitz}, \text{Reddy}, \text{Staiger} \}$. We now loop 
 through $i$.
 
 \input{figs/inter_trial.tex}
@@ -362,7 +367,7 @@ On the Staiger set, meanwhile, $m^*_\text{Schmitz}$ accomplishes all objectives:
 \num{50.7}\% precision, it tops the IPI's precision by more than 12 points, narrowly surpassess the 
 pychologically important \num{50}\% threshold, and the \num{95}\%-confidence interval of our model's 
 precision excludes the IPI's precision. It is remarkable that the $m^*_\text{Schmitz}$, coming from 
-the high-risk, non-prospective, RNA-seq environment of the Schmitz data with the Lamis measured with the 
+the high-risk, non-prospective Schmitz data with the Lamis measured with the 
 RNA-seq technology, well adapts to the prospective, NanoString regime of the Staiger data and 
 does so better than the models we trained in the previous section on part of the Staiger data.
 
@@ -377,7 +382,7 @@ On the Schmitz data, $m^*_\text{Reddy}$ is more precise than the IPI, but fails 
 IPI significantly. It yields a fairly high hazard ratio of \num{53.4} 
 (\num{95}\%-CI \num{18.7}-\num{152.1}).
 
-On the Staiger set, $m^*_\text{Reddy}$ boasts a precision of \num{53.2} that is by \num{2.5} 
+On the Staiger set, $m^*_\text{Reddy}$ posts a precision of \num{53.2} that is by \num{2.5} 
 points higher than that of $m^*_\text{Schmitz}$ and by \num{15} points higher than that of the IPI. 
 Consequently, the lower limit \num{95}\%-confidence interval of its precision at \num{41.5}\% is 
 clearly above the IPI's precision and the hazard ratio rises to a considerable \num{23.9}
@@ -397,15 +402,15 @@ On the Reddy data, our model's precision at \num{50.7}\% stays below the IPI's a
 Speaking for the whole thesis, this renders the Reddy data a challenging test cohort with a 
 hard-to-beat IPI, but -- as we have just seen -- a very helpful training cohort.
 
-Meanwhile on the Schmitz data, the precision of $m^*_\text{Staiger}$ at \num{75.7}\% exceeds that 
+Meanwhile on the Schmitz data, the precision of $m^*_\text{Staiger}$ of \num{75.7}\% exceeds that 
 of the IPI by more than \num{10}\%, but falls short of outrivaling the IPI significantly. Still, 
 this demonstrates that transferring models between the Schmitz and Lamis data works in both 
 directions.
 
 \subsection{Meta analysis}
 
-We again freeze all of our models and unlock the test for all of them to analyze the discrepancy 
-between validated and test error and to gain insights on how stable thresholding the models on the 
+We again freeze all of our models and unlock the test sets for all of them to analyze the discrepancy 
+between validated and test error and to gain insights into how stable thresholding the models on the 
 test cohort is.
 
 \subsubsection{Validated and test errors}
@@ -488,4 +493,13 @@ as expected.
 In plots B.1-2 and C.1-2, the curve falls sharply for prevalences between \num{10}\% and \num{15}\%. 
 We might wonder if the sharply increasing precision as we reduce the prevalence from \num{15}\% 
 down to \num{10}\% overcompensates for the lost statistical power that we need to significantly 
-outperform the IPI. Fig.\ \ref{fig:inter-output-prec-ci} deals with exactly this question.
+outperform the IPI. Fig.\ \ref{fig:inter-output-prec-ci} answers this question with a clear yes.
+With a reduced prevalence of \num{10}\%, we score two more significant victories over the IPI, this 
+time on the Schmitz data: an easy one in the case of $m^*_\text{Reddy}$ and a close one
+for $m^*_\text{Staiger}$. 
+
+This makes $m^*_\text{Reddy}$ a transferable, versatile model that is 
+able to perform in both a representative and high-risk setting for predicting PFS despite being 
+trained to predict OS. Vice versa, for $m^*_\text{Schmitz}$ and $m^\text{Staiger}$, the Reddy data 
+stays challenging and the only data set where a best validated model $m^*_i$ fails to significantly 
+surpass the precision of the IPI.

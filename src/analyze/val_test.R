@@ -1,9 +1,9 @@
 library(patroklos)
 library(patchwork)
 
-make_plot1 <- FALSE
-make_plot2 <- FALSE
-make_plot3 <- TRUE
+make_plot1 <- TRUE
+make_plot2 <- TRUE
+make_plot3 <- FALSE
 
 generate_plot_list <- function(
     data_sets,
