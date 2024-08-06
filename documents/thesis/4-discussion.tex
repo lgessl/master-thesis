@@ -69,11 +69,50 @@ In the inter-trial experiments, with more samples in the test cohort, we could l
 of our selected models to \num{10}\%, drastically raise the precision and still retain enough 
 statistical power to significantly defeat the IPI in even more cases. For the best validated models, 
 we have seen an overwhelmingly monotonic relationship between the prevalence and the precision, 
-which made the \num{15}\%- or -- even better -- \num{10}\%-quantile of the model output a 
+which made the \num{15}\%-quantile or -- even better -- \num{10}\%-quantile of the model output a 
 near-optimal threshold, respectively. 
 
 The results of this thesis strongly suggest that sample size is a crucial factor 
 for our problem. Furthermore, we should be ready to make sacrifices -- less features, 
 even a different kind of the response -- to increase it. 
 
-\section{Future models}
+\section{The future of MMML-Predict}
+
+With $m^*_\text{Schmitz}$ and even more $m^*_\text{Reddy}$, this thesis presents two 
+models that meet all requirements of MMML-Predict: a prevalence of at least \num{10}\% and a 
+precision above \num{50}\% and significantly above the IPI on an independent, prospective data set. 
+
+And still, every percentage point we gain in prevalence will convince more clinicians, researchers 
+and pharmaceutical companies to pay attention to the high-risk group identified by the MMML-Predictor.
+Every percentage point we gain in precision will not just spur interest of the above people and 
+companies, but will also convince more patients to let the MMML-Predictor guide their treatment and 
+will avoid both unnecessary and failed therapies. This thesis did not suggest that model performance 
+has already saturated, so we can go for even more in the future.
+
+How might we do this? This thesis demonstrated that we can use data from already-existent trials, 
+even if they are not prospective and differ technologically, to train and validated a model and 
+then successfully test it on data from a prospective trial as MMML-Predict is about to conduct one.
+In the intra-trial experiments, we saw validation and test performance out of touch and presume 
+that a too small, therefore non-representative and systematically differing train and test cohorts 
+could have played a key role in this. For the final MMML-Predictor, one might thus consider 
+using more than \num{100} of the \num{300} samples registered for MMML-Predict, maybe even all 
+\num{300}, for a sufficiently large, statistially more powerful test cohort. One might combine 
+a series of available data sets into a big training cohort. With combining data sets come two 
+caveats. 
+
+First, we need to intersect over the sets of features, which amounts to discarding plenty 
+of features. Nevertheless, many modern DLBCL data sets include gender, age, the five thresholded 
+IPI features as clinical and gene-expression levels as molecular features. More modern data sets 
+also hold the double and triple hit status, which refers to the simultaneous translocation of MYC
+and either BCL2 or BCL6, or MYC, BCL2 and BCL6, respectively. From gene-expression 
+features, we can calculate already-existent molecular signatures as well as the double-expressor and 
+triple-expressor, which describe the phenomena anaogous to double- and triple-hit status with 
+overexpression instead of translocation of the three involved genes.
+
+Second, we need to take care of batch effects. Among the features mentioned above, this concerns 
+the gene-expression levels. The first option is to get rid of protocol effects by once and for all
+thresholding the output of molecular signatures. Most signatures come with canonical thresholds, 
+such as the group for the LAMIS, and we can calculate them on the respective data set even before 
+combining. In this case, we can deploy quite any model as we no longer need to fight the curse 
+of high dimensions or batch effects. The second option is to only apply zero-sum signatures (or 
+stand)
