@@ -1,9 +1,9 @@
 \chapter{Discussion} \label{chap:discussion}
 
 The previous chapter showed that our best models can significantly outperform the IPI in both 
-a high-risk and representative-risk setting. Moreover, we demonstrated that can reliably validate 
-our trained models and pick a high-performing one if we restrict the methods from chapter 
-\ref{chap:methods} appropriately.
+a high-risk and representative-risk setting. Moreover, we demonstrated that we can reliably validate 
+our trained models and pick a near-optimal if not optimal one if we restrict the methods from 
+chapter \ref{chap:methods} appropriately and increase the sample size.
 
 \section{Heuristics for candidate models}
 
@@ -17,15 +17,15 @@ gene-expression levels together with more features into another model with care.
 this, which uses the cross-validated predictions of the early model to train the late model, 
 delivers way too optimistic validated errors for the late model. The early model, usually involving 
 much more features than training samples, has plenty of freedom to overfit and it will exploit this 
-freedom when we tune its hyperparameters in cross-validation. The algorithm of the late model then 
-recognizes the output of the early model as a very predictive features and is misled to make it 
+freedom when we tune its hyperparameters in a cross-validation. The algorithm of the late model then 
+recognizes the output of the early model as a very predictive feature and is misled to make it 
 a prominent feature in the final model. On independent test data, the input for the late model 
 systematically differs from the training, causing it to generalize poorly.
 
 Instead, we need to present the late model training data identically distributed to the test 
 data. An easy and successful way to this is to not train and tune the early model ourselves, but have 
-other people do this on an independent data set. In other words, we use already existent signatures. 
-Specifically, we did this with cell of origin and the Lamis. The Lamis signature fulfills the 
+other people do this on an independent data set. In other words, we use already-existent signatures. 
+Specifically, we did this with cell of origin and the Lamis. The Lamis fulfills the 
 zero-sum constraint such that transferring it to a new data set with gene-expression levels 
 measured under another protocol only results in a constant shift. When using the output of such 
 a signature as a feature for one of our models, we have two options regarding its format.
@@ -55,13 +55,13 @@ across protocols.
 \section{Increasing the sample size}
 
 In addition to restricting the hyperparameter-tuple space $H$ carefully, we raised the number of 
-samples by combining the three data sets. We hoped to get both more representative train and test 
+samples by combining three data sets. We hoped to get both more representative train and test 
 cohorts with less systematic differences and hence turn validated errors into better estimates 
 for test errors. Whatever the reason, in the latter we succeeded. To combine the data, we had to 
 make sacrifices: we discarded the features that are 
-not present in all threee data -- and this included valuable features like MYC translocations -- 
+not present in all three data sets -- and this included valuable features like MYC translocations -- 
 and we often trained models to predict PFS and then tested them on OS or vice versa. Still, our 
-best validated models defied this together with systematic, especially technological and prognostic 
+best validated models defied this as well as systematic, especially technological and prognostic 
 differences between the data sets and, at roughly \num{15}\% prevalence, outperformed the IPI 
 significantly on the prospective Staiger data.
 
@@ -70,11 +70,12 @@ of our selected models to \num{10}\%, drastically raise the precision and still 
 statistical power to significantly defeat the IPI in even more cases. For the best validated models, 
 we have seen an overwhelmingly monotonic relationship between the prevalence and the precision, 
 which made the \num{15}\%-quantile or -- even better -- \num{10}\%-quantile of the model output a 
-near-optimal threshold, respectively. 
+near-optimal threshold. 
 
 The results of this thesis strongly suggest that sample size is a crucial factor 
 for our problem. Furthermore, we should be ready to make sacrifices -- less features, 
-even a different kind of the response -- to increase it. 
+even a different kind of the response -- to increase the number of samples in both train and test 
+cohort. 
 
 \section{The future of MMML-Predict}
 
@@ -84,16 +85,16 @@ precision above \num{50}\% and significantly above the IPI on an independent, pr
 
 And still, every percentage point we gain in prevalence will convince more clinicians, researchers 
 and pharmaceutical companies to pay attention to the high-risk group identified by the MMML-Predictor.
-Every percentage point we gain in precision will not just spur interest of the above people and 
+Every percentage point we gain in precision will not just spur more interest of the above people and 
 companies, but will also convince more patients to let the MMML-Predictor guide their treatment and 
 will avoid both unnecessary and failed therapies. This thesis did not suggest that model performance 
 has already saturated, so we can go for even more in the future.
 
 How might we do this? This thesis demonstrated that we can use data from already-existent trials, 
-even if they are not prospective and differ technologically, to train and validated a model and 
+even if they are not prospective and differ technologically, to train and validate a model and 
 then successfully test it on data from a prospective trial as MMML-Predict is about to conduct one.
-In the intra-trial experiments, we saw validation and test performance out of touch and presume 
-that a too small, therefore non-representative and systematically differing train and test cohorts 
+In the intra-trial experiments, we saw validation and test performance out of touch. We suspect 
+that too small, therefore non-representative and systematically differing train and test cohorts 
 could have played a key role in this. For the final MMML-Predictor, one might thus consider 
 using more than \num{100} of the \num{300} samples registered for MMML-Predict, maybe even all 
 \num{300}, for a sufficiently large, statistially more powerful test cohort. One might combine 
@@ -102,9 +103,9 @@ caveats.
 
 First, we need to intersect over the sets of features, which amounts to discarding plenty 
 of features. Nevertheless, many modern DLBCL data sets include gender, age, the five thresholded 
-IPI features as clinical and gene-expression levels as molecular features. More modern data sets 
-also hold the double and triple hit status, which refers to the simultaneous translocation of MYC
-and either BCL2 or BCL6, or MYC, BCL2 and BCL6, respectively. From gene-expression 
+IPI features as clinical features and gene-expression levels as molecular features. More modern data 
+sets also hold the double-hit and triple-hit status, which refers to the simultaneous translocation 
+of MYC and either BCL2 or BCL6, or MYC, BCL2 and BCL6, respectively. From gene-expression 
 features, we can calculate already-existent molecular signatures as well as the double-expressor and 
 triple-expressor, which describe the phenomena anaogous to double- and triple-hit status with 
 overexpression instead of translocation of the three involved genes.
@@ -115,4 +116,18 @@ thresholding the output of molecular signatures. Most signatures come with canon
 such as the group for the LAMIS, and we can calculate them on the respective data set even before 
 combining. In this case, we can deploy quite any model as we no longer need to fight the curse 
 of high dimensions or batch effects. The second option is to only apply zero-sum signatures (or 
-stand)
+scale the gene-expression levels to an $\ell_1$ norm of \num{1} across all samples). Using the 
+output of these signatures as continuous features of a GLM again results in a protocol-dependent 
+shift in output of the GLM. For training, we can add the data set the sample was taken from as a 
+categorical 
+feature to the predictor so we can correct for the data-set-dependent shifts in the loss function. 
+After training, we remove the data-set feature from the model. In testing, 
+we threshold the continuous output of the GLM at the $\alpha$-quantile for some $\alpha$, as we did 
+in this thesis. A shortcoming of this testing procedure is that we always need a sufficiently large 
+test cohort to be able estimate the $\alpha$-quantile reliably. An alternative approach might 
+involve internal standards, i.e.\ a small number of samples one has measured for a test cohort for 
+which we already know a good threshold and that we can measure again for any new protocol to shift 
+the treshold accordingly. Even for MMML-Predict, this is a problem for the distant future.
+
+Looking back at this thesis, we can say with confidence: the state of MMML-Predict is strong and 
+it is getting stronger.
