@@ -27,58 +27,69 @@ $(\mathbf{x}_\text{test}, y_\text{test})$. The following assumes a single, split
 To be able to discuss some probabilistic caveats of validation later, we introduce some formal 
 notation. We start with a set of tuples of hyperparameters $H$, where every $h \in H$ defines a model
 up to its parameters. Determining the parameters of a model, by definition, is the job of the 
-algorithm optimizing a given loss function; we refer to this as fitting. There is a one-to-one 
-mapping between $H$ and the set of candidate models.
+algorithm optimizing a given loss function; we refer to this as fitting. Every $h \in H$ specifies 
+a candidate model and there is a one-to-one mapping between $H$ and the set of candidate models.
 
 For every hyperparameter tuple $h \in H$, we
 \begin{itemize}
     \item fit the model to the train cohort subject to $h$ and provide validated predictions for 
         every sample in the train cohort.
         A validated prediction for a sample is a prediction made by a model fit 
-        subject to $h$ to data that does not include this sample. 
+        subject to $h$ to data that does not include this sample. We obtain a vector of validated 
+        predictions $\hat{y}_\text{train} = \text{val}(h)$ of the same shape as $y_\text{train}$.
         The most common method to obtain validated predictions is a $k$-fold cross validation.
         This means we randomly assign the training samples into $k$ subsets, called folds, and then actually 
         fit $k+1$ models, one model on all samples and for every $i = 1, \ldots, k$, we train a model
-        on all samples except the $i$-th fold and obtain its cross-validated predictions on the 
-        $i$-th fold; these are predictions on new data. Doing this for all folds, we obtain a 
-        cross-validated prediction for every sample and hence a vector of cross-validated predictions
-        $\hat{y}_\text{train} = \text{cv}(h)$ of the same shape as $y_\text{train}$. 
-    \item Afterwards, we use the cross-validated predictions to calculate the validation error 
+        on all samples \textit{except} the $i$-th fold and obtain its cross-validated predictions 
+        \textit{on} the $i$-th fold. Doing this for all folds, 
+        we obtain a cross-validated prediction for every sample.
+    \item Afterwards, we calculate the validation error 
         $\text{err}(y_\text{train}, \hat{y}_\text{train})$.
 \end{itemize}
 
 Finally, we select the model $m^*$ with minimal validated error defined by the hyperparameter tuple 
 \begin{align}
-    h^* = \argmin_{h \in H} \ \text{err}(y_\text{train}, \text{cv}(h)).
+    h^* = \argmin_{h \in H} \ \text{err}(y_\text{train}, \text{val}(h)).
 \end{align}
 
-$\text{cv}$ is not a deterministic mapping. The procedure to calculate validated predictions often 
-involves randomness, e.g. how we split the training samples into folds in a cross validation, and 
-many fitting algorithms like that of random forests resort to randomness. Therefore, we 
-treat $\text{cv}(h)$ as a random variable. It is a well known property of independent,
-identically distributed (i.i.d.) real random variables $X_i, i \in \NN$, that their extreme values 
-are notoriously unstable in the sense that for all $t \in \RR$ with $P(X_1 \geq t) < 1$, 
+$\text{val}$ is not a deterministic mapping. The procedure to calculate validated predictions often 
+involves randomness, e.g. how we split the training samples into folds in a cross validation and 
+many fitting algorithms like that of random forests resort to randomness. The computer does this 
+independently between the $\text{val}(h)$. Therefore, we treat the validation errors
+$\text{err}(y_\text{train}, \text{val}(h))$ as independent 
+real random variables. It is a well known property of independent, identically distributed (i.i.d.) 
+real random variables $X_i, i \in \NN$, that their extreme values are notoriously unstable: for all 
+$t \in \RR$ with $P(X_1 \geq t) < 1$, 
 \begin{align}
     \Pr\left( \min_{1 \leq i \leq n} X_i \geq t \right) = \Pr(X_1 \geq t)^n \to 0 \quad
     \text{as } n \to \infty.
 \end{align}
 
-Usually, not all $\text{err}(y_\text{train}, \text{cv}(h)), h \in H$, are i.i.d. because some models
-models specified by $H$ are better suited for the problem than others.
-Still, subsets of $H$ can easlily deliver models with validation errors close to being i.i.d. 
-We often try out a bunch of hyperparameter tuples across which the fit models 
-do not essentially differ and hence their validated predictions and errors are essentially the 
-same, in other words: identically distributed.
-All that makes the validated errors differ is independent randomness. This particularly holds true 
-for the subset of $H$ that specifies unsuited, merely guessing models. In both cases, with growing 
-size of such a subset of $H$, the minimal validated error among the models in this subset will get 
-lower and lower.
+To avoid this disaster, which is nothing but overfitting the validated predictions to the training 
+data, we need $\text{err}(y_\text{train}, \text{val}(h))$ with clearly distinct distributions. 
+How can we achieve this this? First, we can choose $H$ in such a way that the fit models are 
+notably distinct. There is, however, a trade-off: the rougher and smaller $H$ is, the more distinct 
+the models and their validated errors are, but the higher the chance is that we miss out on a very good 
+model. Vice versa, the larger and more granular $H$ is, the more likely one of the $h \in H$ 
+specifies a very performant model, but the less likely validation is to reveal this model because,
+due to near-i.i.d.\ validation errors in subsets of $H$, another, actually worse model might sneak 
+in a greatly underestimated validation error. Second, differrent methods to calculate validated
+predictions can leverage differences in the distribution of the 
+$\text{err}(y_\text{train}, \text{val}(h))$ differently. We will not just use cross validation, but 
+also so-called out-of-bag predictions in the case of random forests in this thesis. Third, the 
+magic bullet of machine learning also helps cure this problem: more training samples will make it 
+harder to overfit the validated predictions.
 
-This underscores the need for a smart and lean choice of the candidate models or hyperparameter 
-tuples, respectively. Exclusion criteria for candidate models may be theoretical considerations
-and experience by both us and others. Concerning experience, this means we will not move away too 
-far from default hyperparameters and we will develop heuristics in chapter \ref{chap:results} as 
-we move from one data set to the next.
+What do we conclude from this for practice? First, we aim to choose $H$ in a smart and lean way. 
+We do not want to have big subsets of $H$ that specify more or less the same model. This is hard 
+to foresee, but criteria may be theoretical considerations and experience by both us and others 
+like default or automatically generated hyperparameters. Second, once we have fit and validated 
+all models specified in $H$ and tested the chosen one, we can unlock the test data for all other 
+models to analyze the relationship between validated and tested errors. We can look out for subsets 
+of $H$ with validated errors strikingly deviating from tested errors or with high test errors and 
+exclude them from $H$ in the future. Third, we try to increase the number of samples in training 
+and test data by combining data sets. This comes with some caveats we will deal with later, but 
+we hope that more reliable validation errors and better models will compensate for this.
 
 \subsection{Testing}
 
@@ -90,29 +101,29 @@ $m^*$ on the test cohort and estimate its performance on independent data via
 
 \subsection{Choice of the error function}\label{sec:error-function}
 
-Taking into account the calculations in section \ref{sec:intro-mmml},
-we want to optimize the precision of the high-risk group, which must comprise at least 15\% of the 
-samples in our data. Since an error should be the lower, the better the model is, we choose 
+As stated in section \ref{sec:intro-mmml}, the MMML-Predictor should detect a high-risk group 
+with an as-high-as-possible precison under the constraint that its prevalence must surpass 
+\num{10}\%. Since an error should be the lower, the better the model is, we choose 
 $\text{err}$ to be the minimum of the negative precisions with a prevalence of at least 17\%. We 
-add two percentage points to the prevalence as it should only cost us a small fraction of the 
-precision, increases statistical power and makes the error function more robust as we will see 
-next. 
+add seven percentage points to the \num{10}\% prevalence as it increases statistical power and makes 
+the error function more robust as we will see next. 
 
 Usually, we need 
 to take a minimum over \textit{several} precisions because most models do not output the final 
 classification.
-Instead they return a continuous score where a higher score means a higher probability of being
-in the positive class, in our case being high-risk, and this continuous score needs thresholding
+Instead, they return a continuous score where a higher score means a higher vote of being
+in the positive class, in our case being high-risk. This continuous score needs thresholding
 via $\hat{y}_i > t$ for some $t \in \RR$.
 We notice that as we increase $t$ and thereby decrease the prevalence, the obtained 
-adjacent precision values more and more depend on one another; for high $t$ and low 
-prevalences, fluctuations of up to 50 percentage points would be possible, but requiring a 
+adjacent precision values fluctuate less and less; for high $t$ and low 
+prevalences, fluctuations of up to \num{50} percentage points would be possible, but requiring a 
 prevalence of at least 17\% caps such fluctuations at 
 \begin{align}
     \frac{1}{\ceil*{\num{0.17} \cdot n_\text{test}}}
 \end{align}
-for $n_\text{test}$ samples in the test cohort. This gives us an error function that is tailored 
-for our problem, sufficiently far-sighted and robust.
+for $n_\text{test}$ samples in the test cohort as an easy calculation shows, cf. also Fig.\ 
+\ref{fig:inter-output-prec} in practice. This gives us an error function that is tailored 
+for our problem and robust.
 
 As indicated by the notation $\text{err}(y_\text{train}, \hat{y}_\text{train})$ and 
 $\text{err}(y_\text{test}, \hat{y}_\text{test})$, we optimize $t$ on the true outcomes 
@@ -124,8 +135,8 @@ almost optimal choice) on both train and test cohort correponds to a prevalence 
 slightly above 17\% such that one can agree on the following when it comes to the MMML-Predict data: 
 choose $t$ as the 17\%-quantile of the continuous model output on the test cohort.
 
-Similarly, given a cohort, we threshold the IPI in such a way that it maximizes the precision under 
-the constraint of a prevalence of at least \num{10}\% on this cohort and call this veritable 
+Similarly, given some cohort, we threshold the IPI in such a way that it maximizes the precision under 
+the constraint of a prevalence of at least \num{10}\% on this cohort and call this truly 
 binary classifier thresholded IPI, in short tIPI. Usually this amounts to thresholding the IPI via 
 $\text{IPI} \geq 4$. The IPI only needs to deliver the minimum 
 attention-triggering prevalence of \num{10}\% while its challengers, our models, need a somewhat 
@@ -133,9 +144,10 @@ higher prevalence to gain statistical power against the IPI as explained before.
 the IPI's threshold for a given cohort ensures a fair competition.
 
 In general, given data $(\mathbf{x}, y)$, we denote the prevalence of a model $m$ correspoding to 
-$\text{err}(y, m(\textbf{x}))$ by $\text{prev}_y(m)$ and the corresponding precision by $\text{prec}_y(m) = 
--\text{err}(y, m(\textbf{x}))$. When it is clear from the context which data set or subset of a data set 
-we are talking about, we just write $\text{prev}(m)$ and $\text{prec}(m)$.
+$\text{err}(y, m(\textbf{x}))$ by $\text{prev}_{\mathbf{x}, y}(m)$ and the corresponding precision 
+by $\text{prec}_{\mathbf{x}, y}(m) = -\text{err}(y, m(\textbf{x}))$. When it is clear from the 
+context which data set or subset of a data set we are talking about, we just write $\text{prev}(m)$ 
+and $\text{prec}(m)$.
 
 \subsection{Inter-technical variability} 
 One could instead suggest to already optimize the output threshold of our models on the cross-validated 
@@ -152,32 +164,33 @@ inter-technical variability whenever we combine data sets or have a model predic
 other than the one it was trained on.
 
 If we 
-measure the same $p$ features of the $n$ patients in $\mathbf{x} \in \RR^{n \times p}$ again with 
+measure the same $p$ features of the $n$ patients in $\mathbf{x} \in \RR^{n \times p}$ again under 
 another protocol, we end up with another predictor 
 $\mathbf{z} \in \RR^{n \times p}$.
-For gene-expression levels,
+For logarithmized gene-expression levels,
 we can often well model the discrepancies with two indepedent biases, sample-wise effects $\theta_i$
 and feature-wise effects $\omega_j$, leading to
 \begin{align}\label{eq:inter-tech-exact}
     \Delta_{ij} = \mathbf{z}_{ij} - \mathbf{x}_{ij} = \theta_i + \omega_j + \epsilon_{ij}
 \end{align}
-for residues $r_{ij}$. Assuming accurate modeling, i.e. small residues, we can well approximate
+for residues $\epsilon_{ij}$. Assuming accurate modeling, i.e. small residues, we can well approximate
 \begin{align}
     \mathbf{z}_{ij} \approx \tilde{\mathbf{z}}_{ij} = \mathbf{x}_{ij} + \theta_i + \omega_j.
 \end{align}
-We can now apply an ordinary linear -- or Gaussian -- model to $\mathbf{z}$ obtaining
+We can now apply an ordinary linear model with parameters $(\beta_0, \beta)$ to $\mathbf{z}$ 
+and obtain
 \begin{align} \label{eq:inter-tech}
 \begin{split}
     \beta_0 + \sum_{j=1}^p \beta_j \mathbf{z}_{ij} &\approx \beta_0 + \sum_{j=1}^p \beta_j \tilde{\mathbf{z}}_{ij} \\
     &= \beta_0 + \sum_{j=1}^p \beta_j \mathbf{x}_{ij} + \sum_{j=1}^p \beta_j \theta_i + \sum_{j=1}^p \beta_j \omega_j.
 \end{split}
 \end{align}
-The second summand is zero under the zero-sum constraint $\sum_{j = 1}^p \beta_j = 0$ and the third 
+The third summand is zero under the zero-sum constraint $\sum_{j = 1}^p \beta_j = 0$. The fourth 
 summand is constant across all samples and can be absorbed by the intercept, cf.\ 
 \cite{transplatform17}. 
 
-Under these (not very 
-strict) conditions, going from one protocol to another just leads to a constant shift of the model 
+Under these assumptions, which are pretty realistic,
+going from one protocol to another just leads to a constant shift of the model 
 output; even for generalized linear models, i.e. a Gauss model composed with some monotic link function,
 inter-technical variability does not change the ordering of the samples. All one needs to do to 
 obtain a final classification is calibrating the threshold for the output scores. However, this 
@@ -192,20 +205,21 @@ Model-agnostic hyperparameters are those hyperparameters we can set and tune for
 concern the predictor matrix $\mathbf{x} \in \RR^{n \times p}$ and the response vector $y \in 
 (\RR \times \{ 0, 1 \})^n \cup \{ 0, 1 \}^n$. We can provide the response in two formats. In the 
 first case, the response has two entries per sample: the first one is the time to event, in our 
-case progression-free survival, and the second one indicates if the event has occured (1) or 
-if the patient was censored before it could occur (0); more on this in subsection 
+case PFS, the second one is the censoring status and is 1 if the event did occur at this time and 
+0 if the sample was censored at this time before the event could occur; more on this in subsection 
 \ref{subsec:core-models} when we present the Cox model. In the second case, the response is a binary 
-vector with 1 indicating the positive class (high-risk DLBCL)
-and 0 indicating the negative class (low-risk DLBCL). Note that in the latter case we need 
+vector with 1 encoding the positive class, high-risk DLBCL,
+and 0 encoding the negative class, low-risk DLBCL. Note that in the latter case we need 
 to discard samples censored before two years, but this is typically only a small proportion of the 
 samples in the data set.
 
 \subsubsection{A-priori feature selection}
 
-Of course, not every feature in the data set should be part of the predictor matrix $\mathbf{x}$. Including 
-features measured to toward the end of a patinent's therapy or even after it, is cheating and we 
+Not every feature in the data set should be part of the predictor matrix $\mathbf{x}$. Including 
+features measured toward the end of a patinent's therapy or even after it, is cheating and we 
 should definitely exclude them. Excluding any of the remaining features is hard to justify: If we 
-know for a feature that it alone is associated with the response, we of course include it in $\mathbf{x}$.
+know for a feature that it alone is associated with the response, we include it in $\mathbf{x}$ 
+without doubt.
 On the other hand, if a feature alone shows no link to the response, the right model might still be 
 able to leverage it in combination with other features; but at this step, we do not know if such 
 a model exists and if it is among our candiate models. The only remaining option for handpicking 
@@ -220,7 +234,8 @@ a handful and have all the other feature selection happen during model fitting.
 \paragraph{Gene-expression data}
 The first and most important decision to make is: do we want to include the high-dimensional
 gene-expression part of the data at all? If we do not, we suddenly have $p \ll n$ instead of 
-$p \gg n$ and we can use much more complex models. 
+$p > n$ or even $p \gg n$. This strongly effects the models we fit, hence also $H$ and 
+validation.
 
 \paragraph{Features in different formats}
 Second, we need to make a couple of more decisions regarding the format of some features.
@@ -229,27 +244,27 @@ Second, we need to make a couple of more decisions regarding the format of some 
         form; discretized as by the IPI inventors; the IPI score as a single continuous feature; 
         or the so-called IPI group, a partioning of the IPI score into three groups. Similarly, 
         widely accepted thresholds may exist for other clinical and genetic features.
-    \item For already existing models, we can include their continuous output or also threshold 
-        it. E.g., cell-of-origin signatures can be -- and most of the time in data sets already 
-        have been -- thresholded into ABC, GCB and unclassified subtypes. The above-mentioned IPI 
-        group thresholds the IPI model. 
+    \item For already existing models, we can either include their continuous output or threshold 
+        it. E.g., cell-of-origin signatures can be hresholded into ABC, GCB and unclassified 
+        subtypes. Data sets of only provide this grouping and not the raw continuous score. The 
+        above-mentioned IPI group thresholds the IPI model. 
 \end{itemize}
 
-E.g., imagine a data set provides the five IPI features in continuous format and the continuous output 
-of some gene-expression signature for which 
-its inventors also provide a preferred threshold. If we want to decide for exactly one format 
-per feature, this leaves us with $4 \cdot 2$ possibilities for this simple case. If we want try out 
-every combination of non-empty subsets, the number of possibilities jumps to $2^4 \cdot 2^2 = 
-64$. 
+E.g., imagine a data set provides the five IPI features in continuous format, from which we can 
+easily infer all other mentioned formats, and the continuous output of some gene-expression 
+signature for which its inventors also provide a preferred threshold. If we want to decide for 
+exactly one format per feature, this leaves us with $4 \cdot 2$ possibilities for this simple case. 
+If we want try out every combination of features in any format, the number of possibilities jumps to 
+$2^4 \cdot 2^2 = 64$. 
 
 Our solution here again is to be generous and include all formats of a feature in $\mathbf{x}$ a 
 certain model may benefit from. This sentence usually 
-simplifies to do: include all widely used formats of a feature in $\mathbf{x}$. E.g., generalized linear models
-cannot threshold continuous features, so a feature in its thresholded format may give a rough 
-contribution to the prediction while the same feature in its continuous form may further refine it.
-Moreover, even decision trees can benefit from a feature additionally provided in its thresholded 
-format if this threshold has been inferred on a much bigger data set since the decision tree 
-may not be able to find the threshold itself.
+simplifies to do: include all widely used formats of a feature in $\mathbf{x}$. E.g., generalized 
+linear models cannot threshold continuous features, so a feature in its thresholded format may give 
+a rough contribution to the prediction while the same feature in its continuous form may further 
+refine it. Moreover, even decision trees can benefit from a feature additionally provided in its 
+thresholded format if this threshold has been inferred on a much bigger data set since the decision 
+tree may not be able to find the threshold itself.
 
 \subsubsection{Imputation}
 
@@ -264,39 +279,48 @@ This enables reasonable computing.
 
 \paragraph{Imputing}
 
-We then mean-impute the remaining missing values. At this point, we model a categorical feature 
-with $c$ categories as $c-1$ binary dummy features; if for a sample this categorical feature is not 
-available, all $c-1$ dummy features will be \texttt{NA}. For every column in $\mathbf{x}$, we calculate the 
+At this point, we dichotomize a categorical 
+feature with $c$ categories into $c-1$ binary dummy features; if for a sample this categorical feature is not 
+available, all $c-1$ dummy features will be \texttt{NA}. This yields a modified $\mathbf{x}$ that 
+bears exactly the same information as before. For \textit{every} column in $\mathbf{x}$, we calculate the 
 mean of the available features in $\mathbf{x}$ and replace the \texttt{NA} values with it. 
-For a missing categorical feature, every dummy feature therefore holds the marginal probability 
-that the feature is in the $k$-th category. This is efficient, transparent and easily applicable to 
-new data.
+For a missing categorical feature, every dummy feature therefore holds the marginal Bernoullie 
+probability that the feature is in the $k$-th category. This is efficient, transparent and easily 
+applicable to new data.
 
 \subsubsection{Adding combinations of discrete features to the predictor}
 
-We add all combinations of at most $n_\text{combi}$ categorical features that are positive in a 
+Next, we add all combinations of at most $n_\text{combi}$ categorical features that are positive in a 
 share of at least $s_\text{min}$ patients to $\mathbf{x}$; e.g., we add a column ``female \& ABC-type 
 tumor'' if at least \num{5}\% of patients have this property. We always choose $s_\text{min}
 = 5\%$. We set $n_\text{combi} = 1$ for models that facilitate interactions between features 
 themselves, otherwise we set $n_\text{combi} = 3$.
 
+Technically, we need to combine the binary features we derived from distinct categorical features 
+in the previous step. We realize this by multiplying the corresponding columns in 
+$\mathbf{x}$ element-wise. We thereby keep treating the value of a binary feature as a Bernoullie
+probability under the assumption that the binary dummy features involved in the combination are 
+independent, which is not always justified. The average of a combined (Bernoullie) feature over all 
+samples, for which we apply the threshold $s_\text{min}$, therefore approximates the expected value 
+of the combined feature.
+
 \subsubsection{Tuning the definion of ``high risk''}
 
-Defining a patient as high-risk if and only if the progression-free survival is less than two years
-is clinically accepted, yet quite arbitrary decision. It may not be the time cutoff that 
-separates patients' survival 
-best from a biological point of view. Therefore we can provide the fitting 
-algorithm a modified response $y$, governed by the time cutoff $T > 0$, which we will refer to as 
-training survival cutoff.
+Defining a patient as high-risk if and only if the PFS is less than two years
+is a clinically accepted, yet quite arbitrary decision. It may not be the time cutoff that 
+separates PFS best from a biological point of view. Therefore, we can provide the fitting 
+algorithm a refined response $y$, governed by the \textit{training survival cutoff} $T > 0$.
 \begin{itemize}
-    \item For binary response $y \in \{0, 1\}^n$, we set $y_i = 1$ if the progression-free survival 
-        of patient $i$ is less than $T$ and $y_i = 0$ otherwise.
+    \item For binary response $y \in \{0, 1\}^n$, we set $y_i = 1$ if the PFS 
+        of patient $i$ is less than $T$ and $y_i = 0$ otherwise. The higher $T$ is, the more 
+        samples we need to discard due to censoring.
     \item For response $y \in (\RR \times \{0, 1\})^n$ with time to event and censoring, we censor 
         all samples with time to event exceeding $T$ at $T$.
 \end{itemize}
 Patients may separate much more clearly for some $T \neq 2$ and as long as we come up 
-with a positive cohort that comprises at least 15\% of the samples, this allows us to fulfill our 
-task more easily.
+with a positive cohort that comprises at least 15\% of the samples of the test data, this allows us 
+to fulfill our task more easily. We stress that $T$ only influences how we train models. For 
+validation and testing, a PFS of \num{2} years stays the crucial cutoff.
 
 \subsection{Core models}\label{subsec:core-models}
 
@@ -314,9 +338,8 @@ the predictor and the response, respectively. More
 precisely, we observe independent training samples $(x_i, y_i) \in \RR^{p+1}, i = 1, \ldots, n$, 
 distributed according to $(X, Y)$; $x_i$ is the $i$-th row of the predictor matrix $\mathbf{x}$ and
 $y_i$ is the $i$-th entry of the response vector $y$. The i.i.d.\ test samples follow the same 
-distribution as the training samples, but in this subsection everything is about the training and 
-hence the training samples; if we say samples in this subsection, we always refer to the training   
-samples.
+distribution as the training samples, but in this subsection everything is about training. If we 
+say samples in this subsection, we always refer to the training samples.
 
 \subsubsection{Generalized linear models}\label{subsubsec:glm}
 
@@ -332,12 +355,12 @@ $(x_i, y_i)$, we obtain
 \begin{align}
     \mu_i = E(Y \cond X = x_i) = g^{-1}\left(\beta_0 + \sum_{j=1}^p \beta_j x_{ij}\right).
 \end{align}
-Relating $\mu_i$ to $y_i$ via a log likelihood, will allow us to fit $(\beta_0, \beta)$ to 
+Relating $\mu_i$ to $y_i$ via a log likelihood will allow us to fit $(\beta_0, \beta)$ to 
 $(x_i, y_i)_{i = 1, \ldots, n}$. We can express the \textit{linear predictor} 
 $\sum_{j=1}^p \beta_j x_{ij}$ in terms of the Euclidean scalar product as $x_i^T \beta$, where 
 $x_i^T$ denotes the transpose of the column vector $x_i$.
 
-\paragraph{Ordinary linear model}
+\paragraph{Gauss model}
 Here, $g = \text{id}$. $Y$ and $Y \cond X = x_i$ for all $i = 1, \ldots, n$ follow a normal
 distribution with fixed standard deviation $\sigma > 0$ (a property called homoscadasticity), but 
 varying mean. The log likelihood of $\mu_i$ is
@@ -382,7 +405,8 @@ While we do not deviate from default value $1/n$ for the sample weights in the r
 \ref{chap:results}, we will discuss in chapter \ref{chap:discussion} how we can use them in the 
 future in a natural way without getting lost in the vast amount of freedom one has to choose them.
 
-What is the zero-sum constraint good for? Imagine, part of the features suffer from sample-wise 
+We want to demonstrate what the zero-sum constraint is good for in a more general setting. Imagine, 
+part of the features suffer from sample-wise 
 shifts. We denote these features by $J \subset \{1, \ldots, p\}$ and the shifts by $s_i \in R$, 
 $i = 1, \ldots, n$. We now set the zero-sum weights  
 \begin{align}
@@ -416,30 +440,31 @@ talk about the output of a GLM, we always mean the output of the linear predicto
 makes $g$ more a tweak in the loss function, important for training, than a part of the modelling 
 function.
 
-We are not done, yet, with the loss function: the coordinate descent minimizes 
-Eq.\ \eqref{eq:loss-glm-no-lasso} with a regularization term add. Before we discuss this, we want 
+We are not done, yet, with $L$: the coordinate descent minimizes 
+Eq.\ \eqref{eq:loss-glm-no-lasso} with a regularization term added. Before we discuss this, we want 
 to introduce a model that is closely related to GLMs.
 
 \subsubsection{Cox proportional-hazards model}\label{subsubsec:cox}
 
-For the Cox proportional-hazards model -- or in short: Cox model -- the response variable $Y$ 
-measures the time until the event of interest occurs (``event'') or the time after which at some 
-point the 
-event occurs (``censoring''). Another binary random variable $\delta: \Omega \to \RR$ encodes 
+For the Cox proportional-hazards model -- in short: Cox model -- the response variable $Y$ 
+measures the time \textit{until} the event of interest occurs (``event'') or the time 
+\textit{after} which the event occurs (``censoring''). Another binary random variable 
+$\delta: \Omega \to \RR$ encodes 
 which of these two options is the case: $\delta(\omega) = 1$ for the event, $\delta(\omega) = 0$ 
 for censoring. This pays tribute to an important characteristic of survival trials: some
 participants drop out of the trial before the event could happen -- e.g. the trial terminated, the 
 patient decided to withdraw or died from another cause -- or the event luckily never happens.
 
 \paragraph{Hazard function} To understand what the Cox model predicts, we need another random 
-variable $T: \Omega \to \RR$, the time to the event (this time not affected by censoring), and 
-require $T$ to have a density $f_T: \RR \to \RR$. We define the hazard function $h: \RR \to \RR$
+variable $T: \Omega \to \RR$, the time to the event. Unlike $Y$, $T$ is not affected by censoring. 
+We require $T$ to have a density $f_T: \RR \to \RR$ and define its hazard function $h: \RR \to \RR$
 via
 \begin{align}
     h(t) = \lim_{\Delta t \to 0} \frac{P(t \leq T < t + \Delta t \cond T \geq t)}{\Delta t}.
 \end{align}
 We can interprete $h(t)$ as the instantaneous rate at which the event is occurring at time $t$, 
-given that the event has not occured before time $t$. Let $F_T$ be $T$'s distribution function. Then 
+given that the event has not occured before time $t$. Let $F_T$ be the distribution function of 
+$T$. Then 
 we can write
 \begin{align}
     \frac{P(t \leq T < t + \Delta t \cond T \geq t)}{\Delta t} = 
@@ -453,11 +478,12 @@ Hence,
 where $S(t) = 1 - F_T(t)$ is the survival function, and $h(t)$ is well-defined as long as $S_T(t)
 > 0$.
 
-\paragraph{Conditional hazard} The Cox model wants to get a hand on \textit{conditional} hazards.
+\paragraph{Conditional hazard} The Cox model proposed in \cite{cox72} wants to get a hand on 
+\textit{conditional} hazards.
 Intuitively, it is clear that the population with one value of $X$ can have a vastly different 
 hazard function than the population with another value of $X$ if $X$ has predictive power for $T$.
 Formally, however, it is hard to define a conditional hazard function: $X$ may very well 
-have a continuous distribution, hence we condition on an event of probability $0$ when we write 
+follow a continuous distribution, hence we condition on an event of probability $0$ when we write 
 $P(t \leq T < t + \Delta t \cond T \geq t, X = x)$ -- it is hard to define this in a natural
 and straightforward way. In practice, the measurements in $X$ often fluctuate around their true 
 values anyway, so it is sensible to condition on a small neighborhood of $x$, say an $\epsilon$-ball 
@@ -486,15 +512,17 @@ for parameters $\beta \in \RR^p$.
 \paragraph{Partial log likelihood}
 Given our independent samples $(x_i, y_i, \delta_i) \in \RR^{p+2}$, $i = 1, \ldots, n$, distributed 
 according to $(X, Y, \delta)$, let $E \subset \{ 1, \ldots, n \}$ refer to the non-censored samples 
-($\delta_i = 1$) and for $i \in E$, let $R_i$ denote the set of samples where no event has occurred 
+($\delta_i = 1$). For $i \in E$, let $R_i$ denote the set of samples where no event has occurred 
 until $y_i$, i.e. $y_j \geq y_i$ for all $j \in R_i$. For fixed $i \in E$ and time to event $y_i$,
 conditionally on the risk set $R_i$, the probability that the event occurs on sample $i$ as 
 observed is
 \begin{align}
     \frac{h(y_i \cond X = x_i)}{\sum_{j \in R_i} h(y_i \cond X = x_j)} = 
     \frac{\exp(x_i^T \beta) h_0(y_i)}{\sum_{j \in R_i} \exp(x_j^T \beta) h_0(y_i)} = 
-    \frac{\exp(x_i^T \beta)}{\sum_{j \in R_i} \exp(x_j^T \beta)}.
+    \frac{\exp(x_i^T \beta)}{\sum_{j \in R_i} \exp(x_j^T \beta)}
 \end{align}
+according to \cite[Eq. (12)]{cox72}.
+
 Taking all events into account yields the partial likelihood 
 \begin{align}
     \tilde{\ell}(\beta) = \prod_{i \in E} \frac{\exp(x_i^T \beta)}{\sum_{j \in R_i} \exp(x_j^T 
@@ -503,8 +531,8 @@ Taking all events into account yields the partial likelihood
 Because $T$ is continuous, there is a zero probability for two distinct samples having the same 
 event time, so we need not resort to one of the more sophisticated likelihoods capable of handling ties.
 Analogously to Eq. \eqref{eq:loss-glm-no-lasso}, we can equip the log likelihood with sample 
-weights $w_i > 0$ and zero-sum weights $u_j \geq 0$ such that the loss function reads 
-\begin{align}
+weights $w_i > 0$ and zero-sum weights $u_j \geq 0$ such that the refined log likelihood reads 
+\begin{align}\label{eq:cox-log-lh}
 \begin{split}
     L(\beta) &= \sum_{i \in E} w_i x_i^T \beta - \log \left( \sum_{j \in R_i} w_j \exp(x_j^T
     \beta) \right) \\
@@ -514,7 +542,7 @@ weights $w_i > 0$ and zero-sum weights $u_j \geq 0$ such that the loss function 
 As with GLMs, we can leverage the zero-sum constraint to reach shift-invariance.
 
 There are more analogies to GLMs. In Eq.\ \eqref{eq:cox-proportional-factor}, we also compose the 
-linear predictor with an increasing function. Given a cohort of samples, we are stil most 
+linear predictor with an increasing function. Given a cohort of samples, we are still most 
 interested in the ordering of the output scores and the linear predictor $x_i^T \beta$ already 
 uniquely determines this ordering. Again, when we talk about the output of a Cox model, we mean the 
 output of the linear predictor. In light of all these similarities,
@@ -526,10 +554,11 @@ Modern molecular measurements are a big factor in our hope that MMML-Predict can
 the IPI. These measurements, like gene expression levels, show up as hundreds if not thousands of 
 features in our data, meaning we usually have $p > n$ if not $p \gg n$. In this situation, we 
 cannot uniquely determine the parameters of any of the models by maximzing the log likelihood: 
-the models have way more degress of freedom than we have samples, find biologically meaningless 
-and non-reproducible structures in the training cohort and generalize to poorly to new data.
+the models have way more degress of freedom than we have samples, they will find biologically 
+meaningless and non-reproducible structures in the training cohort and generalize poorly to new 
+data.
 
-The solution to this is to restrict the freedom of the model to the extent that it is forced to 
+A solution to this is to restrict the freedom of the model to the extent that it is forced to 
 learn the gist from the data. For that reason, we want to penalize model complexity. Elastic-net 
 regularization, a widely adopted method proposed by Zou and Hastie \cite{elasticnet05}, does this 
 job for us. The elastic net generalizes two well-established regularization methods,
@@ -546,7 +575,7 @@ by combining them with a weight factor $\alpha \in [0, 1]$ into
     p_{\text{enet}, \alpha}(\beta) = \frac{1-\alpha}{2} |\beta|_2^2 + \alpha |\beta|_1.
 \end{align}
 Muliplited with the regularization strength $\lambda \geq 0$, we can add it to the negative 
-log likelihood to obtain the regularized loss function
+(refined) log likelihood to obtain the regularized loss function
 \begin{align}
     \mathcal{L}(\beta_0, \beta) = -L(\beta_0, \beta) + \lambda p_{\text{enet}, \alpha}(\beta).
 \end{align}
@@ -559,7 +588,7 @@ of correlated features. Ridge regression tends to force the coefficients of corr
 similar values while LASSO tends to pick one of them and set the others to zero. E.g, in the 
 extreme case of $k$ identical features, the LASSO arbitrarily picks one of them with, say, 
 coefficient $a$; the ridge regression, meanwhile, assigns every of the $k$ features the coefficient 
-$a/k$. Relying a very few features comes with the advantage of sparse models, for which we 
+$a/k$. Relying on very few features comes with the advantage of sparse models, for which we 
 can cheaply generate new data, but it is very sensitive to measurement errors in one of the picked 
 features; in the latter case, ridge regularization would average out errors with the help of other 
 correlated features. Elastic-net regularization balances the sparsity of the LASSO with the 
@@ -584,16 +613,19 @@ predictor. We can use the weights to standardize $X$ by setting $v_j$ to an esti
 deviation of feature $j$. Why 
 should we do this? Let us consider two features $X_1$ and $X_2$ with standard deviation $\sigma_1$
 and $\sigma_2$, respectively. To change the output of the model by $1$ when the feature changes by 
-one standard deviation, $X_1$ needs the coefficient $\beta_1 = 1/\sigma_1$ and $X_2$ needs 
-$\beta_2 = 1/\sigma_2$. For $\alpha = 1$, $p_{\text{enet}, \alpha}$ penalizes both coefficients 
-equally and it still does so approximately for $\alpha$ slightly below $1$. Standardization strives 
-to garuantee equal justice for features on different scales.
-Standardization works, however, contrary to the zero-sum idea: thanks to the zero-sum constraint, 
-the fitting process and the final model both are invariant under sample-wise shifts on a subset of 
-features if we set the zero-sum weights accordingly. Standardization, in contrast, actively changes 
-the cost function, which probably results in a different model. Consequently, one should stick to 
-the default value $v_j = 1$ for the features for which we wish to have shift-invariance; these 
-are usually the gene expression levels, which are on comparable scales anyway.
+one standard deviation and all other features keep their values, $X_1$ needs the coefficient 
+$\beta_1 = 1/\sigma_1$ and $X_2$ needs $\beta_2 = 1/\sigma_2$. For $\alpha = 1$, 
+$p_{\text{enet}, \alpha}$ penalizes both coefficients equally and it still does so approximately 
+for $\alpha$ slightly below $1$. Thanks to standardization of $X$, $\beta_1$ and $\beta_2$ contribute 
+$1$ to the elastic-net penalty. Standardization strives to garuantee equal justice for features 
+on different scales. Standardization works, however, contrary to the zero-sum idea: thanks to the 
+zero-sum constraint, the fitting process and the final model both are invariant under sample-wise 
+shifts on a subset of features if we set the zero-sum weights accordingly. Sample-wise shifts 
+change the standard deviation of the affected features. With standardization, in 
+contrast, this changes the cost function, which probably results in a different model. 
+Consequently, when deploying the zero-sum constraint in some way, one should stick to the default 
+value $v_j = 1$ for the features for which we wish to have shift-invariance; these are usually the 
+gene-expression levels, which are on comparable scales anyway.
 
 \subsubsection{Random forests}
 
@@ -606,7 +638,7 @@ trees -- and aggregate the classification of every constituent tree.
 \paragraph{Trees}
 A tree is a simple function
 \begin{align}
-    T = \sum_{m=1}^M c_m \chi_{R_m}: \RR^p \to \{0, 1\}
+    T = \sum_{m=1}^M c_m \chi_{R_m}: \RR^p \to \{ \pm 1 \}
 \end{align}
 with $c_m \in \{\pm 1\}$ and the $R_m$ being disjoint rectangle sets, i.e. $R_m = \prod_{j=1}^p 
 (a_j, b_j]$ for $a_j, b_j \in \RR \cup \{ \pm \infty \}$. It aims to predict the conditional 
@@ -621,7 +653,7 @@ trivially fulfill Eq. \eqref{eq:rf-major} exactly for our samples, this would on
 overfit trees. Instead, we confine ourselves with simpler, rougher trees that will make errors on 
 training samples, but generalize better. 
 In the algorithm further below, we will only need to calculate an error for the samples inside a 
-rectangle set $R \subset \RR^n$. Let $n(R) = |\{ 1 \leq i \leq n: x_i \in R \}|$ be the number of 
+rectangle set $R \subset \RR^p$. Let $n(R) = |\{ 1 \leq i \leq n: x_i \in R \}|$ be the number of 
 samples in $R$ and
 \begin{align}
     \hat{p}_R = \frac{|\{ 1 \leq i \leq n: x_i \in R, y_i = 1 \}|}{n(R)}
@@ -636,7 +668,7 @@ we demand that every rectangle set $R_m$ contain at least $n_\text{min}$ samples
 constraint still leaves us with a computationally infeasible number of possible trees, and this is 
 why we fit $T$ with a greedy algorithm: it recursively partitions every rectangle set along a 
 feature in two subsets in such a way that the impurity measure gets minimal until every resulting 
-rectangle set comprises less than $n_\text{min}$ samples. Formalizing binary partioning, for a 
+rectangle set comprises less than $n_\text{min}$ samples. Formalizing binary partitioning, for a 
 rectangle set $R$, a feature $j \in \{1, \ldots, p\}$ and split point $s \in \RR$, we define 
 the pair of half planes
 \begin{align}
@@ -645,19 +677,19 @@ the pair of half planes
 With respect to the impurity measure, there are only finitely many split points of interest since 
 we only have finitely many samples, and hence we need to consider no more than $n \cdot p$ when 
 considering $R$ for partioning. All of this allows us to compactly describe a procedure to grow a 
-tree in Alg. \ref{alg:tree}.
+tree in Alg.\ \ref{alg:tree}.
 \input{algos/tree.tex}
 
 \paragraph{Forests}
 Trees are known to be notoriously noisy, meaning if we fix $x \in \RR^p$ the variance 
 $V_\mathbf{z}(T(x))$ is quite high; the index $\mathbf{z}$ makes explicit that we consider $T(x)$ as 
 a function -- or better: random variable -- of i.i.d.\ drawing training samples $\mathbf{z}$ (and 
-then fitting a tree to them according to Alg. \ref{alg:tree}). On the other hand, if grown deep,
+then fitting a tree to them according to Alg.\ \ref{alg:tree}). On the other hand, if grown deep,
 trees have pretty low bias, meaning for fixed $x \in \RR^p$ the expectation $E_\mathbf{z}(T(x))$ 
 is close to $E(Y \cond x)$. High variance and low bias makes trees 
 ideal candidates for a method called bagging, which averages the predictions of many noisy, 
 approximately unbiased models with the goal to reduce their variance. Given trees $T_b$, $b = 1, 
-\ldots, B$, fit to some identically distributed training data $\mathbf{z}_b$, we denote the new model by 
+\ldots, B$, fit to identically distributed training data $\mathbf{z}_b$, we denote the new model by 
 \begin{align}
     \overline{T} = \frac{1}{B} \sum_{b=1}^B T_b.
 \end{align}
@@ -670,10 +702,10 @@ variance $\sigma^2$. If the $T_b(x)$ are independent, the variance is additive a
 $V_\mathbf{z}(\overline{T}(x)) = \sigma^2/B$, which tends to zero as $B \to \infty$. In practice, 
 the $T_b(x)$ are not totally independent as they have training samples in common: we do not i.i.d.\ 
 sample from the whole population $(X, Y)$, but draw a bootstrap sample of size $n$ from our training 
-data $(x_i, y_i)$, $i = 1, \ldots, n$; providing every 
-tree its own separate, tiny set of training samples would seriously increase the bias. Bootstrapping 
--- uniformly sampling without replacement -- is the key concept of bagging, explaining why 
-\textit{bootstrap aggregation} is a synonym for it. If in this 
+data $(x_i, y_i)$, $i = 1, \ldots, n$. Instead providing every 
+tree its own separate, tiny, but independent set of training samples would seriously increase the 
+bias. Bootstrapping -- uniformly sampling without replacement -- is the key concept behind bagging, 
+explaining why \textit{bootstrap aggregation} is a synonym for it. If in this 
 situation the $T_b(x)$ have a pairwise correlation of $\rho > 0$, we have 
 \begin{align}
     V_\mathbf{z}\left(\overline{T}(x)\right) = \rho \sigma^2 + \frac{1-\rho}{B} \sigma^2,
@@ -683,10 +715,10 @@ which tends to $\rho \sigma^2$ as $B \to \infty$, cf. \cite[Eq. (15.1)]{elem-sta
 Thus, in addition to bagging, random forests strive to reduce to correlation between the trees 
 without increasing the variance and bias too much. We achieve this by randomly selecting a subset
 of $m \leq p$ features every time we split a rectangle into two sub-rectangles when growing the 
-tree in Alg. \ref{alg:tree}; in 
-more detail, the $j$'s over which we take the minimum in line \ref{alg:tree:split} only range over 
+tree in Alg.\ \ref{alg:tree}. In more detail, the indices $j$ over which we take the minimum in 
+line \ref{alg:tree:split} only range over 
 these $m$ features. We denote the modified function with the appended parameter $m$ by 
-\textsc{RfTree}. Alg. \ref{alg:forest} applies these ideas all together.
+\textsc{RfTree}. Alg.\ \ref{alg:forest} applies these ideas all together.
 
 \input{algos/forest.tex}
 
@@ -694,18 +726,18 @@ Widely used default values are $m = \floor{\sqrt{p}}$ and $n_\text{min} = 1$. As
 shown above that increasing it reduces the variance at constant bias; in practice, therefore, only 
 computation time limits the number of trees in the forest. We can go for a high $B$ as fitting the 
 constituent trees is an embarrassingly parallel problem. We can 
-also validate random forests very efficiently by facilitating out-of-bag (OOB) samples: For each sample 
-$(x_i, y_i)$, we can construct its random forest predictor by averaging only those trees for which 
-$(x_, y_i)$ was not part of the bootstrapped training sample -- no need for a time consuming 
-cross validation. The predicition of this random forest predictor for $x_i$ is the OOB prediction 
-for sample $i$. When we say cross-validated prediction for a random forest, we mean the OOB
-prediction.
+also validate random forests very efficiently by facilitating \textit{out-of-bag (OOB)} samples: 
+For each sample $(x_i, y_i)$, we can construct its random forest predictor by averaging only those 
+trees for which $(x_i, y_i)$ was not part of the bootstrapped training sample -- no need for a time 
+consuming cross validation. The predicition of this random forest predictor for $x_i$ is the OOB 
+prediction for sample $i$. When we say validated prediction for a random forest, we mean the 
+OOB prediction.
 
 \subsection{Nested models}\label{subsec:nested-models}
 
 Given some \textit{early} models -- e.g. core models -- $f_i: \RR^p \to \RR$, $i = 1, \ldots, m$, 
 we can nest them into another, \textit{late} model $f: \RR^m \to \RR$ and obtain a new model 
-$f \circ (f_1, \ldots, f_m)$. 
+$g = f \circ (f_1, \ldots, f_m)$. 
 
 \subsubsection{Early models trained on another data set}
 Often, the early models have been trained on another, independent data set, so we observe their 
@@ -713,37 +745,41 @@ output as features in our data set. Examples are the cell-of-origin signature, t
 LAMIS. Such $f_i$ are merely projections onto a feature.
 
 \subsubsection{Early models trained on the same data set}
-If we need to fit some of the early models to our data ourselves, getting reliable cross-validated 
-predictions
-for $f$ becomes trickier. To simplify notation, we assume the only early model left to be fit is 
-$f_1$. How do 
+If we need to fit some of the early models to the training data ourselves, getting reliable 
+cross-validated predictions
+for $f$ becomes trickier. Without loss of generality, we assume the only early model left to be fit 
+is $f_1$. We want to fit $f_1$ according to a hyperparameter tuple $h_1$ and $f$ according to $h_2$, 
+giving us the hyperparameter tuple $h \in H$ for the nested model. How do 
 we get realistic cross-validated predictions $\hat{y}_i$, $i \in F_\ell$, for the $\ell$-th fold? 
-We start by fitting $f_1$ to $(x_i, y_i)$, $i \in \{ 1, \ldots, n \} \setminus F_\ell = F_\ell^c$.
-The question reduces to: which values for feature $1$ do we provide the algorithm fitting $f$?
+We start by fitting $f_1$ to $(x_i, y_i)$, $i \in \{ 1, \ldots, n \} \setminus F_\ell = F_\ell^c$ 
+subject to $h_1$.
+The question reduces to: which values for the output of $f_1$, denoted $o$, do we provide the 
+algorithm fitting $f$ to $(o_i, f_2(x_i), \dots, f_m(x_i); y_i)$, $i \in F_\ell^c$?
 
-The predictions $f_1(x_i)$, $i \in F_\ell^c$, are too optimistic most of the time since 
-$f_1$ overfits its training data to some extent. Consequently, $f$ will put too much
-trust in them and will generalize poorly, as $f$'s cross-validated predictions already will 
-show. We want to tackle this problem by using cross-validated predictions for $f_1$, instead.
-The first and theoretically cleanest option is to do an inner cross-validation when fitting $f_1$ 
-and provide the resulting cross-validated predictions to $f$'s fitting algorithm. However, this 
-increases time complexity by a factor of $k$ for a $k$-fold cross-validation.
-Because we fit $f_1$ in a cross-validation anyway, we prefer to provide the cross-validated 
-predictions we get in this process to $f$'s fitting algorithm; for the details, see 
-Alg. \ref{alg:nested-pcv}. 
+The choice $o_i = f_1(x_i)$ is most likely too optimistic since $f_1$ overfits its training 
+data to some extent. Consequently, $f$ will put too much trust in them and will generalize poorly, 
+as the cross-validated predictions of $f$ will already show. We want to tackle this problem by 
+using cross-validated predictions for $f_1$, instead. The theoretically cleanest approach 
+is to do an \textit{inner} cross validation for $f_1$, i.e. another cross-validation for fitting 
+$f_1$ to $(x_i, y_i)$, $i \in F_\ell^c$, and use the cross-validated predictions from \textit{this} 
+cross validation for $o$. However, this increases time complexity by a factor of $k$ for a $k$-fold 
+cross-validation. Because we fit $f_1$ to $(x_i, y_i)$, $i = 1, \ldots, n$, in a cross validation 
+anyway, we prefer to use the cross-validated predictions we get in this process for $o$. 
+Alg.\ \ref{alg:nested-pcv} writes this down clearly.
 
 \input{algos/nested_pseudo_cv.tex}
 
-This gain in time complexity compared to the other suggestion comes at a little price: a not 
-throughly clean cross validation for $g$. To see this, we assume that the assignment of samples 
-into folds in $f_1$'s and $f$'s cross validation is the same (a very realistic assumption as we 
-usually choose $k = n$). We fix a sample $i$ and another sample $j$ that is another fold. 
-Sample $i$'s cross-validated prediction $\hat{y}_i$ for $g$ (which is nothing but its 
-cross-validated prediction for $f$) depends on the cross-validated 
-prediction $\hat{y}_j^{(1)}$ for $f_1$ of sample $j$. $\hat{y}_j^{(1)}$ in turn depends on sample 
+The gain in time complexity compared to the approach involving an inner cross validation comes at a 
+little price: a not thoroughly clean cross validation for $g$. To see this, we assume that the 
+assignment of samples into folds in the cross validation for $f_1$ and $f$ is the same -- a very 
+realistic assumption as we 
+usually choose $k = n$. We fix a sample $i$ and another sample $j$ that is in another fold. 
+Sample $i$'s cross-validated prediction $\hat{y}_i$ for $g$ -- or equivalently its cross-validated 
+prediction for $f$ -- depends on the cross-validated 
+prediction $o_j$ of sample $j$ for $f_1$. $o_j$ in turn depends on sample 
 $i$. All in all, $\hat{y}_i$ very slighly depends on $(x_i, y_i)$.
 
-Next, we want to talk how we tune the hyperparameters of a nested model. In practice, one thinks of 
+Next, we want to talk about how we tune the hyperparameters of a nested model. In practice, one thinks of 
 the hyperparameter tuples $H$ as partitioned into subsets. We summarize the
 hyperparameters of a model that make it most distinct to other models in its \textit{architecure}. 
 For a core model, the architecture concerns its class (like logistic model or random forest) and 
@@ -752,28 +788,28 @@ of the involved core models and the hierarchy that nests them into one another.
 
 For a given architecture of a nested model, we need to tune the hyperparameter tuple $h = (h_1, h_2)$ 
 of 
-Alg. \ref{alg:nested-pcv}, i.e., we repeately call \textsc{NestedPseudoCV} as we vary $h \in H_0$
-with $H_0$ being the set of candidate hyperparameter tuples for this model architecture. We have 
-candidate 
+Alg.\ \ref{alg:nested-pcv}, i.e., we repeately call \textsc{NestedPseudoCV} as we vary $h \in H_0$
+with $H_0$ being the set of tried out hyperparameter tuples for this model architecture. What 
+should $H$ look like? We have candidate 
 hyperparameter tuples $H_{0, 1}$ for $f_1$ and $H_{0, 2}$ for $f$. An unprejudiced strategy is to 
 set $H = H_{0, 1} \times H_{0, 2}$. Compared to non-nested models, we try out a considerably 
 higher number of hyperparamter tuples -- roughly a factor of $|H_{0, 1}| \approx |H_{0, 2}|$ and 
 the validated errors of nested models have a higher chance 
-of being overestimated; cf. subsection \ref{subsec:train-val}. We therefore settle on a greedier 
-strategy: We first tune $h_1 \in H_{0, 1}$ and then go on to tune $h_2 \in H_{0, 2}$. 
+of being overestimated, cf.\ subsection \ref{subsec:train-val}. We therefore settle on a greedier 
+strategy: we first tune $h_1 \in H_{0, 1}$ and then go on to tune $h_2 \in H_{0, 2}$. 
 
-Often, $f_1$ deals with high-dimensional input. E.g., $f_1$ is a Gauss, logistic or Cox model 
+$f_1$ often deals with high-dimensional input. E.g., $f_1$ is a Gauss, logistic or Cox model 
 predicting from 
-several thousand RNA-seq gene expression levels. Hence, we undoubtedly need elastic-net 
-regularization in their training and need to tune the regualarization hyperparameter $\lambda$. 
-With this alone we quickly end up with several hundred hyperparameters to be tuned for $f_1$. 
+several thousand RNA-seq gene-expression levels. Hence, we undoubtedly need elastic-net 
+regularization in its training and need to tune the regualarization strength $\lambda$. 
+With this alone, we quickly end up with several hundred hyperparameters to be tuned for $f_1$. 
 With $H_{0,1}$ being so big, good validated performances have one thing in common: they are 
 probably too optimistic, the cross-validated predictions are too accurate. This means we still 
-have not gotten entirely rid of the problem that that $f$ puts too much trust into $f_1$'s output 
-misled by too optimistic values in the training. This problem will propagate into an even bigger 
-problem: even more optimistic cross-validated predictions for $g$ and an even more overestimated 
+have not gotten entirely rid of the problem that $f$ puts too much trust into $f_1$'s output 
+misled by too optimistic values in the training. This problem will propagate into another
+problem: too optimistic cross-validated predictions for $g$ and an overestimated 
 cross-validated performance of $g$. It is hard to quantify the effect, so we will have a very close 
-eye on models nested according to Alg. \ref{alg:nested-pcv} in chapter \ref{chap:results}. 
+eye on models nested according to Alg.\ \ref{alg:nested-pcv} in chapter \ref{chap:results}. 
 
 \subsubsection{Nested models and inter-technical variability}
 
@@ -792,14 +828,14 @@ With Eq.\ \ref{eq:inter-tech}, we obtain
     g(z_i) &= (f \circ (f_1, \ldots, f_m))(z_i) \\ 
     &= (z_i^T \beta, f_2(z_i), \ldots, f_m(z_i))^T \gamma \\
     &\approx (x_i^T \beta + c, f_2(x_i), \ldots, f_m(x_i))^T \gamma \\ 
-    &= c \gamma_1 + (f \circ (f_1, \ldots, f_m))(x) = c \gamma_1 + g(x_i)
+    &= c \gamma_1 + (f \circ (f_1, \ldots, f_m))(x_i) = c \gamma_1 + g(x_i)
 \end{split}
 \end{align}
 for some $c \in \RR$ and all samples $i = 1, \ldots, n$. The sample-wise shift in the output of 
 $f_1$ propagates into a sample-wise shift in the output of $g$ -- qualitatively this is the same 
 as in Eq.\ \ref{eq:inter-tech}. The residuals $\epsilon_{ij}$, $\beta$ and $\gamma$ impact the 
 above approximation. From our 
-perspective, where output ordering matters most, we can say: the better the approximation, the more 
+perspective, where output ordering matters most, we can say: the better this approximation, the more 
 monotonic the $g(z_i)$ are in $g(x_i)$. We do not elaborate on this theoretically any further; 
 in our practice in section \ref{sec:inter-trial}, we will see that the approximation is indeed
 very good.
@@ -827,7 +863,7 @@ all the methods described in this chapter to life and is available on GitHub \ci
 together with a 
 \href{https://lgessl.github.io/patroklos/}{website}\footnote{\url{https://lgessl.github.io/patroklos}}. 
 In fact, one can deploy 
-\texttt{patroklos} to solve any binary classification problem in a supervised-learning manner;
+\texttt{patroklos} to solve any binary classification problem in a supervised-learning manner.
 \texttt{patroklos} provides some extra functionality for those problems among them where the 
 reponse is a thresholded survival time, high-dimensional data is involved and one wants to maximize 
 the precision of the classifier for a sufficently large positive cohort.
@@ -840,7 +876,7 @@ tuple into a function that fits and validates models for a variety of hyperparam
 It supports fitting core models with the support of the R packages \texttt{zeroSum} 
 \cite{zerosumR} and \texttt{ranger} \cite{ranger-gh} out of the box. \texttt{zeroSum} 
 augments the popular \texttt{glmnet} package by the zero-sum constraint: it fits and 
-tunes Gaussian, logistic and Cox models in a cross-validation and endows their loss function 
+tunes Gauss, logistic and Cox models in a cross validation and endows their loss function 
 with elastic-net regularization and -- unlike \texttt{glmnet} -- the zero-sum 
 constraint. The time-critical work happens in a fast, well-structured C++ backbone. 
 \texttt{ranger} fits random forests fast, also thanks to a performant C++ backbone. 
@@ -855,7 +891,7 @@ full control of validation and unifies it
 by calculating the same error measure across all models and even more statistics of the model
 with the help of the \texttt{AssScalar} R6 class. With the \texttt{Ass2d} R6 class, the 
 user can plot one property of a truly binary classifier against another, which guides 
-thresholding models with continuous output.
+thresholding models with continuous output as in Fig.\ \ref{fig:inter-output-prec}.
 
 \paragraph{Modular, extendible design} 
 \texttt{patroklos} defines function interfaces so the user 
@@ -865,21 +901,21 @@ strive to abstract models from the data in such a way that the user can easily a
 data.
 
 \paragraph{Meta analysis} 
-\texttt{patroklos} provides tools to analyze how, for model architectures, the validated error 
-depends on the test error and allows to highlight supgroups of model 
-architectures to disclose fundamental flaws in validation.
+\texttt{patroklos} provides tools to analyze how the validated error depends on the test error and 
+allows to highlight subgroups of model architectures to disclose fundamental flaws in validation 
+and test performance.
 
 \subsection{\texttt{patroklos} in action}
 
 The Git repository that brings \texttt{patroklos} into action for this thesis is available in a 
 public version on GitHub \cite{thesis-gh}. We try our best at presenting the results in a 
 comprehensive and understandable way in the following chapter \ref{chap:results}. Yet, since code 
-is much more precise than words, the Git repository rigorously defines everything we have done to 
-obtain the results.
+is more precise than freely written text, the Git repository rigorously defines everything we have 
+done to obtain the results.
 
-The public Git repository does not contain the data because part of it is not publicly available.
-To reproduce the results of this thesis, the reader may request access to the scientific computing 
-servers of the Chair of Statistical Bioinformatics, University of Regensburg, from 
+The public Git repository does not contain the data because part of it must not be publicly 
+available. To reproduce the results of this thesis, the reader may request access to the scientific 
+computing servers of the Chair of Statistical Bioinformatics, University of Regensburg, from 
 \href{mailto:christian.kohler@ur.de}{Christian Kohler}\footnote{Email: 
 \href{mailto:christian.kohler@ur.de}{\texttt{christian.kohler@ur.de}}}; on these servers, a mounted
 volume holds all data sets.

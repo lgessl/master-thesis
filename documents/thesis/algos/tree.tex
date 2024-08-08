@@ -11,10 +11,10 @@
             n\left(R_{j,s}^{(2)}\right) Q\left(R_{j,s}^{(2)}\right)$ \label{alg:tree:split}
           \For{$\ell = 1, 2$}
             \If{$n\left(R_{j_*, s_*}^{(\ell)}\right) < n_{\text{min}}$}
-              \State $\mathcal{R} \gets \mathcal{R} \cup R_{j_*, s_*}^{(\ell)}$
+              \State $\mathcal{R} \gets \mathcal{R} \cup \left\{ R_{j_*, s_*}^{(\ell)} \right\}$
               \State $c_R \gets 1$ if $\hat{p}_R > \num{0.5}$ else \num{-1}
             \Else
-              \State $\mathcal{I} \gets \mathcal{I} \cup R_{j_*, s_*}^{(\ell)}$
+              \State $\mathcal{I} \gets \mathcal{I} \cup \left\{ R_{j_*, s_*}^{(\ell)} \right\}$
             \EndIf
           \EndFor
         \EndWhile

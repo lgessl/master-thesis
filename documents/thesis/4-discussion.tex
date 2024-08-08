@@ -77,7 +77,7 @@ for our problem. Furthermore, we should be ready to make sacrifices -- less feat
 even a different kind of the response -- to increase the number of samples in both train and test 
 cohort. 
 
-\section{The future of MMML-Predict}
+\section{The future of MMML-Predict}\label{subsec:discussion-mmml}
 
 With $m^*_\text{Schmitz}$ and even more $m^*_\text{Reddy}$, this thesis presents two 
 models that meet all requirements of MMML-Predict: a prevalence of at least \num{10}\% and a 
@@ -128,6 +128,19 @@ test cohort to be able estimate the $\alpha$-quantile reliably. An alternative a
 involve internal standards, i.e.\ a small number of samples one has measured for a test cohort for 
 which we already know a good threshold and that we can measure again for any new protocol to shift 
 the treshold accordingly. Even for MMML-Predict, this is a problem for the distant future.
+
+Our last idea concerns the sample weights in loss functions. Almost every loss function is derived 
+from the log likelihood of i.i.d.\ samples and thus sums over the training samples. Therefore, they 
+offer to weight every summand with a sample weight, as we have seen in the loss functions of the 
+presented GLMs in Eq.\ \eqref{eq:loss-glm-no-lasso} and \eqref{eq:cox-log-lh}. One can even provide 
+sample weights for random forests. We have a huge amount of 
+freedom in how we choose the sample weights and trying out too many choices risks torpedoing 
+validation. We will now describe a single, natural choice. Let $q$ denote the 
+proportion of high-risk samples in the training data. In the prospective Staiger data, we had 
+$q = \num{24.3}$, which renders our classification problem imbalanced. Setting $w_i = 1/q$ for 
+high-risk and $w_i = 1/(1-q)$ for low-risk samples perfectly balances the classification task in 
+the sense that the sum of sample weights belonging to high-risk samples equals the sum of sample 
+weights belonging to low-risk samples.
 
 Looking back at this thesis, we can say with confidence: the state of MMML-Predict is strong and 
 it is getting stronger.
