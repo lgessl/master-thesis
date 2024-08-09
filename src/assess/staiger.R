@@ -13,7 +13,7 @@ val_tbl <- pan_ass_scalar$assess_center(data, models)
 
 data$cohort <- "test"
 pan_ass_scalar$file <- "results/staiger/panta_test.csv"
-# models <- models[val_tbl[["model"]][1]]
+models <- models[val_tbl[["model"]][1:3]]
 pan_ass_scalar$assess_center(data, models)
 
 # val_vs_test(

@@ -84,12 +84,22 @@ used in the MMML-Predictor will be measured. The new classifier has to label at 
 patients in the test cohort as high-risk; stated differently, we require a rate of positive 
 predictions or -- synonymously -- a precision of at least \num{10}\%. At the same time, the 
 precision -- i.e.\ the proportion of \textit{truly} high-risk patients among the patients 
-\textit{labeled} as high-risk -- must be significantly above that of the group defined by
-$\text{IPI} \geq 4$; this means, the \num{95}\%-confidence interval of the new 
-classifier's precision according to the Clopper-Pearson method must not include the precision of 
-the group determined by $\text{IPI} \geq 4$. According to data with \num{2721} patients pooled from 
-prospective trials of the German High-Grade Non-Hodgkin Lymphoma Study Group (DSHNHL), this 
-precision of the IPI is at around \num{35}\%. 
+\textit{labeled} as high-risk -- must be \textit{significantly} above that of the group defined by
+$\text{IPI} \geq 4$. 
+
+In more detail, being high-risk or not is a Bernoullie random variable. 
+The precision is the success probability of this random variable under the condition that the 
+MMML-Predictor predicts a high risk. The test cohort comprises independent, identically distributed 
+(i.i.d) samples. They stay independent under the condition of being labeled high-risk by the 
+MMML-Predictor. The precision on the test cohort is therefore tailored for the Clopper-Pearson 
+method, which calculates exact $\gamma$-confidence intervals (CIs) for the success probability 
+of i.i.d.\ Bernoullie random variables for an arbitrary confidence level $\gamma \in (0, 1)$
+\cite{clopper34}.
+By significantly outperforming the precision of the IPI, we mean that the \num{95}\%-CI
+of the new classifier's precision according to the Clopper-Pearson method must not include the 
+precision of the group determined by $\text{IPI} \geq 4$. According to data with \num{2721} 
+patients pooled from prospective trials of the German High-Grade Non-Hodgkin Lymphoma Study Group 
+(DSHNHL), this precision of the IPI is at around \num{35}\%. 
 % Taking this number, a prevalence of \num{15}\% and the test cohort size into 
 % account, a calculation of the MMML-Predict consortium suggests that a precision of at least \num{50}\%
 % of the MMML-Predictor suffices with \num{95}\% statistical power. A prevalence of \num{10}\% would 

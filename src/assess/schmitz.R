@@ -8,11 +8,11 @@ source("src/models/schmitz.R")
 
 data$cohort <- "val_predict"
 pan_ass_scalar$file <- "results/schmitz/panta_val.csv"
-# eval_tbl <- pan_ass_scalar$assess_center(data, models)
+eval_tbl <- pan_ass_scalar$assess_center(data, models)
 
 data$cohort <- "test"
 pan_ass_scalar$file <- "results/schmitz/panta_test.csv"
-# models <- models[eval_tbl[["model"]][1]]
+models <- models[eval_tbl[["model"]][1]]
 pan_ass_scalar$assess_center(data, models)
 
 # val_vs_test(

@@ -403,7 +403,12 @@ zero-sum constraint with respect to zero-sum weights $u_j \geq 0$, $j = 1, \ldot
 \end{align}
 While we do not deviate from default value $1/n$ for the sample weights in the results chapter 
 \ref{chap:results}, we will discuss in chapter \ref{chap:discussion} how we can use them in the 
-future in a natural way without getting lost in the vast amount of freedom one has to choose them.
+future in a natural way without getting lost in the vast amount of freedom one has to choose them. 
+
+Fitting a model to our data means finding a model parameter that minimizes the loss function. Here,
+\begin{align}
+    (\hat{\beta_0}, \hat{\beta}) = \argmin_{(\beta_0, \beta) \in \RR^{p+1}} L(\beta_0, \beta).
+\end{align}
 
 We want to demonstrate what the zero-sum constraint is good for in a more general setting. Imagine, 
 part of the features suffer from sample-wise 
@@ -524,14 +529,14 @@ observed is
 according to \cite[Eq. (12)]{cox72}.
 
 Taking all events into account yields the partial likelihood 
-\begin{align}
+\begin{align}\label{eq:cox-partial-lh}
     \tilde{\ell}(\beta) = \prod_{i \in E} \frac{\exp(x_i^T \beta)}{\sum_{j \in R_i} \exp(x_j^T 
     \beta)}.
 \end{align}
 Because $T$ is continuous, there is a zero probability for two distinct samples having the same 
 event time, so we need not resort to one of the more sophisticated likelihoods capable of handling ties.
 Analogously to Eq. \eqref{eq:loss-glm-no-lasso}, we can equip the log likelihood with sample 
-weights $w_i > 0$ and zero-sum weights $u_j \geq 0$ such that the refined log likelihood reads 
+weights $w_i > 0$ and zero-sum weights $u_j \geq 0$ such that the refined log partial likelihood reads 
 \begin{align}\label{eq:cox-log-lh}
 \begin{split}
     L(\beta) &= \sum_{i \in E} w_i x_i^T \beta - \log \left( \sum_{j \in R_i} w_j \exp(x_j^T
@@ -548,14 +553,41 @@ uniquely determines this ordering. Again, when we talk about the output of a Cox
 output of the linear predictor. In light of all these similarities,
 in this thesis we refer to both GLMs in the typical sense and Cox models as GLMs.
 
+\paragraph{Hazard ratio}
+
+We can use the Cox model to calculate a hazard ratio (HR) between two groups of samples. Suppose 
+$g_i \in \{0, 1\}$ encodes this grouping. In our case, $g_i = f(x_i)$ is always the output of 
+a binary classifier $f$. We now fit a univariate Cox model to $(g_i, y_i, \delta_i)$, $i = 1, 
+\ldots, n$, by maximizing 
+the partial likelihood in Eq.\ \eqref{eq:cox-log-lh} with respect to $\beta$ and obtain its scalar 
+coefficient $\hat{\beta}$. By Eq.\ \eqref{eq:cox-proportional-factor}, $\exp(\hat{\beta})$
+is the relative risk increase of being in group $g_i = 1$ compared to group $g_i = 0$ and we call 
+it hazard ratio.
+
+We can view the maximum partial-likelihood estimate $\hat{\beta}$ as a random variable that depends 
+on i.i.d.\ sampling $n$ traning samples. In analogy with maximum-likelihood estimation, there are 
+good arguments to believe that the maximum \textit{partial} log-likelihood estimator $\hat{\beta}$
+is
+\begin{itemize}  
+    \item \textit{consistent}, i.e., with growing sample size $n$, $\hat{\beta}$ converges in 
+        probability to the true coefficient of the Cox model $\beta_0$, and
+    \item \textit{asymptotically normal}, i.e., with growing sample size, $\hat{\beta}$ converges 
+        in distribution to a normal distribution with mean $\beta_0$ and a standard deviation we 
+        can estimate with the help of the second derivative of the partial log likelihood with 
+        respect to $\beta$ evaluated at $\hat{\beta}$ \cite[8.1--8.4]{klein03}.
+\end{itemize}
+This justifies to treat $\hat{\beta}$ as normal with known mean and variance and allows us to
+calculate confidence intervals for the HR $\exp(\hat{\beta})$ as well as a two-sided p-value for 
+the null-hypothesis $\exp(\hat{\beta}) = 1$, i.e. identical risk between the two groups. 
+
 \subsection{Elastic-net regularization} \label{subsec:elastic-net}
 
 Modern molecular measurements are a big factor in our hope that MMML-Predict can succeed and improve 
 the IPI. These measurements, like gene expression levels, show up as hundreds if not thousands of 
 features in our data, meaning we usually have $p > n$ if not $p \gg n$. In this situation, we 
-cannot uniquely determine the parameters of any of the models by maximzing the log likelihood: 
+cannot uniquely determine the parameters of any of the models by minimizing the loss function: 
 the models have way more degress of freedom than we have samples, they will find biologically 
-meaningless and non-reproducible structures in the training cohort and generalize poorly to new 
+meaningless and non-reproducible structures in the training data and generalize poorly to new 
 data.
 
 A solution to this is to restrict the freedom of the model to the extent that it is forced to 
@@ -574,13 +606,14 @@ by combining them with a weight factor $\alpha \in [0, 1]$ into
 \begin{align}
     p_{\text{enet}, \alpha}(\beta) = \frac{1-\alpha}{2} |\beta|_2^2 + \alpha |\beta|_1.
 \end{align}
-Muliplited with the regularization strength $\lambda \geq 0$, we can add it to the negative 
+Muliplied with the regularization strength $\lambda \geq 0$, we can add it to the negative 
 (refined) log likelihood to obtain the regularized loss function
 \begin{align}
     \mathcal{L}(\beta_0, \beta) = -L(\beta_0, \beta) + \lambda p_{\text{enet}, \alpha}(\beta).
 \end{align}
 Note that in the Cox case, $\mathcal{L}$ does not depend on $\beta_0$ and we just ignore $\beta_0$ 
-in the above equation. 
+in the above equation. Fitting a model to training data means finding a minimizer $(\hat{\beta_0}, 
+\hat{\beta})$ of the loss function $\mathcal{L}$.
 
 \paragraph{Effect on correlated features}
 While both ridge and LASSO regularization shrink the coefficients, they act differently in the case 

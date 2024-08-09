@@ -153,7 +153,6 @@ knowledge and thus deploy the full range of core models: Gauss, logistic, Cox mo
 forests. As all of these models need to deal with features on different scales, we always 
 standardize the predictor.
 
-
 \paragraph{Nested models}
 We nest models according to Alg. \ref{alg:nested-pcv}, where the early model $f_1$ is the best 
 validated model among the gene-expression-only models. If the late model $f$ is a GLM,
@@ -177,10 +176,21 @@ declines to \num{55.6}\% on the Reddy test set. These way too optimistic cross-v
 demand further investigation.
 
 \paragraph{Staiger}
-On the Staiger data, $m^*$ is a very simple model: a logistic model that neither uses gene 
-expression levels nor combinations of discrete features ($n_\text{combi} = 1$). Of note, the model
-incorporates the Lamis score and group with decisively non-zero coefficient. Here, $m^*$'s 
+On the Staiger data, $m^*$ is a very simple model: a logistic model that neither uses 
+gene-expression levels nor combinations of discrete features ($n_\text{combi} = 1$). Of note, the 
+model incorporates the Lamis score and group with decisively non-zero coefficient. Here, $m^*$'s 
 validated precision of \num{58.2}\% is more in line with the \num{45.9}\% precision on the test set.
+
+\paragraph{Logrank test}
+The last row of Table \ref{table:intra-trial} holds two-sided p-values for the logrank test
+statistic as proposed by Mandel \cite{mantel66}, which is calculated under the null hypothesis 
+that the positive and negative group according to $m^*$ have the same hazard. While $m^*$ for all 
+three data sets fails to beat the tIPI's precision significantly, all logrank tests statistics are 
+highly significant. In fact, all models picked as the winner in a validation in this chapter 
+achieve a highly significant logrank test. This shows that significantly beating the 
+IPI's precision is much harder than classifying patients into two groups with vastly different 
+hazard. For this reason, the logrank test does not play a role in this thesis and we did not dig 
+into in more detail in chapter \ref{chap:methods}.
 
 \subsection{Meta analysis}
 

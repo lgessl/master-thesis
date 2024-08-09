@@ -99,9 +99,8 @@ prec_ci_as2 <- Ass2d$new(
 )
 
 pan_ass_scalar <- AssScalar$new(
-    metrics = c("precision", "prevalence", "precision_ci_ll", "hr", "hr_ci_ll", "hr_ci_ul", 
-        "hr_p", "auc", "logrank", "accuracy", 
-        "threshold", "n_samples", "perc_true"),
+    metrics = c("precision", "prevalence", "precision_ci_ll", "precision_ci_ul", "hr", "hr_ci_ll", 
+        "hr_ci_ul", "hr_p", "auc", "logrank", "accuracy", "threshold", "n_samples", "perc_true"),
     prev_range = c(0.17, 1),
     round_digits = 5, 
     file = "panta.csv",
