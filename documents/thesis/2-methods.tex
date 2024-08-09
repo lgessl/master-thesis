@@ -405,10 +405,10 @@ While we do not deviate from default value $1/n$ for the sample weights in the r
 \ref{chap:results}, we will discuss in chapter \ref{chap:discussion} how we can use them in the 
 future in a natural way without getting lost in the vast amount of freedom one has to choose them. 
 
-Fitting a model to our data means finding a model parameter that minimizes the loss function. Here,
-\begin{align}
-    (\hat{\beta_0}, \hat{\beta}) = \argmin_{(\beta_0, \beta) \in \RR^{p+1}} L(\beta_0, \beta).
-\end{align}
+Fitting a model to our data means finding a parameter $(\hat{\beta}_0, \hat{\beta})$ that minimizes 
+the loss function. $(\hat{\beta}_0, \hat{\beta})$ serves as an estimate for the true model. As it 
+optimizes a slightly refined likelihood, $(\hat{\beta}_0, \hat{\beta})$ is closely related to a 
+maximum likelihood estimator.
 
 We want to demonstrate what the zero-sum constraint is good for in a more general setting. Imagine, 
 part of the features suffer from sample-wise 
