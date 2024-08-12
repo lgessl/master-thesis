@@ -93,8 +93,8 @@ we hope that more reliable validation errors and better models will compensate f
 
 \subsection{Testing}
 
-We calculate the predictions $m^*(X_\text{test}) = \hat{y}_\text{test}$ of the best validated model 
-$m^*$ on the test cohort and estimate its performance on independent data via 
+We calculate the predictions $m^*(\mathbf{x}_{\text{test}, i}) = \hat{y}_{\text{test}, i}$ of the 
+best validated model $m^*$ on the test cohort and estimate its performance on independent data via 
 \begin{align}
     \text{err}(y_\text{test}, \hat{y}_\text{test}).
 \end{align}
@@ -346,29 +346,33 @@ say samples in this subsection, we always refer to the training samples.
 Here, we work with binary response, i.e. $\mathrm{im}(Y) \subset \{0, 1\}$. Both ordinary 
 linar models and logistic regression models are generalized linear models (GLMs). In 
 a GLM, $Y$ follows an exponential-family distribution and there is an invertible link function 
-$g: \RR \to \RR$ and parameters $(\beta_0, \beta) \in \RR^{p+1}$ such that
+$g: \RR \to \RR$ and parameters $(\tbeta_0, \tbeta) \in \RR^{p+1}$ such that
 \begin{align}
-    g(E(Y \cond X = x)) = \beta_0 + \sum_{j=1}^p \beta_j x_j \quad \text{for all } x \in \RR^p,
+    g(E(Y \cond X = x)) = \tbeta_0 + \sum_{j=1}^p \tbeta_j x_j \quad \text{for all } x \in \RR^p,
 \end{align}
-where the $E(Y \cond X = x)$ is the expected value of $Y$ given $X = x$. For the above samples 
-$(x_i, y_i)$, we obtain
-\begin{align}
-    \mu_i = E(Y \cond X = x_i) = g^{-1}\left(\beta_0 + \sum_{j=1}^p \beta_j x_{ij}\right).
+where the $E(Y \cond X = x)$ is the expected value of $Y$ given $X = x$. We can express the 
+\textit{linear predictor} $\sum_{j=1}^p \tbeta_j x$ in terms of the Euclidean scalar product 
+as $x^T \tbeta$, where $x^T$ denotes the transpose of the column vector $x$. 
+
+In practice, we do not know the (true) parameters
+$(\tbeta_0, \tbeta)$. But we do have our $n$ i.i.d.\ observations $(x_i, y_i)$
+and we will use them together with a likelihood to estimate $(\tbeta_0, \tbeta)$. For an 
+arbitray $(\beta_0, \beta) \in \RR^{p+1}$, we can try to predict the conditional expectation as
+\begin{align}\label{eq:glm-mu}
+    \mu_i(\beta_0, \beta) = g^{-1}(\beta_0 + x_i^T \beta), \quad i = 1, \ldots, n.
 \end{align}
-Relating $\mu_i$ to $y_i$ via a log likelihood will allow us to fit $(\beta_0, \beta)$ to 
-$(x_i, y_i)_{i = 1, \ldots, n}$. We can express the \textit{linear predictor} 
-$\sum_{j=1}^p \beta_j x_{ij}$ in terms of the Euclidean scalar product as $x_i^T \beta$, where 
-$x_i^T$ denotes the transpose of the column vector $x_i$.
+We have $\mu_i(\tbeta_0, \tbeta) = E(Y \cond X = x_i)$.
 
 \paragraph{Gauss model}
-Here, $g = \text{id}$. $Y$ and $Y \cond X = x_i$ for all $i = 1, \ldots, n$ follow a normal
+Here, $g = \text{id}$. $Y$ and $Y \cond X = x$ for all $x \in \RR^p$ follow a normal
 distribution with fixed standard deviation $\sigma > 0$ (a property called homoscadasticity), but 
-varying mean. The log likelihood of $\mu_i$ is
+varying mean. The log likelihood of an expected value -- or equivalently mean -- $\mu$ given an 
+observation $y \in \RR$ is
 \begin{align}
 \begin{split}
-    \ell(\mu_i; y_i) &= \log\left( \frac{1}{\sqrt{2\pi}\sigma} 
-        \exp \left( -\frac{1}{2\sigma^2}(y_i - \mu_i)^2 \right) \right) \\
-    &= -\frac{1}{2\sigma^2}(y_i - \mu_i)^2 - \log \left( \sqrt{2\pi}\sigma \right).
+    \ell(\mu; y) &= \log\left( \frac{1}{\sqrt{2\pi}\sigma} 
+        \exp \left( -\frac{1}{2\sigma^2}(y - \mu)^2 \right) \right) \\
+    &= -\frac{1}{2\sigma^2}(y - \mu)^2 - \log \left( \sqrt{2\pi}\sigma \right).
 \end{split}
 \end{align}
 Up to a constant shift and re-scaling, which does not affect maximizing the log likelihood, this
@@ -380,17 +384,17 @@ Here, the linear predictor is the log-odds for $Y = 1$ over $Y = 0$ given $X = x
     g: \mu \mapsto \log\left( \frac{\mu}{1 - \mu} \right), \text{ hence } g^{-1}: \eta \mapsto
     \frac{1}{1 + \exp(-\eta)}.
 \end{align}
-Y and $Y \cond X = x_i$ for all $i = 1, \ldots, n$ follow a Bernoulli distribution with parameter 
-$p$ and $\mu_i$, respectively. The log likelihood of $\mu_i$ is
+Y and $Y \cond X = x$ for all $x \in \RR^p$ follow a Bernoulli distribution with varying success 
+probability. The log likelihood of an expected value -- or equivalently success probability -- 
+$\mu$ given an observation $y \in \{0, 1\}$ is
 \begin{align}
-    \ell(\mu_i; y_i) &= \log\left( \mu_i^{y_i} (1 - \mu_i)^{1 - y_i} \right) 
-    = y_i \log(\mu_i) + (1 - y_i) \log(1 - \mu_i). 
+    \ell(\mu; y) &= \log\left( \mu^{y} (1 - \mu)^{1 - y} \right) 
+    = y \log(\mu) + (1 - y) \log(1 - \mu). 
 \end{align}
 
 \paragraph{Loss function}
-Using $\mu_i = g^{-1}(\beta_0 + x_i^T \beta)$, in both cases we can express the 
-log likelihood 
-for $(\beta_0, \beta)$. For our i.i.d.\ samples $(x_i, y_i)_{i = 1, \ldots, n}$, we therefore obtain 
+Using Eq.\ \eqref{eq:glm-mu}, the log likelihood for $(\beta_0, \beta)$ given our i.i.d.\ samples 
+$(x_i, y_i)$, $i = 1, \ldots, n$, therefore is
 \begin{align}
     L(\beta_0, \beta) &= \sum_{i=1}^n \ell(\mu_i; y_i) 
     = \sum_{i=1}^n \ell\left( g^{-1}\left( \beta_0 + x_i^T \beta \right); y_i \right).
@@ -404,16 +408,18 @@ zero-sum constraint with respect to zero-sum weights $u_j \geq 0$, $j = 1, \ldot
 While we do not deviate from default value $1/n$ for the sample weights in the results chapter 
 \ref{chap:results}, we will discuss in chapter \ref{chap:discussion} how we can use them in the 
 future in a natural way without getting lost in the vast amount of freedom one has to choose them. 
+$L$ is no longer a log likelihood, so we call it a \textit{loss function}.
 
-Fitting a model to our data means finding a parameter $(\hat{\beta}_0, \hat{\beta})$ that minimizes 
-the loss function. $(\hat{\beta}_0, \hat{\beta})$ serves as an estimate for the true model. As it 
-optimizes a slightly refined likelihood, $(\hat{\beta}_0, \hat{\beta})$ is closely related to a 
-maximum likelihood estimator.
+Fitting a Gauss or logistic model to the data means minimizing $L$ with respect to 
+$(\beta_0, \beta)$ and coming up with a minimizer $(\hbeta_0, \hbeta)$, which is our estimate for 
+$(\tbeta_0, \tbeta)$. Subsection \ref{subsec:elastic-net} will deal with the question how we can 
+make $(\hbeta_0, \hbeta)$ a \textit{unique} minimizer.
 
 We want to demonstrate what the zero-sum constraint is good for in a more general setting. Imagine, 
 part of the features suffer from sample-wise 
 shifts. We denote these features by $J \subset \{1, \ldots, p\}$ and the shifts by $s_i \in R$, 
-$i = 1, \ldots, n$. We now set the zero-sum weights  
+$i = 1, \ldots, n$. We now set the zero-sum 
+weights  
 \begin{align}
     u_j =
     \begin{cases}
@@ -422,8 +428,10 @@ $i = 1, \ldots, n$. We now set the zero-sum weights
     \end{cases}
 \end{align}
 for some $c > 0$ (usually $c = 1$); we can express this conviently with the help of the indicator 
-function $\chi_J$ as $u_j = \chi_J(j) c$. By the zero-sum constraint, $\sum_{j \in J} c \beta_j = 0$  
-and hence $\sum_{j \in J} \beta_j = 0$. In this situation, the linear predictor 
+function $\chi_J$ as $u_j = \chi_J(j) c$. By the zero-sum constraint, we demand 
+$\sum_{j \in J} c \beta_j = 0$  
+and hence $\sum_{j \in J} \beta_j = 0$; apart from that, $(\beta_0, \beta)$ is arbitrary. 
+In this situation, the linear predictor 
 \begin{align}
     \beta_0 + \sum_{j=1}^p \beta_j (x_{ij} + s_i \chi_J(j))
     = \beta_0 + x_i^T \beta + \sum_{j \in J} \beta_j s_i = \beta_0 + x_i^T \beta,
@@ -483,8 +491,9 @@ Hence,
 where $S(t) = 1 - F_T(t)$ is the survival function, and $h(t)$ is well-defined as long as $S_T(t)
 > 0$.
 
-\paragraph{Conditional hazard} The Cox model proposed in \cite{cox72} wants to get a hand on 
-\textit{conditional} hazards.
+\paragraph{Conditional hazard}
+The Cox model, proposed by Sir David Cox in a ground-braking paper in \num{1972} \cite{cox72}, wants 
+to get a hand on \textit{conditional} hazards.
 Intuitively, it is clear that the population with one value of $X$ can have a vastly different 
 hazard function than the population with another value of $X$ if $X$ has predictive power for $T$.
 Formally, however, it is hard to define a conditional hazard function: $X$ may very well 
@@ -510,17 +519,21 @@ i.e.
 for some (unspecified) baseline hazard $h_0$ and $\lambda_x > 0$. Moreover, it assumes $\lambda_x$ depends 
 on $x$ via 
 \begin{align}\label{eq:cox-proportional-factor}
-    \lambda_x = \exp(x^T \beta),
+    \lambda_x = \exp(x^T \tbeta),
 \end{align}
-for parameters $\beta \in \RR^p$.
+for parameters $\tbeta \in \RR^p$.
 
 \paragraph{Partial log likelihood}
 Given our independent samples $(x_i, y_i, \delta_i) \in \RR^{p+2}$, $i = 1, \ldots, n$, distributed 
-according to $(X, Y, \delta)$, let $E \subset \{ 1, \ldots, n \}$ refer to the non-censored samples 
-($\delta_i = 1$). For $i \in E$, let $R_i$ denote the set of samples where no event has occurred 
-until $y_i$, i.e. $y_j \geq y_i$ for all $j \in R_i$. For fixed $i \in E$ and time to event $y_i$,
-conditionally on the risk set $R_i$, the probability that the event occurs on sample $i$ as 
-observed is
+according to $(X, Y, \delta)$, how can we estimate $\tbeta$? The Cox model is a semi-parametric 
+model in that it leaves the baseline hazard $h_0$ unspecified. Consequently, estimation with maximum 
+likelihood is not possible. This led to another break-through invention in \cite{cox72}, the 
+\textit{partial} likelihood, which we will present now. Let $\beta \in \RR^n$ be arbitrary and let 
+$E \subset \{ 1, \ldots, n \}$ refer to the non-censored samples ($\delta_i = 1$). For $i \in E$, 
+let $R_i$ denote the set of samples 
+where no event has occurred until $y_i$, i.e. $y_j \geq y_i$ for all $j \in R_i$. For
+fixed $i \in E$ and time to event $y_i$, conditionally on the risk set $R_i$, the probability that 
+the event occurs on sample $i$ as observed is
 \begin{align}
     \frac{h(y_i \cond X = x_i)}{\sum_{j \in R_i} h(y_i \cond X = x_j)} = 
     \frac{\exp(x_i^T \beta) h_0(y_i)}{\sum_{j \in R_i} \exp(x_j^T \beta) h_0(y_i)} = 
@@ -535,8 +548,9 @@ Taking all events into account yields the partial likelihood
 \end{align}
 Because $T$ is continuous, there is a zero probability for two distinct samples having the same 
 event time, so we need not resort to one of the more sophisticated likelihoods capable of handling ties.
-Analogously to Eq. \eqref{eq:loss-glm-no-lasso}, we can equip the log likelihood with sample 
-weights $w_i > 0$ and zero-sum weights $u_j \geq 0$ such that the refined log partial likelihood reads 
+Analogously to Eq. \eqref{eq:loss-glm-no-lasso}, we can equip the partial log likelihood with sample 
+weights $w_i > 0$ and zero-sum weights $u_j \geq 0$ such that the refined log partial likelihood, 
+which we now call a loss function, reads 
 \begin{align}\label{eq:cox-log-lh}
 \begin{split}
     L(\beta) &= \sum_{i \in E} w_i x_i^T \beta - \log \left( \sum_{j \in R_i} w_j \exp(x_j^T
@@ -544,14 +558,18 @@ weights $w_i > 0$ and zero-sum weights $u_j \geq 0$ such that the refined log pa
     & \text{subject to } \sum_{j=1}^p \beta_j u_j = 0.
 \end{split}
 \end{align}
-As with GLMs, we can leverage the zero-sum constraint to reach shift-invariance.
+As with GLMs, we can leverage the zero-sum constraint to reach shift-invariance. Our estimate 
+for $\tbeta$ is a minimizer of $L$ with respect to $\beta$, denoted by $\hbeta$. More on its 
+unique existence in subsection \ref{subsec:elastic-net}.
 
 There are more analogies to GLMs. In Eq.\ \eqref{eq:cox-proportional-factor}, we also compose the 
 linear predictor with an increasing function. Given a cohort of samples, we are still most 
 interested in the ordering of the output scores and the linear predictor $x_i^T \beta$ already 
 uniquely determines this ordering. Again, when we talk about the output of a Cox model, we mean the 
 output of the linear predictor. In light of all these similarities,
-in this thesis we refer to both GLMs in the typical sense and Cox models as GLMs.
+in this thesis we refer to both GLMs in the typical sense and Cox models as GLMs. Looking closely,
+the Cox gets along without an intercept. We will therefore always ignore $\beta_0$ if mentioned in 
+the context of a Cox model in the following.
 
 \paragraph{Hazard ratio}
 
@@ -559,33 +577,34 @@ We can use the Cox model to calculate a hazard ratio (HR) between two groups of 
 $g_i \in \{0, 1\}$ encodes this grouping. In our case, $g_i = f(x_i)$ is always the output of 
 a binary classifier $f$. We now fit a univariate Cox model to $(g_i, y_i, \delta_i)$, $i = 1, 
 \ldots, n$, by maximizing 
-the partial likelihood in Eq.\ \eqref{eq:cox-log-lh} with respect to $\beta$ and obtain its scalar 
-coefficient $\hat{\beta}$. By Eq.\ \eqref{eq:cox-proportional-factor}, $\exp(\hat{\beta})$
-is the relative risk increase of being in group $g_i = 1$ compared to group $g_i = 0$ and we call 
-it hazard ratio.
+the partial likelihood in Eq.\ \eqref{eq:cox-log-lh} with respect to $\beta$ and obtain an estimate
+for the (scalar) model coefficient $\hbeta$. By Eq.\ \eqref{eq:cox-proportional-factor}, 
+$\exp(\hbeta)$ is the relative risk increase of being in group $g_i = 1$ compared to group 
+$g_i = 0$ and we call it hazard ratio.
 
 We can view the maximum partial-likelihood estimate $\hat{\beta}$ as a random variable that depends 
 on i.i.d.\ sampling $n$ traning samples. In analogy with maximum-likelihood estimation, there are 
 good arguments to believe that the maximum \textit{partial} log-likelihood estimator $\hat{\beta}$
 is
 \begin{itemize}  
-    \item \textit{consistent}, i.e., with growing sample size $n$, $\hat{\beta}$ converges in 
-        probability to the true coefficient of the Cox model $\beta_0$, and
-    \item \textit{asymptotically normal}, i.e., with growing sample size, $\hat{\beta}$ converges 
-        in distribution to a normal distribution with mean $\beta_0$ and a standard deviation we 
+    \item \textit{consistent}, i.e., with growing sample size $n$, $\hbeta$ converges in 
+        probability to the true coefficient of the Cox model $\tbeta$, and
+    \item \textit{asymptotically normal}, i.e., with growing sample size, $\hbeta$ converges 
+        in distribution to a normal distribution with mean $\tbeta$ and a standard deviation we 
         can estimate with the help of the second derivative of the partial log likelihood with 
-        respect to $\beta$ evaluated at $\hat{\beta}$ \cite[8.1--8.4]{klein03}.
+        respect to $\beta$ evaluated at $\hbeta$ \cite[8.1--8.4]{klein03}.
 \end{itemize}
 This justifies to treat $\hat{\beta}$ as normal with known mean and variance and allows us to
 calculate confidence intervals for the HR $\exp(\hat{\beta})$ as well as a two-sided p-value for 
-the null-hypothesis $\exp(\hat{\beta}) = 1$, i.e. identical risk between the two groups. 
+the null-hypothesis $\exp(\hat{\beta}) = 1$, i.e.\ identical risk between the two groups. 
 
 \subsection{Elastic-net regularization} \label{subsec:elastic-net}
 
 Modern molecular measurements are a big factor in our hope that MMML-Predict can succeed and improve 
 the IPI. These measurements, like gene expression levels, show up as hundreds if not thousands of 
 features in our data, meaning we usually have $p > n$ if not $p \gg n$. In this situation, we 
-cannot uniquely determine the parameters of any of the models by minimizing the loss function: 
+cannot uniquely determine the parameters $(\hbeta_0, \hbeta)$ by minimizing 
+Eq.\ \eqref{eq:loss-glm-no-lasso} or Eq.\ \eqref{eq:cox-log-lh}:
 the models have way more degress of freedom than we have samples, they will find biologically 
 meaningless and non-reproducible structures in the training data and generalize poorly to new 
 data.
@@ -886,9 +905,10 @@ to inter-technical variability.
 
 We have designed the software that generates the results of this thesis in such a way that it 
 can be the foundation of the machine-learning part of MMML-Predict as the project develops and 
-other researchers take over. Beyond this, we have written code, wherever it was possible, in such 
+other researchers take over. Beyond this, we wrote code, wherever it was possible, in such 
 a general way that one can apply it not just for the MMML-Predict problem, but for all equivalent 
-and closely related problems.
+and closely related problems. We ran all code in the statistical-computing environment \texttt{R}
+\cite{r-language}.
 
 \subsection{The R package \texttt{patroklos}}
 The R package \texttt{patroklos} holds all of the highly reusable code of this thesis. It brings 
@@ -907,7 +927,7 @@ attach hyperparamters tuples to them, including model-agnostic hyperparameters t
 provides a decorator to transform a function that fits merely one model for a single hyperparameter 
 tuple into a function that fits and validates models for a variety of hyperparameter tuples. 
 It supports fitting core models with the support of the R packages \texttt{zeroSum} 
-\cite{zerosumR} and \texttt{ranger} \cite{ranger-gh} out of the box. \texttt{zeroSum} 
+\cite{zerosumR} and \texttt{ranger} \cite{ranger17} out of the box. \texttt{zeroSum} 
 augments the popular \texttt{glmnet} package by the zero-sum constraint: it fits and 
 tunes Gauss, logistic and Cox models in a cross validation and endows their loss function 
 with elastic-net regularization and -- unlike \texttt{glmnet} -- the zero-sum 
@@ -924,7 +944,9 @@ full control of validation and unifies it
 by calculating the same error measure across all models and even more statistics of the model
 with the help of the \texttt{AssScalar} R6 class. With the \texttt{Ass2d} R6 class, the 
 user can plot one property of a truly binary classifier against another, which guides 
-thresholding models with continuous output as in Fig.\ \ref{fig:inter-output-prec}.
+thresholding models with continuous output as in Fig.\ \ref{fig:inter-output-prec}. 
+\texttt{patroklos} calculates logrank p-values and hazard ratios together with their confidence
+intervals with the help of the R package \texttt{survival} \cite{survival-cran}.
 
 \paragraph{Modular, extendible design} 
 \texttt{patroklos} defines function interfaces so the user 
