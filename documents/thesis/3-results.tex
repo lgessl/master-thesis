@@ -41,22 +41,24 @@ Second, this data set is not the result of a
 prospective, representative trial, but consists of opportunistically collected patients from highly renowned 
 U.S. hospitals, which preferably treat 
 difficult cases. As a result, the high-risk proportion in the Schmitz data is at \num{36.6}\% -- 
-compared to \num{24.3}\% in the prospective Staiger data -- and the IPI reaches a precision of 
+compared to \num{24.3}\% in the prospective Staiger data -- and the tIPI reaches a precision of 
 \num{65.2}\% for classifying high-risk patients at a prevalence of \num{12.9}\% -- compared to 
-\num{38.2}\% at \num{17.0}\% in the Staiger data. The IPI already meets the MMML-Predict goals, 
+\num{38.2}\% at \num{17.0}\% in the Staiger data. The tIPI already meets the MMML-Predict goals, 
 but we want to see if we can do even better in such a high-risk regime.
 
 \paragraph{Reddy data}
 
 Compared to a prospective study, also the Reddy data, comprised of \num{604} patients treated with 
 rituximab-containing regimens, is enriched for high-risk patients. The 
-IPI has a performance that already satisfies the MMML-Predict goals, even if a bit less 
+tIPI has a performance that already satisfies the MMML-Predict goals, even if a bit less 
 convincingly than on the Schmitz data. After identifying \num{150} DLBCL driver genes, Reddy et al.\ 
 trained a Cox model, named genomic risk model,
 that predicts overall survival (OS) from combinations of genetic events and gene-expression markers 
-(cell of origin, MYC, and BCL2) and thresholded its output into low, intermediate and high risk. This is a
-model whose predictions we cannot use because their split into the train and test cohort is not 
-clear, but that inspired us to use combinations of discrete features, cf.\ subsection 
+(cell of origin, MYC, and BCL2) and thresholded its output into low, intermediate and high risk. 
+This is a
+model whose predictions we cannot use because the authors do not tell us which samples they assigned
+into train and test set, but that inspired us to use combinations of discrete features, cf.\ 
+subsection 
 \ref{subsec:model-agnostic}. Nevertheless, with high expression and translocation of MYC, BCL2 and 
 BCL6, the data provides some of the input features of the genomic risk model as well as three binary 
 clinical features: B symptoms at diagnosis, testicular and central-nervous-system involvement. B 
@@ -68,12 +70,12 @@ loss being simultaneously present.
 The Staiger data is composed of \num{466} patients treated with CHOP-like and R-CHOP-like regimens 
 and enrolled in prospective clinical trials. 
 Staiger et al.\ first determined \num{731} gene pairs with highly correlated gene-expression levels 
-between their train cohort -- \num{233} DLBCLs with gene-expression levels built from the Affymetrix 
+between their training cohort -- \num{233} DLBCLs with gene-expression levels built from the Affymetrix 
 GeneChip technology -- and the Staiger data -- \num{466} DLBCLs with gene-expression levels built 
 from the NanoString nCounter technology -- with the aid of six paired nCounter-GeneChip samples, cf.\ 
 \cite[Supplementary Methods]{staiger20}.
-Next, they learned a Cox model on the differences of the (logarithmized) gene-expression levels 
-from these gene pairs and the five thresholded IPI features using LASSO regularization. 
+Next, they learned a LASSO-regularized Cox model on the differences of the (logarithmized) 
+gene-expression levels from these gene pairs and the five thresholded IPI features.
 Afterwards, they removed the five IPI features from the model aiming to make it independent of the 
 IPI. One can expand the differences of gene-expression levels in the signature to obtain an ordinary 
 gene-expression signature with coefficients corresponding to single genes, the LAMIS. It is 
@@ -96,7 +98,7 @@ We will conduct inter-trial experiments on a big data set consisting of the samp
 Reddy and Staiger data. As for the gene expression-levels, we map the Ensemble gene IDs used 
 in the Reddy data to HGNC gene symbols with the help of the \texttt{BiomaRt} R package 
 \cite{biomart09}
-to end up with the same gene nomenclature in all three data sets. Intersecting the gene expression 
+to end up with the same gene nomenclature in all three data sets. Intersecting the gene-expression 
 features leaves us with gene-expression levels for \num{119} genes and the features gender, age, 
 the five thresholded IPI features, the IPI score, the IPI group, the LAMIS score and the LAMIS 
 group. The resulting data set is \num{1299} samples strong.
@@ -106,7 +108,7 @@ group. The resulting data set is \num{1299} samples strong.
 To gain first insights into our methods, we conduct intra-trial experiments separately on the 
 Schmitz, Reddy and Staiger data. To this end, we split every data set into a train and test 
 cohort. We do so uniformly at random, with two constraints: first, a ratio of 3 to 1 between train 
-and test cohort and, second, the ratio between high-risk and low-risk patients in train cohort, 
+and test cohort and, second, the ratio between high-risk and low-risk patients in training cohort, 
 test cohort and overall data set is the same. As shown in Table \ref{table:intra-trial}, the 
 performance of the tIPI notably differs between the whole data set and the subsampled test cohort. 
 
@@ -115,7 +117,7 @@ performance of the tIPI notably differs between the whole data set and the subsa
 \subsection{Model architectures}
 
 We want to give a brief summary of the models we send into the race and take a closer look at the 
-best one, $m^*$, on every data set.
+best validated one, $m^*$, on every data set.
 
 \subsubsection{Candidates}
 
@@ -146,19 +148,19 @@ all of these three; for the LAMIS, % here and for the rest of thesis
 we add the score as a continuous and the group as a discrete feature. For $s_\text{min} = \num{0.05}$ 
 and $n_\text{combi} \in \{1, 2, 3, 4 \}$, we add combinations of discrete features to the predictor. 
 We both include and exclude gene-expression levels in the predictor.
-
-As for the model class, we build on our experience gained from the gene-expression-only models and 
-just use the two top performing model classes of these models for such models that use gene 
-expression levels. For models not predicting from gene-expression levels, we have no prior 
-knowledge and thus deploy the full range of core models: Gauss, logistic, Cox models and random 
-forests. As all of these models need to deal with features on different scales, we always 
-standardize the predictor.
+% As for the model class, we build on our experience gained from the gene-expression-only models and 
+% just use the two top performing model classes of these models for such models that use gene 
+% expression levels. For models not predicting from gene-expression levels, we have no prior 
+% knowledge and thus deploy the full range of core models: Gauss, logistic, Cox models and random 
+% forests. 
+As all of these models need to deal with features on different scales, we always 
+standardize the predictor. We regularize all GLMs with the LASSO because we may end up up adding 
+several hundreds combined discrete features to the predictor.
 
 \paragraph{Nested models}
 We nest models according to Alg. \ref{alg:nested-pcv}, where the early model $f_1$ is the best 
 validated model among the gene-expression-only models. If the late model $f$ is a GLM,
-we regularize with it the LASSO, because we may end up adding several 
-hundreds combined discrete features to the predictor. We select features a priori as in the previous 
+we regularize with it the LASSO. We select features a priori as in the previous 
 paragraph.
 
 \subsubsection{Best validated models}
@@ -186,12 +188,12 @@ validated precision of \num{58.2}\% is more in line with the \num{45.9}\% precis
 The last row of Table \ref{table:intra-trial} holds two-sided p-values for the logrank test
 statistic as proposed by Mandel \cite{mantel66}, which is calculated under the null hypothesis 
 that the positive and negative group according to $m^*$ have the same hazard. While $m^*$ for all 
-three data sets fails to beat the tIPI's precision significantly, all logrank tests statistics are 
+three data sets fails to beat the tIPI's precision significantly, all logrank test statistics are 
 highly significant. In fact, all models picked as the winner in a validation in this chapter 
 achieve a highly significant logrank test. This shows that significantly beating the 
-IPI's precision is much harder than classifying patients into two groups with vastly different 
+IPI's precision is much harder than classifying patients into two groups with clearly different 
 hazard. For this reason, the logrank test does not play a role in this thesis and we did not dig 
-into in more detail in chapter \ref{chap:methods}.
+into more detail in chapter \ref{chap:methods}.
 
 \subsection{Meta analysis}
 
@@ -200,12 +202,12 @@ evaluate the test performance of more models. Our main focus rests on the discre
 validated and test error; as we laid out in section \ref{sec:train-val-test}, the models with the 
 best validated errors most likely have an underestimated test error and it is hard to fight this 
 effect qualitatively. However, we use several methods to calculate a validated error -- cross 
-validation, the pseudo cross validation of Alg. \ref{alg:nested-pcv} and the OOB error of random 
+validation, the pseudo cross validation of Alg.\ \ref{alg:nested-pcv} and the OOB error of random 
 forests -- and for every model architecture we tune different hyperparameters and a different 
 number of hyperparameter tuples. Both validation error and test error of a model are random 
 variables and it is hard to infer statistical properties of them based on a single realization of 
 these random variables; by grouping the models according to their hyperparameters we gain 
-statistical power and look for patterns in the validation and test error as well as 
+statistical power and can look for patterns in the validation and test error as well as 
 discrepancies between them.
 
 \subsubsection{Models predicting from gene-expression levels only}
@@ -215,7 +217,7 @@ discrepancies between them.
 \paragraph{Staiger}
 Looking at Fig.\ \ref{fig:intra-val-test-geo}, we see that, for Staiger, the models only using 
 gene-expression levels cannot compete with $\text{tIPI}$. While the validated errors of these models are 
-below the \num{-36.4}\% negative precision of the IPI, the test errors all are above \num{-30}\%. 
+below the \num{-36.4}\% negative precision of the tIPI, the test errors all are above \num{-30}\%. 
 In all cases, the test error is at least 10 points higher than the validated error, a discrepancy 
 also indicated by the fact that the identity line is outside the plot area. It is hard to imagine that 
 these models even if nested into another model can help outperform the IPI. Hence, for the 
@@ -311,7 +313,7 @@ we trained for that purpose ourselves, but allows training more precise models a
 more accurately. Another way to close the validation-test gap is to increase the number of samples 
 in both the train and test cohort: it both makes overfitting the validated predictions to the 
 training cohort harder and makes it less likely that the test cohort includes cases biologically 
-not covered at all in the train cohort. We will now go along this path as we use every of the 
+not covered at all in the training cohort. We will now go along this path as we use every of the 
 three data sets in their entirety for training and validation and then test on the other two.
 
 \subsection{Model architectures}
@@ -368,16 +370,16 @@ through $i$.
 $m^*_\text{Schmitz}$ is a Cox model predicting from discrete features and combinations of up to 
 three of them; in particular, no gene-expression levels are directly involved and the model confines 
 itself with the LAMIS \textit{group}. All in all, the sparse model uses \num{7} features. During 
-training, we provided the model with a fairly low survival cutoff of \num{1.4} years.
+training, we provided the model with a fairly low survival cutoff of $T = \num{1.4}$ years.
 
-When tested on the Reddy data, $m^*_\text{Schmitz}$ beats the IPI's precision by 5 points. This 
+When tested on the Reddy data, $m^*_\text{Schmitz}$ beats the precision of the tIPI by 5 points. This 
 is not enough to show significant superiority in the sense that the \num{95}\%-confidence interval 
-of our model's precision does not include the precision of the IPI.
+of our model's precision does not include the precision of the tIPI.
 
 On the Staiger set, meanwhile, $m^*_\text{Schmitz}$ accomplishes all objectives: with 
-\num{50.7}\% precision, it tops the IPI's precision by more than 12 points, narrowly surpasses the 
+\num{50.7}\% precision, it tops the precision of the tIPI by more than 12 points, narrowly surpasses the 
 psychologically important \num{50}\% threshold, and the \num{95}\%-confidence interval of our model's 
-precision excludes the IPI's precision. It is remarkable that the $m^*_\text{Schmitz}$, coming from 
+precision excludes the precision of the tIPI. It is remarkable that the $m^*_\text{Schmitz}$, coming from 
 the high-risk, non-prospective Schmitz data with the LAMIS measured with the 
 RNA-seq technology, well adapts to the prospective, NanoString regime of the Staiger data and 
 does so better than the models we trained in the previous section on part of the Staiger data.
@@ -389,14 +391,14 @@ combinations of up to two discrete features. Hyperparameter tuning yielded a tra
 cutoff of \num{2.3} years, somewhat below the \num{2.5} cutoff separating patients into high-risk 
 and low-risk DLBCLs. 
 
-On the Schmitz data, $m^*_\text{Reddy}$ is more precise than the IPI, but fails to outperform the 
-IPI significantly. It yields a fairly high hazard ratio of \num{53.4} 
+On the Schmitz data, $m^*_\text{Reddy}$ is more precise than the tIPI, but fails to outperform the 
+tIPI significantly. It yields a fairly high hazard ratio of \num{53.4} 
 (\num{95}\%-CI \num{18.7}-\num{152.1}).
 
 On the Staiger set, $m^*_\text{Reddy}$ posts a precision of \num{53.2} that is by \num{2.5} 
-points higher than that of $m^*_\text{Schmitz}$ and by \num{15} points higher than that of the IPI. 
+points higher than that of $m^*_\text{Schmitz}$ and by \num{15} points higher than that of the tIPI. 
 Consequently, the lower limit \num{95}\%-confidence interval of its precision at \num{41.5}\% is 
-clearly above the IPI's precision and the hazard ratio rises to a considerable \num{23.9}
+clearly above the precision of the tIPI and the hazard ratio rises to a considerable \num{23.9}
 (\num{95}\%-CI \num{9.9}-\num{57.6}). Even more than $m^*_\text{Schmitz}$, $m^*_\text{Reddy}$ 
 defies systematic differences between data sets: comparing the Reddy to the Staiger data, we 
 notice the contrasts non-prospective versus prospective, 
@@ -409,12 +411,12 @@ the LAMIS score and five more discrete features -- no combinations of discrete f
 $n_\text{combi} = 1$. With $T = \num{1.4}$, it uses the same low training survival cutoff as 
 $m^*_\text{Schmitz}$.
 
-On the Reddy data, our model's precision at \num{50.7}\% stays below the IPI's at \num{54.1}\%. 
+On the Reddy data, our model's precision at \num{50.7}\% stays below that of the tIPI at \num{54.1}\%. 
 Speaking for the whole thesis, this renders the Reddy data a challenging test cohort with a 
 hard-to-beat IPI, but -- as we have just seen -- a very helpful training cohort.
 
 Meanwhile on the Schmitz data, the precision of $m^*_\text{Staiger}$ of \num{75.7}\% exceeds that 
-of the IPI by more than \num{10}\%, but falls short of outrivaling the IPI significantly. Still, 
+of the tIPI by more than \num{10}\%, but falls short of outrivaling the tIPI significantly. Still, 
 this demonstrates that transferring models between the Schmitz and LAMIS data works in both 
 directions.
 
@@ -479,7 +481,7 @@ For all $i$, the best validated model $m_i^*$ outputs a continuous score and we 
 these scores in a protocol-dependent manner to obtain a binary classifier. As a reminder, the errors 
 we presented so far are all optimized on the respective cohort: the maximum precision under the 
 constraint to have a prevalence of at least \num{15}\% for our models and of at least \num{10}\% 
-for the IPI. When given a new data set with blinded outcome, we suggested to threshold a model at 
+for the tIPI. When given a new data set with blinded outcome, we suggested to threshold a model at 
 the \num{15}\%-quantile of its continuous output on this data set. This, by definition, leads to 
 higher test errors than with the optimization procedure. The question is by how much the test error 
 of the optimally thresholded model and the \num{15}\%-quantile-thresholded model will differ.
@@ -489,8 +491,8 @@ top of the ranking and low-risk patients at the bottom. As a result, as we decre
 the group of patients with a score above a threshold tends to comprise a lower and lower proportion 
 of high-risk patients. Stated differently, for good models the precision tends to drop as the 
 threshold drops and the relationship between prevalence and precision is roughly monotonic. In the 
-case of a perfectly monotonic dependence between prevalence and precision, an optimal threshold 
-with a prevalence of at least $\alpha$ would therefore \textit{exactly} be the $\alpha$-quantile. 
+case of a perfectly monotonic dependence between prevalence and precision, the $\alpha$-quantile 
+would be an optimal threshold with a prevalence of at least $\alpha$. 
 In the case of a somewhat violated monotonicity, we still have reason to hope that the 
 $\alpha$-quantile is a near-optimal threshold.
 
@@ -508,7 +510,7 @@ In plots B.1--2 and C.1--2, the curve falls sharply for prevalences between \num
 We might wonder if the sharply increasing precision as we reduce the prevalence from \num{15}\% 
 down to \num{10}\% overcompensates for the lost statistical power that we need to significantly 
 outperform the IPI. Fig.\ \ref{fig:inter-output-prec-ci} answers this question with a clear yes.
-With a reduced prevalence of \num{10}\%, we score two more significant victories over the IPI, this 
+With a reduced prevalence of \num{10}\%, we score two more significant victories over the tIPI, this 
 time on the Schmitz data: an easy one in the case of $m^*_\text{Reddy}$ and a close one
 for $m^*_\text{Staiger}$. 
 
@@ -516,4 +518,4 @@ This makes $m^*_\text{Reddy}$ a transferable, versatile model that is
 able to perform in both a representative and high-risk setting for predicting PFS despite being 
 trained to predict OS. Vice versa, for $m^*_\text{Schmitz}$ and $m^*_\text{Staiger}$, the Reddy data 
 stays challenging and the only data set where a best validated model $m^*_i$ fails to significantly 
-surpass the precision of the IPI.
+surpass the precision of the tIPI.

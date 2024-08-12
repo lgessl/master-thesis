@@ -116,9 +116,11 @@ patients pooled from prospective trials of the German High-Grade Non-Hodgkin Lym
 
 Inside MMML-Predict, Rainer Spang's group in Regensburg will develop the MMML-Predictor. 
 This is 
-a supervised-learning task with a binary classification problem: PFS of less 
+a supervised-learning task with a classification problem with binary response: PFS of less 
 than two years -- or high-risk DLBCL -- is the positive group, PFS of more than two 
-years -- or low-risk DLBCL -- is the negative group. While the number of samples is rather small, 
+years -- or low-risk DLBCL -- is the negative group. Part of the task is figuring out which features
+are part of the model input, the predictor.
+While the number of samples is rather small, 
 the number of available features is large thanks to high-throughput measurements like RNA-seq or 
 NanoString. We have an enormous amount of freedom in how we design and train the classifier. 
 Hence, we need to deal with the curse of high dimensions if we want to use the high-dimensional part 
@@ -128,7 +130,7 @@ we do not overfit the data. While we should be able to tackle the first problem 
 for the latter one we need a trustworthy internal validation strategy and, most importantly, we 
 must not validate too many models in the first place.
 
-Since, as of July 2024, the MMML-Predict train cohort has not yet arrived in Regensburg, this thesis
+Since, as of July 2024, the MMML-Predict training cohort has not yet arrived in Regensburg, this thesis
 will imitate the train-test scenario of MMML-Predict on already-available DLBCL data sets. 
 
 This thesis has two main goals.

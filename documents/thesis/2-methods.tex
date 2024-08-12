@@ -12,15 +12,26 @@ introduce a method that lets us train compositions of multiple models.
 
 The design of MMML-Predict with its train and test cohort, where the people developing the predictor 
 never get to see the test cohort, sets the scene for the standard two-step approach in 
-supervised-learning tasks: We use the train cohort to fit multiple models (training) and choose the model
+supervised-learning tasks: We use the training cohort to fit multiple models (training) and choose the model
 among these models that we have confidence performs best on new data (validation). We then touch 
 the test cohort for the first time as we evaluate the chosen model on it to persuade the outside 
 world we have come up with model worth deploying.
 
 Since we want to have the same conditions for data used in this thesis as later in MMML-Predict,
-we randomly split given data $(\mathbf{x}, y)$ with predictor matrix $\mathbf{x}$ and corresponding 
-response $y$ into a train cohort $(\mathbf{x}_\text{train}, y_\text{train})$ and a test cohort 
-$(\mathbf{x}_\text{test}, y_\text{test})$. The following assumes a single, split data set.
+we randomly split given data into a train and a test cohort. In more detail, we are initially given 
+a cohort of samples $(x_i, y_i)$, $i = 1, \ldots, n$. Every $x_i \in \RR^p$ is a vector of $p$ 
+features, the \textit{predictor}, that we want to use to predict the corresponding \textit{response} 
+$y_i \in \{0, 1\} \cup \RR \times 
+\{0, 1\}$; we will explain later what this odd-looking format for the response encodes. We summarize the 
+outcomes to the outcome vector $y = (y_i)_{i = 1, \ldots, n}$ and consider the predictors the row 
+vectors of the predictor matrix $\mathbf{x} = (x_i)_{i = 1, \ldots, n} \in \RR^{n \times p}$. We 
+call $n$ the \textit{sample size} of the cohort. We randomly partition $I = \{1, \ldots, n\}$ into two 
+disjoint subsets $I_\text{train}$ and $I_\text{test}$ and obtain a \textit{training cohort} -- often 
+also called \textit{training data} or \textit{training set} --
+$(\mathbf{x}_\text{train}, y_\text{train}) = (x_i, y_i)_{i \in I_\text{train}}$ and a \textit{test 
+cohort} -- often also called \textit{test data} or \textit{test set} -- 
+$(\mathbf{x}_\text{test}, y_\text{test}) = (x_i, y_i)_{i \in I_\text{test}}$. The following assumes 
+a single, split data set.
 
 \subsection{Training and validation}\label{subsec:train-val}
 
@@ -32,8 +43,8 @@ a candidate model and there is a one-to-one mapping between $H$ and the set of c
 
 For every hyperparameter tuple $h \in H$, we
 \begin{itemize}
-    \item fit the model to the train cohort subject to $h$ and provide validated predictions for 
-        every sample in the train cohort.
+    \item fit the model to the training cohort subject to $h$ and provide validated predictions for 
+        every sample in the training cohort.
         A validated prediction for a sample is a prediction made by a model fit 
         subject to $h$ to data that does not include this sample. We obtain a vector of validated 
         predictions $\hat{y}_\text{train} = \text{val}(h)$ of the same shape as $y_\text{train}$.
@@ -127,7 +138,7 @@ for our problem and robust.
 
 As indicated by the notation $\text{err}(y_\text{train}, \hat{y}_\text{train})$ and 
 $\text{err}(y_\text{test}, \hat{y}_\text{test})$, we optimize $t$ on the true outcomes 
-of the train cohort when validating and we optimize it again on the true outcomes of the test cohort 
+of the training cohort when validating and we optimize it again on the true outcomes of the test cohort 
 when testing. Strictly speaking, $t$ is a hyperparameter, which we optimize on the 
 test cohort during testing; this sounds delicate. The results however will show that the optimal 
 choice for $t$ (or at least an 
