@@ -119,7 +119,7 @@ This is
 a supervised-learning task with a binary classification problem: PFS of less 
 than two years -- or high-risk DLBCL -- is the positive group, PFS of more than two 
 years -- or low-risk DLBCL -- is the negative group. While the number of samples is rather small, 
-the number of available features is large thanks to high-troughput measurements like RNA-seq or 
+the number of available features is large thanks to high-throughput measurements like RNA-seq or 
 NanoString. We have an enormous amount of freedom in how we design and train the classifier. 
 Hence, we need to deal with the curse of high dimensions if we want to use the high-dimensional part 
 of the data and, 
@@ -138,10 +138,10 @@ molecular features, we can indeed deliver
 the desired model, which yields a larger and more precise high-risk group of DLBCL patients than 
 IPI and does so significantly. With an eye to rolling out the MMML-Predictor in clinical practice, 
 we want to demonstrate that we can design this model in such a way that one can transfer it from 
-one platform to another without seriously comprised performance.
+one lab protocol to another without seriously comprised performance.
 \item Second, we want to develop heuristics and recommendations to answer the question which candidate 
 models are worth training and validating and -- more importantly -- which are not. For this, we 
-need to find which models we can reliably validate 
+need to find out which models we can reliably validate 
 and which perform well on independent test data. These findings will guide us on how to keep 
 the number of candidate models we fit to the MMML-Predict training data low. This helps
 us avoid overfitting in the internal validation and submitting a model that convinces 

@@ -25,22 +25,22 @@ systematically differs from the training, causing it to generalize poorly.
 Instead, we need to present the late model training data identically distributed to the test 
 data. An easy and successful way to this is to not train and tune the early model ourselves, but have 
 other people do this on an independent data set. In other words, we use already-existent signatures. 
-Specifically, we did this with cell of origin and the Lamis. The Lamis fulfills the 
+Specifically, we did this with cell of origin and the LAMIS. The LAMIS fulfills the 
 zero-sum constraint such that transferring it to a new data set with gene-expression levels 
 measured under another protocol only results in a constant shift. When using the output of such 
 a signature as a feature for one of our models, we have two options regarding its format.
-First, we can threshold the signature -- as with cell of origin into ABC and GCB or the Lamis into 
+First, we can threshold the signature -- as with cell of origin into ABC and GCB or the LAMIS into 
 a high and low group --, thereby rendering the signature protocol-independent and ready to input 
-into any late model; this, of course, also works with violated zero-sum constaint and 
+into any late model; this, of course, also works with violated zero-sum constraint and 
 $m^*_\text{Schmitz}$ from section \ref{sec:inter-trial} 
 does this quite successfully. Second, we can leave the signature output untouched and provide it as a 
 continuous feature to a GLM, for whose linear predictor a constant shift in an input feature results 
 in constant shift of its output. The most convincing model of this thesis, $m^*_\text{Reddy}$ does 
-this with the Lamis score.
+this with the LAMIS score.
 
 \paragraph{Gene-expression levels}
 As a result, we refrain from incorporating gene-expression levels directly into the models trained 
-by us, but only use their valuable information condensed into the output of alredy-existent models. 
+by us, but only use their valuable information condensed into the output of already-existent models. 
 With the curse of high dimensions gone, we have observed much more trustworthy validated errors. 
 Furthermore, this reduces the training time and enables us to use more complex models.
 
@@ -97,7 +97,7 @@ In the intra-trial experiments, we saw validation and test performance out of to
 that too small, therefore non-representative and systematically differing train and test cohorts 
 could have played a key role in this. For the final MMML-Predictor, one might thus consider 
 using more than \num{100} of the \num{300} samples registered for MMML-Predict, maybe even all 
-\num{300}, for a sufficiently large, statistially more powerful test cohort. One might combine 
+\num{300}, for a sufficiently large, statistically more powerful test cohort. One might combine 
 a series of available data sets into a big training cohort. With combining data sets come two 
 caveats. 
 
@@ -107,7 +107,7 @@ IPI features as clinical features and gene-expression levels as molecular featur
 sets also hold the double-hit and triple-hit status, which refers to the simultaneous translocation 
 of MYC and either BCL2 or BCL6, or MYC, BCL2 and BCL6, respectively. From gene-expression 
 features, we can calculate already-existent molecular signatures as well as the double-expressor and 
-triple-expressor, which describe the phenomena anaogous to double- and triple-hit status with 
+triple-expressor, which describe the phenomena analogous to double- and triple-hit status with 
 overexpression instead of translocation of the three involved genes.
 
 Second, we need to take care of batch effects. Among the features mentioned above, this concerns 
@@ -127,7 +127,7 @@ in this thesis. A shortcoming of this testing procedure is that we always need a
 test cohort to be able estimate the $\alpha$-quantile reliably. An alternative approach might 
 involve internal standards, i.e.\ a small number of samples one has measured for a test cohort for 
 which we already know a good threshold and that we can measure again for any new protocol to shift 
-the treshold accordingly. Even for MMML-Predict, this is a problem for the distant future.
+the threshold accordingly. Even for MMML-Predict, this is a problem for the distant future.
 
 Our last idea concerns the sample weights in loss functions. Almost every loss function is derived 
 from the log likelihood of i.i.d.\ samples and thus sums over the training samples. Therefore, they 
