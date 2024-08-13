@@ -126,10 +126,7 @@ Models trained in a leave-one-out cross-validation only on the gene-expression l
 Gauss, logistic and Cox model. Regarding noteworthy hyperparameter decisions, we both apply and 
 do not apply standardization of the predictor; we do not demand the zero-sum constraint 
 because we do not want to transfer our model to other data sets and want to safe computation time;
-we regularize with elastic-net penalty factor $\alpha \in \{ \num{0.1}, 1 \}$; as throughout this 
-chapter, we have the \texttt{zeroSum} package calculate a sequence of \num{100} regularization strengths 
-$\lambda$ for us and stop early if the cross-validated error does not improve for \num{10} 
-consecutive decreasing $\lambda$ values.
+we regularize with elastic-net penalty factor $\alpha \in \{ \num{0.1}, 1 \}$.
 
 We train and validate a model for every combination of these hyperparameters.
 Not taking into account the values of $\lambda$ (which are hard to foresee due to early stopping), 

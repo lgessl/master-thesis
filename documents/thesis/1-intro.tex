@@ -62,23 +62,28 @@ It is also the threshold used in the MMML-Predict we will introduce next.
 
 Renowned lymphoma experts from across academic Germany -- clinical trialists, biostatisticians, 
 bioinformaticians, lymphoma pathologists and translational lymphoma biologists -- have formed the 
-consortium MMML-Predict to develop and roll out a new, robust, simple-to-use, cost-effective and 
-parsimonious prognostic tool for DLBCL 
+consortium MMML-Predict to develop and roll out a robust, simple-to-use and cost-effective 
+prognostic tool for DLBCL 
 which yields a clinically more relevant high-risk group. This tool, the MMML-Predictor, will allow 
 patients and clinicians early in the treatment cycle to make an informed decision if they want to 
 continue with the standard R-CHOP-like treatment or switch to a novel, more experimental treatment. 
 
 In a discovery phase, MMML-Predict will enroll \num{200} patients in a prospective trial at first 
 diagnosis and 
-collect all clinical and molecular risk features that alone predict an unfavorable outcome, 
-including clinical scores (like the IPI), gene-expression-based factors (like cell-of-origin 
+collect a bunch of clinical and molecular risk features.
+They include clinical scores (like the IPI), gene-expression-based factors (like cell-of-origin 
 signatures, immune scores) and genetic determinants (like MYC, BCL2, TP53, germline and somatic 
-signatures). Many of of these features rely on measuring gene-expression levels for a set of genes. 
+signatures). Many of of these features rely on measuring \textit{gene-expression levels} for a set 
+of genes. 
 For a single gene, its expression level reflects the number of RNA transcripts copied from 
-this gene in a tissue, in our case a lymphoma biopsy. Gene-expression levels catch the cell and 
-tumor state on a molecular level.
-In a novel approach, MMML-Predict will measure dynamic response determinants during treatment (PET-CT 
-and liquid biopsy-based MRD detection). It is unknown if these features capture similar or different 
+this gene in a tissue, in our case a lymphoma biopsy. Gene-expression levels catch the tissue
+state on a molecular level. Measuring gene-expression levels for all 
+or at least a high number of genes that an organism expresses, yields a gene-expression profile. 
+\textit{Cell-of-origin signatures} indicate if the gene-expression profile 
+of a tumor is more similar to that of a germinal-center B-cell (GCB) or an activated B-cell (ABC), 
+which refer to two states of a B cell over its life cycle.
+In a novel approach, MMML-Predict will measure dynamic response determinants during treatment. It is 
+unknown if these features capture similar or different 
 risks; combining them may finally bring to the patients' bedside the significant progress in the 
 understanding of the DLBCL biology researchers have made over the last decades.
 
