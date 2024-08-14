@@ -1,7 +1,7 @@
   \begin{algorithm}
     \caption{Growing a tree by recursive binary partitioning} \label{alg:tree}
     \begin{algorithmic}[1]
-      \Function{Tree}{$(x_i, y_i)_{i = 1, \ldots, n}$; $Q$, $n_\text{min}$}
+      \Function{Tree}{$(\mathbf{x}_i, y_i)_{i = 1, \ldots, n}$; $Q$, $n_\text{min}$}
         \State $\mathcal{R} \gets \emptyset$ \Comment{Final partioning}
         \State $\mathcal{I} \gets \{ \RR \}$ \Comment{Intermediate partioning}
         \While{$\mathcal{I} \neq \emptyset$}

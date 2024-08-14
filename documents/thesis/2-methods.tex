@@ -469,7 +469,7 @@ function $\chi_J$ as $u_j = \chi_J(j) c$. By the zero-sum constraint, we demand
 $\sum_{j \in J} c \beta_j = 0$  
 and hence $\sum_{j \in J} \beta_j = 0$; apart from that, $(\beta_0, \beta)$ is arbitrary. 
 In this situation, the linear predictor 
-\begin{align}
+\begin{align}\label{eq:zerosum-sample-shifts}
     \beta_0 + \sum_{j=1}^p \beta_j (\mathbf{x}_{ij} + s_i \chi_J(j))
     = \beta_0 + \mathbf{x}_i^T \beta + \sum_{j \in J} \beta_j s_i = \beta_0 + \mathbf{x}_i^T \beta,
 \end{align}
@@ -657,23 +657,37 @@ job for us. The elastic net generalizes two well-established regularization meth
         of the parameters, and 
     \item LASSO (least absolute shrinkage and selection operator) regularization \cite{lasso18}, 
         which forces $\beta$ to stay inside a diamond centered at the origin by limiting the 
-        $\ell_1$ norm of the parameters,
+        $\ell_1$ norm of the parameters.
 \end{itemize}
-by combining them with a weight factor $\alpha \in [0, 1]$ into 
-\begin{align}
-    p_{\text{enet}, \alpha}(\beta) = \frac{1-\alpha}{2} |\beta|_2^2 + \alpha |\beta|_1.
+It does so by combining them with a weight factor $\alpha \in [0, 1]$ and feature-wise penalty 
+weights $v \in \RR_{\geq 0}^p$ into
+\begin{align}\label{eq:enet-weights}
+    p_{\text{enet}, \alpha, v}(\beta) = \sum_{j=1}^p v_j \left( \frac{1-\alpha}{2} \beta_j^2 +
+    \alpha |\beta_j| \right).
 \end{align}
-Multiplied with the regularization strength $\lambda \geq 0$, we can add it to the loss function
-$L$ from Eq.\ \ref{eq:loss-glm-no-lasso} and Eq.\ \ref{eq:cox-loss} to obtain the regularized 
-loss function
-\begin{align}
-    \mathcal{L}(\beta_0, \beta) = -L(\beta_0, \beta) + \lambda p_{\text{enet}, \alpha}(\beta).
+Multiplied with the regularization strength $\lambda \in \RR_{\geq 0}$, we can add it to the loss 
+function $L$ from Eq.\ \eqref{eq:loss-glm-no-lasso} and Eq.\ \eqref{eq:cox-loss} to obtain the 
+regularized loss function
+\begin{align}\label{eq:loss-elastic-net}
+    \mathcal{L}(\beta_0, \beta) = -L(\beta_0, \beta) + \lambda p_{\text{enet}, \alpha, v}(\beta).
 \end{align}
+
+In all three cases -- Gauss, logistic and Cox model -- it is possible to approximately minimize 
+$\mathcal{L}$ with respect to $(\beta_0, \beta)$ with a coordinate-descent algorithm 
+\cite[section 2.3]{zerosum16}. We have finally arrived at the loss function we will optimize to 
+fit models in chapter \ref{chap:results}.
+
+The default value for the penalty weights is $v_j = 1$ for all $i = 1, \ldots, p$. Deviating from 
+the default can be useful 
+in at least two cases. First, sometimes we are so convinced of the predictive 
+power of a feature in our model that we set $v_j = 0$ for it to all but ensure a non-zero 
+coefficient for it. The second use case is \textit{standardizing the predictor matrix}, which 
+we will deal with further below.
 
 \paragraph{Effect on correlated features}
 While both ridge and LASSO regularization shrink the coefficients, they act differently in the case 
 of correlated features. Ridge regression tends to force the coefficients of correlated features to 
-similar values while LASSO tends to pick one of them and set the others to zero. E.g, in the 
+similar values while the LASSO tends to pick one of them and set the others to zero. E.g, in the 
 extreme case of $k$ identical features, the LASSO arbitrarily picks one of them with, say, 
 coefficient $a$; the ridge regression, meanwhile, assigns every of the $k$ features the coefficient 
 $a/k$. Relying on very few features comes with the advantage of sparse models, for which we 
@@ -683,47 +697,37 @@ correlated features. Elastic-net regularization balances the sparsity of the LAS
 robustness of the ridge regularization, especially for values of $\alpha$ close to $1$ 
 \cite{elasticnet05}.
 
-\paragraph{Feature-wise penalty weights}
-We refine the elastic-net regularization one last time and introduce \textit{a priori} defined 
-feature weights $v_i \geq 0$ yielding
-\begin{align}\label{eq:enet-weights}
-    p_{\text{enet}, \alpha}(\beta) = \sum_{j=1}^p v_j \left( \frac{1-\alpha}{2} \beta_j^2 +
-    \alpha |\beta_j| \right).
-\end{align}
-In all three cases -- Gauss, logistic and Cox model -- it is possible to approximately minimize 
-$\mathcal{L}$ with respect to $(\beta_0, \beta)$ with a coordinate-descent algorithm 
-\cite[section 2.3]{zerosum16}. We have finally arrived at the loss function we will optimize to 
-fit models in chapter \ref{chap:results}.
-
-The default value is $w_j = 1$ for all $i = 1, \ldots, p$. Deviating from the default can be useful 
-in at least two scenarios. First, sometimes we are so convinced of the predictive 
-power of a feature in our model that we set $v_j = 0$ for it to all but ensure a non-zero 
-coefficient for it; the IPI (in some format) could be such a feature. 
 
 \paragraph{Standardizing the predictor matrix} 
 The second application of the penalty weights is an aspect of a bigger topic: standardizing the
-predictor matrix. We can use the weights to standardize $X$ by setting $v_j$ to an estimate of the 
-standard deviation of feature $j$. Why 
+predictor matrix. We can use the weights to standardize $\mathbf{x}$ by setting $v_j$ to an estimate 
+of the standard deviation of feature $X_j$. Why 
 should we do this? Let us consider two features $X_1$ and $X_2$ with standard deviation $\sigma_1$
-and $\sigma_2$, respectively. To change the output of the model by $1$ when the feature changes by 
+and $\sigma_2$, respectively, and $\sigma_1 < \sigma_2$. To change the output of the model by $1$ 
+when the feature changes by 
 one standard deviation and all other features keep their values, $X_1$ needs the coefficient 
-$\beta_1 = 1/\sigma_1$ and $X_2$ needs $\beta_2 = 1/\sigma_2$. For $\alpha = 1$, 
-$p_{\text{enet}, \alpha}$ penalizes both coefficients equally and it still does so approximately 
-for $\alpha$ slightly below $1$. Thanks to standardization of $X$, $\beta_1$ and $\beta_2$ contribute 
-$1$ to the elastic-net penalty. Standardization strives to guarantee equal justice for features 
-on different scales. Standardization works, however, contrary to the zero-sum idea: thanks to the 
-zero-sum constraint, the fitting process and the final model both are invariant under sample-wise 
-shifts on a subset of features if we set the zero-sum weights accordingly. Sample-wise shifts 
-change the standard deviation of the affected features. With standardization, in 
-contrast, this changes the cost function, which probably results in a different model. 
+$\beta_1 = 1/\sigma_1$ and $X_2$ needs $\beta_2 = 1/\sigma_2$. We have $\beta_1 > \beta_2$. For 
+the default penalty weights $v_1 = v_2 = 1$, the elastic net penalizes $X_1$, the feature with a smaller 
+standard deviation, which in turn needs a higher coefficient, more. For $\alpha$ close to 
+\num{1}, setting $v_1 = \sigma_1, v_2 = \sigma_2$, we approximately offset this difference.
+Standardization strives to guarantee equal justice for features 
+on different scales. 
+
+Standardization works, however, contrary to the zero-sum idea. Thanks to the 
+zero-sum constraint, the fitting process and the final model are invariant under sample-wise 
+shifts on a subset of features if we set the zero-sum weights accordingly (cf.\ Eq.\ 
+\eqref{eq:zerosum-sample-shifts}). Sample-wise shifts 
+change the standard deviation of the affected features, which, with standardization,
+affects the cost function and likely leads to another model. 
 Consequently, when deploying the zero-sum constraint in some way, one should stick to the default 
 value $v_j = 1$ for the features for which we wish to have shift-invariance; these are usually the 
 gene-expression levels, which are on comparable scales anyway.
 
 \paragraph{Choosing a $\lambda$ sequence}
 As we increase the regularization strength $\lambda$, the set of minimizers for
-Eq.\ \ref{eq:enet-weights} becomes smaller and smaller. For $\lambda$ large enough, there exists 
-a unique, trivial solution with $\hbeta = 0$. For the above-mentioned coordinate descent, given 
+Eq.\ \eqref{eq:loss-elastic-net} becomes smaller and smaller. For $\lambda$ large enough, there exists 
+a unique, trivial solution $(\hbeta_0, \hbeta)$ with $\hbeta = 0$. For the above-mentioned 
+coordinate descent, given 
 training data, we can approximate the smallest $\lambda$ that still yields a 
 trivial solution, denoted by $\lambda_\text{max}$ \cite[section 3.3]{rehberg-thesis18}. Following 
 \cite[section 2.5]{regularization-path10}, we choose a minimum value $\lambda_\text{min} = 
@@ -733,7 +737,7 @@ $\lambda_\text{min}$ equidistantly on the log scale. Typical values are $\epsilo
 $n_\lambda = \num{100}$, and we will stick to them throughout chapter \ref{chap:results}. This 
 allows us to tune $\lambda$ in a rather natural way.
 
-We minimize Eq.\ \eqref{eq:enet-weights} for $\lambda$ from this sequence in decreasing order. This gives rise 
+We minimize Eq.\ \eqref{eq:loss-elastic-net} for $\lambda$ from this sequence in decreasing order. This gives rise 
 to two tweaks to tune $\lambda$ efficiently. First, we expect the minimizers of two adjacent $\lambda$ 
 values to be quite close and therefore use the minimizer from the previous run of the iterative coordinate 
 descent as the starting value for its next run in a so-called \textit{warm start}. Second, we 
@@ -743,8 +747,9 @@ $\lambda$ values. In chapter \ref{chap:results}, we will use a typical value of 
 
 \subsubsection{Random forests}
 
-More precisely, we talk about classification random forests (RFs), hence $Y$ is binary in this subsection 
-with $\im(Y) \subset \{ \pm 1 \}$, where $1$ still encodes the positive class. When we say random 
+More precisely, we talk about classification random forests (RFs), hence $Y$ is binary in this 
+subsection. To simplify notation, \num{-1} instead of \num{0} encodes the negative class of 
+the response, hence $Y$ maps to $\im(Y) \subset \{ \pm 1 \}$. When we say random 
 forests in this thesis, we mean classification 
 random forests. Random forests are an ensemble of classification trees -- in short: 
 trees -- and aggregate the classification of every constituent tree.
@@ -755,15 +760,17 @@ A tree is a simple function
     T = \sum_{m=1}^M c_m \chi_{R_m}: \RR^p \to \{ \pm 1 \}
 \end{align}
 with $c_m \in \{\pm 1\}$ and the $R_m$ being disjoint rectangle sets, i.e. $R_m = \prod_{j=1}^p 
-(a_j, b_j]$ for $a_j, b_j \in \RR \cup \{ \pm \infty \}$. It aims to predict the conditional 
-majority class 
+(a_j, b_j]$ for $a_j, b_j \in \RR \cup \{ \pm \infty \}$. By means of such a tree, we want to 
+infer the conditional majority class of the response $Y$ from the predictor $X$. In the perfect 
+case, we have
 \begin{align}\label{eq:rf-major}
-    \sgn(E(Y \cond X = x)) = T(x) \quad \text{for all } x \in \im(X);
+    \sgn(E(Y \cond X = x)) = \tilde{T}(x) \quad \text{for all } x \in \im(X)
 \end{align}
-$\sgn$ is the signum function.
+for a tree $\tilde{T}$. $\sgn$ is the signum function.
 
-How can we use our samples $(\mathbf{x}_i, y_i)$, $i = 1, \ldots, n$, to learn a tree $T$? While we can 
-trivially fulfill Eq. \eqref{eq:rf-major} exactly for our samples, this would only lead to terribly 
+How can we use our samples $(\mathbf{x}_i, y_i)$, $i = 1, \ldots, n$, to learn a tree $T$ that does 
+good job on Eq.\ \eqref{eq:rf-major}? While we can 
+trivially fulfill Eq.\ \eqref{eq:rf-major} exactly for our samples, this would only lead to heavily
 overfitted trees. Instead, we confine ourselves with simpler, rougher trees that will make errors on 
 training samples, but generalize better. 
 In the algorithm further below, we will only need to calculate an error for the samples inside a 
@@ -774,14 +781,14 @@ samples in $R$ and
 \end{align}
 be the proportion of samples in $R$ with positive response. The error measure -- in the context of 
 trees usually termed impurity measure -- we use in this thesis
-is the Gini impurity $Q(R) = 2 \hat{p}_R (1 - \hat{p}_R)$; it is low for pure $R$ dominated by 
+is the \textit{Gini impurity} $Q(R) = 2 \hat{p}_R (1 - \hat{p}_R)$. It is low for pure $R$ dominated by 
 samples with either positive or negative response and grows quadratically as the response of the 
 samples in $R$ gets more and more imbalanced. The impurity measure is a hyperparameter: other 
-options include the misclassification error and the cross entropy. To govern the complexity $T$,
+options include the misclassification error and the cross entropy. To govern the complexity of $T$,
 we demand that every rectangle set $R_m$ contain at least $n_\text{min}$ samples. Even this 
 constraint still leaves us with a computationally infeasible number of possible trees, and this is 
-why we fit $T$ with a greedy algorithm: it recursively partitions every rectangle set along a 
-feature in two subsets in such a way that the impurity measure gets minimal until every resulting 
+why we fit $T$ with a greedy algorithm: we recursively partition every rectangle set along a 
+feature into two sub-rectangles in such a way that the impurity measure gets minimal until every resulting 
 rectangle set comprises less than $n_\text{min}$ samples. Formalizing binary partitioning, for a 
 rectangle set $R$, a feature $j \in \{1, \ldots, p\}$ and split point $s \in \RR$, we define 
 the pair of half planes
@@ -789,7 +796,8 @@ the pair of half planes
     R^{(1)}_{j, s} = \{r \in R: r_j \leq s\} \text{ and } R^{(2)}_{j, s} = \{r \in R: r_j > s\}.
 \end{align}
 With respect to the impurity measure, there are only finitely many split points of interest since 
-we only have finitely many samples, and hence we need to consider no more than $n \cdot p$ when 
+we only have finitely many samples in $R$, and hence we need to consider no more than $n(R) \cdot p$ split 
+points when 
 considering $R$ for partitioning. All of this allows us to compactly describe a procedure to grow a 
 tree in Alg.\ \ref{alg:tree}.
 \input{algos/tree.tex}
