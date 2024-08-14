@@ -1,20 +1,18 @@
 \chapter{Results} \label{chap:results}
 
 In this triune chapter, we start with introducing three DLBCL data sets that include 
-survival, clinical and molecular features. Next, in intra-trial experiments, we split every of these 
-three data sets into 
-a train and test cohort, fit a variety of candidate models to the training 
-cohort, validate them on the same and test the best on the test cohort; this is less about presenting a 
-high-performing model, but more about analyzing validated and tested errors to make the set of tried 
-out hyperparameter tuples $H$ slimmer and 
-better for the future. This future plays out in the last part as we train and validate on one of 
-the three data sets and test on another and deal with cross-platform variability in inter-trial 
-experiments.
+survival, clinical and molecular features. Next, in \textit{intra-trial experiments}, we split 
+every of these three data sets into a train and test cohort, fit a variety of candidate models to 
+the training cohort, validate them on the same and test the best on the test cohort. This is less 
+about presenting a high-performing model, but more about analyzing validated and tested errors to 
+make the set of tried out hyperparameter tuples $H$ slimmer and better for the future. This future 
+plays out in the last part as we train and validate on one of the three data sets and test on 
+another and deal with cross-platform variability in \textit{inter-trial experiments}.
 
 \section{The data}\label{sec:data}
 
 Our DLBCL data sets are taken from papers by Schmitz et al.\ \cite{schmitz18}, Reddy et al.\ 
-\cite{reddy17} and Staiger et al.\ \cite{staiger20}; see Table \ref{table:data} for key properties 
+\cite{reddy17} and Staiger et al.\ \cite{staiger20}. See Table \ref{table:data} for key properties 
 and comparison. We will refer to them as Schmitz, Reddy and Staiger data, respectively.
 
 \input{figs/data.tex}
@@ -22,29 +20,27 @@ and comparison. We will refer to them as Schmitz, Reddy and Staiger data, respec
 \paragraph{Schmitz data}
 The data by Schmitz et al.\ includes the five IPI features in their continuous form. 
 By heuristically optimizing a novel genetic distinctiveness metric, Schmitz et al.\ 
-clustered \num{574} DLBCL biopsy samples into four subtypes, called MCD, BN2, N1, EZB and ``other''. They 
+clustered \num{574} DLBCL biopsy samples into four genetic subtypes. They 
 unblinded the survival data only after the clustering was complete and the 
-model was frozen \cite[Appendix 1, pp. 16--18]{schmitz18}. The following, independent survival analysis 
+model was frozen \cite[Appendix 1, pp. 16--18]{schmitz18}. The following survival analysis 
 on a subset of \num{229} patients, for who survival data was available and who had undergone R-CHOP 
-or CHOP-like treatment, unveiled significantly differing PFS between the four subtypes (excluding 
-``other'') according to a logrank test; BN2 and EZB subtypes have far better prognosis than MCD and 
-N1 (2-year PFS rate of \num{81}\% and \num{75}\% as opposed to \num{39}\% and 
-\num{20}\%, respectively). The IPI score did not vary significantly between the subtypes, 
+or CHOP-like treatment, unveiled significantly differing PFS between the four genetic subtypes. The 
+IPI score did not vary significantly between the subtypes, 
 indicating that their new classifier gives us additional information to predict survival.
 
 There are two caveats: First, the genetic classifier saw the entire data set during training and 
 this runs afoul of a strict train-test regime even if training was 
 survival-agnostic. This only affects our intra-trial experiments as in the inter-trial experiments 
 we do not include the genetic subtype as a feature. More importantly, we always need 
-to carefully use features in a data set that are the output of some model trained on this data set. 
-Second, this data set is not the result of a 
+to be careful with using features in a data set that are the output of some model trained on this 
+data set. Second, this data set is not the result of a 
 prospective, representative trial, but consists of opportunistically collected patients from highly renowned 
 U.S. hospitals, which preferably treat 
 difficult cases. As a result, the high-risk proportion in the Schmitz data is at \num{36.6}\% -- 
 compared to \num{24.3}\% in the prospective Staiger data -- and the tIPI reaches a precision of 
 \num{65.2}\% for classifying high-risk patients at a prevalence of \num{12.9}\% -- compared to 
-\num{38.2}\% at \num{17.0}\% in the Staiger data. The tIPI already meets the MMML-Predict goals, 
-but we want to see if we can do even better in such a high-risk regime.
+\num{38.2}\% precision at \num{17.0}\% prevalence in the Staiger data. The tIPI already meets the 
+MMML-Predict goals, but we want to see if we can do even better in such a high-risk regime.
 
 \paragraph{Reddy data}
 
@@ -54,10 +50,10 @@ tIPI has a performance that already satisfies the MMML-Predict goals, even if a 
 convincingly than on the Schmitz data. After identifying \num{150} DLBCL driver genes, Reddy et al.\ 
 trained a Cox model, named genomic risk model,
 that predicts overall survival (OS) from combinations of genetic events and gene-expression markers 
-(cell of origin, MYC, and BCL2) and thresholded its output into low, intermediate and high risk. 
-This is a
+(cell of origin, MYC and BCL2 overexpression) and thresholded its output into low, intermediate and 
+high risk. This is a
 model whose predictions we cannot use because the authors do not tell us which samples they assigned
-into train and test set, but that inspired us to use combinations of discrete features, cf.\ 
+into the train and test set, but that inspired us to use combinations of discrete features, cf.\ 
 subsection 
 \ref{subsec:model-agnostic}. Nevertheless, with high expression and translocation of MYC, BCL2 and 
 BCL6, the data provides some of the input features of the genomic risk model as well as three binary 
@@ -72,31 +68,36 @@ and enrolled in prospective clinical trials.
 Staiger et al.\ first determined \num{731} gene pairs with highly correlated gene-expression levels 
 between their training cohort -- \num{233} DLBCLs with gene-expression levels built from the Affymetrix 
 GeneChip technology -- and the Staiger data -- \num{466} DLBCLs with gene-expression levels built 
-from the NanoString nCounter technology -- with the aid of six paired nCounter-GeneChip samples, cf.\ 
+from the NanoString nCounter technology -- with the help of six paired nCounter-GeneChip samples, cf.\ 
 \cite[Supplementary Methods]{staiger20}.
 Next, they learned a LASSO-regularized Cox model on the differences of the (logarithmized) 
 gene-expression levels from these gene pairs and the five thresholded IPI features.
 Afterwards, they removed the five IPI features from the model aiming to make it independent of the 
 IPI. One can expand the differences of gene-expression levels in the signature to obtain an ordinary 
-gene-expression signature with coefficients corresponding to single genes, the LAMIS. It is 
+gene-expression signature with coefficients corresponding to single genes: the LAMIS 
+(lymphoma-associated macrophage interaction signature). It is 
 based on \num{17} genes, but dominated by just two genes, CSF1 and CPT1A. 
 
 By dichotomizing the 
-LAMIS scores at the 75\%-quantile into their LAMIS group (low or high), Staiger et al.\ present two 
+continuous output of the LAMIS, which we call the \textit{LAMIS score}, at the 75\%-quantile into 
+their LAMIS group (low or high), Staiger et al.\ present two 
 groups on the Staiger data with significantly differing PFS and OS; 
 meanwhile, the IPI features, breaks in MYC, BCL2, BCL6, and cell of origin remain prognostic 
 indicators independently of the LAMIS group.
 
 Since the LAMIS coefficients fulfill the 
-zero-sum property, we apply the LAMIS unchanged on the two other data sets; according to Eq.\ 
-\eqref{eq:inter-tech}, the LAMIS scores have a data-set-dependent shift. We also add the LAMIS 
-group by dichotomizing the LAMIS scores at the 75\%-quantile of the respective data set.
+zero-sum property, we apply the LAMIS unchanged on the two other data sets. Under allegedly realistic 
+assumptions and according to Eq.\ \eqref{eq:inter-tech}, the LAMIS scores have a data-set-dependent 
+shift. This chapter, especially section \ref{sec:inter-trial}, will show how realistic these 
+assumptions are. 
+We also add the LAMIS group by dichotomizing the LAMIS output at its 75\%-quantile of the respective 
+data set.
 
 \paragraph{Combined data}
 
-We will conduct inter-trial experiments on a big data set consisting of the samples in the Schmitz, 
-Reddy and Staiger data. As for the gene expression-levels, we map the Ensemble gene IDs used 
-in the Reddy data to HGNC gene symbols with the help of the \texttt{BiomaRt} R package 
+We will conduct inter-trial experiments on a large data set consisting of the samples from the 
+Schmitz, Reddy and Staiger data. As for the gene expression-levels, we map the Ensemble gene IDs 
+used in the Reddy data to HGNC gene symbols with the help of the \texttt{BiomaRt} R package 
 \cite{biomart09}
 to end up with the same gene nomenclature in all three data sets. Intersecting the gene-expression 
 features leaves us with gene-expression levels for \num{119} genes and the features gender, age, 

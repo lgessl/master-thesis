@@ -1,5 +1,4 @@
   \begin{algorithm}
-    \caption{Growing a forest with bagging and random feature selection} \label{alg:forest}
     \begin{algorithmic}[1]
       \Function{RandomForest}{$(\mathbf{x}_i, y_i)_{i = 1, \ldots, n}$; $B$, $m$, $Q$, $n_\text{min}$}
         \State $\mathcal{E} \gets \emptyset$ \Comment{Ensemble to be filled} 
@@ -13,4 +12,5 @@
         \State \Return $\sgn \circ \left( \frac{1}{B} \sum_{T \in \mathcal{E}} T \right)$
       \EndFunction
     \end{algorithmic}
+    \caption{Growing a forest with bagging and random feature selection.} \label{alg:forest}
   \end{algorithm}

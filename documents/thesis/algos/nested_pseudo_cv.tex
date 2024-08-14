@@ -1,14 +1,13 @@
 \begin{algorithm}
-\caption{Nested pseudo cross validation} \label{alg:nested-pcv}
     \begin{algorithmic}[1]
         \Function{NestedPseudoCV}{$(x_i, y_i)_{i = 1, \ldots, n}$; $h = (h_1, h_2)$, $k$}
-            \State Fit $f_1$ to $(x_i; y_i)$, $i = 1, \ldots, n$, subject to $h_1$ in a $k$-fold 
-                cross-validation, yielding cross-validated predictions $o$.
+            \State Fit $f_1$ to $(x_i; y_i)$, $i = 1, \ldots, n$, subject to $h_1$ , yielding 
+                validated predictions $o$.
             \State Fit $f$ to $(o_i, f_2(x_i), \ldots, f_m(x_i); y_i)$, 
-                $i = 1, \ldots, n$, subject to $h_2$ in a $k$-fold cross-validation, yielding 
-                cross-validated predictions $\hat{y}$.
+                $i = 1, \ldots, n$, subject to $h_2$, yielding validated predictions $\hat{y}$.
             \State $g \gets f \circ (f_1, \ldots, f_n)$
             \State \Return $(\hat{y}, g)$
         \EndFunction
     \end{algorithmic}
+    \caption{Nested pseudo cross validation.} \label{alg:nested-pcv}
 \end{algorithm}

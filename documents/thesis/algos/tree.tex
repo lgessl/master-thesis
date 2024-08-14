@@ -1,5 +1,4 @@
   \begin{algorithm}
-    \caption{Growing a tree by recursive binary partitioning} \label{alg:tree}
     \begin{algorithmic}[1]
       \Function{Tree}{$(\mathbf{x}_i, y_i)_{i = 1, \ldots, n}$; $Q$, $n_\text{min}$}
         \State $\mathcal{R} \gets \emptyset$ \Comment{Final partioning}
@@ -10,15 +9,17 @@
           \State $(j_*, s_*) \gets \argmin_{j, s} n\left(R_{j,s}^{(1)}\right) Q\left(R_{j,s}^{(1)}\right) + 
             n\left(R_{j,s}^{(2)}\right) Q\left(R_{j,s}^{(2)}\right)$ \label{alg:tree:split}
           \For{$\ell = 1, 2$}
-            \If{$n\left(R_{j_*, s_*}^{(\ell)}\right) < n_{\text{min}}$}
-              \State $\mathcal{R} \gets \mathcal{R} \cup \left\{ R_{j_*, s_*}^{(\ell)} \right\}$
-              \State $c_R \gets 1$ if $\hat{p}_R > \num{0.5}$ else \num{-1}
+            \State $R_\ell \gets R_{j_*, s_*}^{(\ell)}$
+            \If{$n(R_\ell) < n_{\text{min}}$}
+              \State $\mathcal{R} \gets \mathcal{R} \cup \{ R_\ell \}$
+              \State $c_{R_\ell} \gets 1$ if $\hat{p}_{R_\ell} > \num{0.5}$ else \num{-1}
             \Else
-              \State $\mathcal{I} \gets \mathcal{I} \cup \left\{ R_{j_*, s_*}^{(\ell)} \right\}$
+              \State $\mathcal{I} \gets \mathcal{I} \cup \{ R_\ell \}$ 
             \EndIf
           \EndFor
         \EndWhile
         \State \Return $\sum_{R \in \mathcal{R}} c_R \chi_R$
       \EndFunction
     \end{algorithmic}
+    \caption{Growing a tree by recursive binary partitioning.} \label{alg:tree}
   \end{algorithm}

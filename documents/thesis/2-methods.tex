@@ -787,11 +787,11 @@ samples in $R$ gets more and more imbalanced. The impurity measure is a hyperpar
 options include the misclassification error and the cross entropy. To govern the complexity of $T$,
 we demand that every rectangle set $R_m$ contain at least $n_\text{min}$ samples. Even this 
 constraint still leaves us with a computationally infeasible number of possible trees, and this is 
-why we fit $T$ with a greedy algorithm: we recursively partition every rectangle set along a 
-feature into two sub-rectangles in such a way that the impurity measure gets minimal until every resulting 
-rectangle set comprises less than $n_\text{min}$ samples. Formalizing binary partitioning, for a 
-rectangle set $R$, a feature $j \in \{1, \ldots, p\}$ and split point $s \in \RR$, we define 
-the pair of half planes
+why we fit $T$ with a greedy algorithm. We recursively split every rectangle set along a 
+feature into two sub-rectangles in such a way that the impurity measure gets minimal and stop if 
+a rectagle set comprises less than $n_\text{min}$ samples. Formally, for a rectangle set $R$, a 
+feature $j \in \{1, \ldots, p\}$ and split point $s \in \RR$, we define 
+the pair of sub-rectangles
 \begin{align}
     R^{(1)}_{j, s} = \{r \in R: r_j \leq s\} \text{ and } R^{(2)}_{j, s} = \{r \in R: r_j > s\}.
 \end{align}
@@ -803,31 +803,33 @@ tree in Alg.\ \ref{alg:tree}.
 \input{algos/tree.tex}
 
 \paragraph{Forests}
-Trees are known to be notoriously \textit{noisy}, meaning if we fix $x \in \RR^p$ the variance 
+Trees are known to be notoriously \textit{noisy}, meaning if we fix $x \in \RR^p$, the variance 
 $V_\mathbf{z}(T(x))$ is quite high; the index $\mathbf{z}$ makes explicit that we consider $T(x)$ as 
-a function -- or better: random variable -- of i.i.d.\ drawing training samples $\mathbf{z}$ (and 
+a random variable that depends on drawing $n$ i.i.d.\ training samples $\mathbf{z}$ (and 
 then fitting a tree to them according to Alg.\ \ref{alg:tree}). On the other hand, if grown deep,
 trees have pretty low \textit{bias}, meaning for fixed $x \in \RR^p$ the expectation $E_\mathbf{z}(T(x))$ 
 is close to $E(Y \cond X = x)$. High variance and low bias makes trees 
 ideal candidates for a method called \textit{bagging}, which averages the predictions of many noisy, 
 approximately unbiased models with the goal to reduce their variance. Given trees $T_b$, $b = 1, 
-\ldots, B$, fit to identically distributed training data $\mathbf{z}_b$, we denote the new model by 
+\ldots, B$, fitted to identically distributed training data $\mathbf{z}_b$, we denote the new model 
+by 
 \begin{align}
     \overline{T} = \frac{1}{B} \sum_{b=1}^B T_b.
 \end{align}
 
 We again fix some $x \in \RR^p$. Since the expected value is linear and the $T_b(x)$ are identically 
-distributed, we have $E_\mathbf{z}(\overline{T(x)}) = E_\mathbf{z}(T_1(x))$ and we see that bagging 
+distributed, we have $E_\mathbf{z}(\overline{T}(x)) = E_\mathbf{z}(T_1(x))$ and we see that bagging 
 leaves the bias unchanged. Consequently, our hope rests on reducing the variance. Say, every 
 $T_b(x)$ -- again understood as a random variable dependent on sampling the training data -- has 
 variance $\sigma^2$. If the $T_b(x)$ are independent, the variance is additive and we have 
 $V_\mathbf{z}(\overline{T}(x)) = \sigma^2/B$, which tends to zero as $B \to \infty$. In practice, 
-the $T_b(x)$ are not totally independent as they have training samples in common: we do not i.i.d.\ 
-sample from the whole population $(X, Y)$, but draw a \textit{bootstrap} sample of size $n$ from our training 
+the $T_b(x)$ are not totally independent as they have training samples in common: we do not 
+sample $\mathbf{z}_b$ from the whole population $(X, Y)$, but draw $\mathbf{z}_b$ as a 
+\textit{bootstrap} sample of size $n$ from our training 
 data $(\mathbf{x}_i, y_i)$, $i = 1, \ldots, n$. Bootstrapping -- uniformly sampling without 
 replacement -- is the key concept behind bagging, 
-explaining why \textit{bootstrap aggregation} is a synonym for it. If in this 
-situation the $T_b(x)$ have a pairwise correlation of $\rho > 0$, we have 
+explaining why \textit{bootstrap aggregation} is a synonym for it. If, in this situation, the 
+$T_b(x)$ have a pairwise correlation of $\rho > 0$, we have 
 \begin{align}
     V_\mathbf{z}\left(\overline{T}(x)\right) = \rho \sigma^2 + \frac{1-\rho}{B} \sigma^2,
 \end{align}
@@ -843,16 +845,17 @@ these $m$ features. We denote the modified function with the appended parameter 
 
 \input{algos/forest.tex}
 
-Widely used default values are $m = \floor{\sqrt{p}}$ and $n_\text{min} = 1$. As for $B$, we have 
+In constrast to GLMs with their continuous output, random forests output a binary classification,
+so we cannot control their prevalence. Widely used default values are $m = \floor{\sqrt{p}}$ and 
+$n_\text{min} = 1$. As for $B$, we have 
 shown above that increasing it reduces the variance at constant bias; in practice, therefore, only 
-computation time limits the number of trees in the forest. We can go for a high $B$ as fitting the 
+computation time limits the number of trees in the forest. We can go for a large $B$ as fitting the 
 constituent trees is an embarrassingly parallel problem. We can 
 also validate random forests very efficiently by facilitating \textit{out-of-bag (OOB)} samples: 
-For each sample $(\mathbf{x}_i, y_i)$, we can construct its random forest predictor by averaging only those 
-trees for which $(\mathbf{x}_i, y_i)$ was not part of the bootstrapped training sample -- no need for a time 
-consuming cross validation. The prediction of this random forest predictor for $\mathbf{x}_i$ is the OOB 
-prediction for sample $i$. When we say validated prediction for a random forest, we mean the 
-OOB prediction.
+for each sample $(\mathbf{x}_i, y_i)$, we construct its \textit{OOB prediction} by averaging only 
+those $T_b(\mathbf{x}_i)$ for which $(\mathbf{x}_i, y_i)$ was not part of the bootstrapped training 
+sample -- no need for a time consuming cross validation. For random forests, we use OOB predictions 
+as validated predictions.
 
 \subsection{Nested models}\label{subsec:nested-models}
 
@@ -868,31 +871,35 @@ LAMIS. Such $f_i$ are merely projections onto a feature.
 \subsubsection{Early models trained on the same data set}
 If we need to fit some of the early models to the training data ourselves, getting reliable 
 cross-validated predictions
-for $f$ becomes trickier. Without loss of generality, we assume the only early model left to be fit 
+for $f$ becomes trickier. Without loss of generality, we assume the only early model left to be 
+fitted 
 is $f_1$. We want to fit $f_1$ according to a hyperparameter tuple $h_1$ and $f$ according to $h_2$, 
-giving us the hyperparameter tuple $h \in H$ for the nested model. How do 
+giving us the hyperparameter tuple $h = (h_1, h_2) \in H$ for the nested model. How do 
 we get realistic cross-validated predictions $\hat{y}_i$, $i \in F_\ell$, for the $\ell$-th fold? 
 We start by fitting $f_1$ to $(\mathbf{x}_i, y_i)$, $i \in \{ 1, \ldots, n \} \setminus F_\ell = F_\ell^c$ 
 subject to $h_1$.
 The question reduces to: which values for the output of $f_1$, denoted $o$, do we provide the 
-algorithm fitting $f$ to $(o_i, f_2(\mathbf{x}_i), \dots, f_m(\mathbf{x}_i); y_i)$, $i \in F_\ell^c$?
+algorithm that fits $f$ to $(o_i, f_2(\mathbf{x}_i), \dots, f_m(\mathbf{x}_i); y_i)$, $i \in 
+F_\ell^c$?
 
 The choice $o_i = f_1(\mathbf{x}_i)$ is most likely too optimistic since $f_1$ overfits its training 
-data to some extent. Consequently, $f$ will put too much trust in them and will generalize poorly, 
+data to some extent. Consequently, $f$ will put too much trust in $o$ and will generalize poorly, 
 as the cross-validated predictions of $f$ will already show. We want to tackle this problem by 
 using cross-validated predictions for $f_1$, instead. The theoretically cleanest approach 
 is to do an \textit{inner} cross validation for $f_1$, i.e. another cross-validation for fitting 
 $f_1$ to $(\mathbf{x}_i, y_i)$, $i \in F_\ell^c$, and use the cross-validated predictions from \textit{this} 
-cross validation for $o$. However, this increases time complexity by a factor of $k$ for a $k$-fold 
-cross-validation. Because we fit $f_1$ to $(\mathbf{x}_i, y_i)$, $i = 1, \ldots, n$, in a cross validation 
-anyway, we prefer to use the cross-validated predictions we get in this process for $o$. 
-Alg.\ \ref{alg:nested-pcv} writes this down clearly.
+cross validation for $o$. However, the additional loop increases time complexity by a factor of $k$ 
+for a $k$-fold cross-validation. Because we fit $f_1$ to $(\mathbf{x}_i, y_i)$, $i = 1, \ldots, n$, 
+in a cross validation anyway, we prefer to use the cross-validated predictions we get in this 
+process for $o$. This even allows to formulate the approach for arbitrary validated predictions 
+for $f_1$ and $f$. Alg.\ \ref{alg:nested-pcv} writes this down clearly.
 
 \input{algos/nested_pseudo_cv.tex}
 
 The gain in time complexity compared to the approach involving an inner cross validation comes at a 
-little price: a not thoroughly clean cross validation for $g$. To see this, we assume that the 
-assignment of samples into folds in the cross validation for $f_1$ and $f$ is the same -- a very 
+little price: a not thoroughly clean validation of $g$. To see this, we assume that the validated 
+predictions for $f_1$ and $f$ are both cross-validated predictions with the same
+assignment of samples into folds -- a very 
 realistic assumption as we 
 usually choose $k = n$. We fix a sample $i$ and another sample $j$ that is in another fold. 
 Sample $i$'s cross-validated prediction $\hat{y}_i$ for $g$ -- or equivalently its cross-validated 
@@ -903,29 +910,31 @@ $i$. All in all, $\hat{y}_i$ very slightly depends on $(\mathbf{x}_i, y_i)$.
 Next, we want to talk about how we tune the hyperparameters of a nested model. In practice, one thinks of 
 the hyperparameter tuples $H$ as partitioned into subsets. We summarize the
 hyperparameters of a model that make it most distinct to other models in its \textit{architecture}. 
-For a core model, the architecture concerns its class (like logistic model or random forest) and 
-the a priori selected features. For a nested model, its architecture is defined by the architectures 
-of the involved core models and the hierarchy that nests them into one another.
+For a core model, the architecture concerns its class -- Gauss, logistic, Cox model or random forest 
+-- and the a-priori selected features. For a nested model, its architecture is defined by the 
+architectures of the involved core models and the hierarchy that nests them into one another.
 
 For a given architecture of a nested model, we need to tune the hyperparameter tuple $h = (h_1, h_2)$ 
 of 
 Alg.\ \ref{alg:nested-pcv}, i.e., we repeatedly call \textsc{NestedPseudoCV} as we vary $h \in H_0$
 with $H_0$ being the set of tried out hyperparameter tuples for this model architecture. What 
-should $H$ look like? We have candidate 
+should $H_0$ look like? We have candidate 
 hyperparameter tuples $H_{0, 1}$ for $f_1$ and $H_{0, 2}$ for $f$. An unprejudiced strategy is to 
 set $H = H_{0, 1} \times H_{0, 2}$. Compared to non-nested models, we try out a considerably 
-higher number of hyperparamter tuples -- roughly a factor of $|H_{0, 1}| \approx |H_{0, 2}|$ and 
+higher number of hyperparamter tuples -- roughly a factor of $|H_{0, 1}| \approx |H_{0, 2}|$ -- and 
 the validated errors of nested models have a higher chance 
 of being overestimated, cf.\ subsection \ref{subsec:train-val}. We therefore settle on a greedier 
-strategy: we first tune $h_1 \in H_{0, 1}$ and then go on to tune $h_2 \in H_{0, 2}$. 
+strategy: we first tune $h_1 \in H_{0, 1}$, yielding a best validated hyperparameter tuple 
+$\hat{h}_1$, and then go on to tune $h_2 \in H_{0, 2}$. This means $H_0 = \{ \hat{h}_1 \} 
+\times H_{0, 1}$.
 
-$f_1$ often deals with high-dimensional input. E.g., $f_1$ is a Gauss, logistic or Cox model 
+$f_1$ often deals with high-dimensional input. E.g., $f_1$ is a Gauss model 
 predicting from 
-several thousand RNA-seq gene-expression levels. Hence, we undoubtedly need elastic-net 
+several thousand gene-expression levels. Hence, we undoubtedly need elastic-net 
 regularization in its training and need to tune the regularization strength $\lambda$. 
 With this alone, we quickly end up with several hundred hyperparameters to be tuned for $f_1$. 
-With $H_{0,1}$ being so big, good validated performances have one thing in common: they are 
-probably too optimistic, the cross-validated predictions are too accurate. This means we still 
+With $H_{0,1}$ being so big, good validated performances have one thing in common: they and the 
+corresponding cross-validated predictions are too optimistic. This means, we still 
 have not gotten entirely rid of the problem that $f$ puts too much trust into $f_1$'s output 
 misled by too optimistic values in the training. This problem will propagate into another
 problem: too optimistic cross-validated predictions for $g$ and an overestimated 
@@ -935,15 +944,19 @@ eye on models nested according to Alg.\ \ref{alg:nested-pcv} in chapter \ref{cha
 \subsubsection{Nested models and inter-technical variability}
 
 Considering a nested model $g = f \circ (f_1, \ldots, f_m)$, what happens if the output of some of 
-the early models $f_i$ suffers from inter-technical variability? Without loss of generality, let 
+the early models $f_i$ is sensitive to inter-technical variability? Without loss of generality, let 
 only $f_1$ be such an early model. Moreover, let both $f_1$ and $f$ be a GLM, which we describe 
 with the linear predictor as $f_1: \RR^p \to \RR, x \mapsto x^T \beta$ and $f: \RR^m \to \RR, 
-x \mapsto x^T \gamma$. Let $\beta$ fulfill the zero-sum constraint, i.e. $\sum_{j=1}^p \beta_j = 0$.
-As before, $\mathbf{z} \in \RR^{n \times p}$ holds the same features for the same samples as the 
-predictor matrix $\mathbf{x}$, but measured under a different protocol.
-We assume that Eq.\ \ref{eq:inter-tech-exact} holds with small residues $\epsilon_{ij}$. In this 
-thesis, $f_1$ will always be a gene-expression signature, which makes this a realistic assumption. 
-With Eq.\ \ref{eq:inter-tech}, we obtain
+x \mapsto x^T \gamma$. 
+$\mathbf{z} \in \RR^{n \times p}$ holds the same features for the same samples as the 
+predictor matrix $\mathbf{x}$, but measured under a different protocol. Let $J = \{1, \ldots, p\}$ 
+denote the features that are affected by the change of protocol, e.g. the gene-expression levels.
+Let $\beta$ fulfill the zero-sum constraint $\sum_{j \in J} \beta_j = 0$.
+We assume that Eq.\ \eqref{eq:inter-tech-exact} holds with small residues $\epsilon_{ij}$. For $j 
+\notin J$, we this is trivial since we even have $\epsilon_{ij} = 0$. For $j \in J$, this is also 
+a realistic assumption since, in this thesis, $f_1$ is always a gene-expression signature.
+
+With Eq.\ \eqref{eq:inter-tech}, we obtain
 \begin{align}\label{eq:inter-tech-nested}
 \begin{split}
     g(\mathbf{z}_i) &= (f \circ (f_1, \ldots, f_m))(\mathbf{z}_i) \\ 
@@ -1000,13 +1013,13 @@ It supports fitting core models with the support of the R packages \texttt{zeroS
 augments the popular \texttt{glmnet} package by the zero-sum constraint: it fits and 
 tunes Gauss, logistic and Cox models in a cross validation and endows their loss function 
 with elastic-net regularization and -- unlike \texttt{glmnet} -- the zero-sum 
-constraint. The time-critical work happens in a fast, well-structured C++ backbone. 
-\texttt{ranger} fits random forests fast, also thanks to a performant C++ backbone. 
+constraint. The time-critical work of \texttt{zeroSum} happens in a fast, well-structured C++ 
+backbone. \texttt{ranger} fits random forests fast, also thanks to a performant C++ backbone. 
 
 \paragraph{Validation and testing} 
 If fitting functions from existing R packages calculate a validated error of 
-their fit models at all, they do so in a plethora of ways, usually using an error measure derived 
-from the loss function they minimize; e.g., \texttt{zeroSum} uses the binomial deviance for 
+their fitted models at all, they do so in a plethora of ways, usually using an error measure derived 
+from the loss function they minimize. E.g., \texttt{zeroSum} uses the binomial deviance for 
 logistic models and \texttt{ranger} uses the classification error for classification random 
 forests. \texttt{patroklos} takes 
 full control of validation and unifies it
@@ -1015,18 +1028,18 @@ with the help of the \texttt{AssScalar} R6 class. With the \texttt{Ass2d} R6 cla
 user can plot one property of a truly binary classifier against another, which guides 
 thresholding models with continuous output as in Fig.\ \ref{fig:inter-output-prec}. 
 \texttt{patroklos} calculates logrank p-values and hazard ratios together with their confidence
-intervals with the help of the R package \texttt{survival} \cite{survival-cran}.
+intervals by means of the R package \texttt{survival} \cite{survival-cran}.
 
 \paragraph{Modular, extendible design} 
 \texttt{patroklos} defines function interfaces so the user 
 can easily wrap fitting functions implemented in other R packages or by the user to make 
-them \texttt{patroklos}-compliant. The two R6 classes \texttt{Model} and \texttt{Data}
+them a part of the \texttt{patroklos} pipeline. The two R6 classes \texttt{Model} and \texttt{Data}
 strive to abstract models from the data in such a way that the user can easily apply $H$ to new 
 data.
 
 \paragraph{Meta analysis} 
 \texttt{patroklos} provides tools to analyze how the validated error depends on the test error and 
-allows to highlight subgroups of model architectures to disclose fundamental flaws in validation 
+allows to highlight subgroups of model architectures to unveil systematic flaws in validation 
 and test performance.
 
 \subsection{\texttt{patroklos} in action}
