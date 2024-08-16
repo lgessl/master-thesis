@@ -271,7 +271,8 @@ Second, we need to make a couple of more decisions regarding the format of some 
         format, i.e.\ age and LDH level as a continuous feature, Ann Arbor stage and performance 
         status as a categorical feature and the number of extranodal sites as a discrete feataure.
         We can also binarize them with the same thresholds as the IPI inventors and include five 
-        binary features.  Similarly, widely accepted thresholds may exist for other clinical and genetic 
+        binary features. We call this the \textit{thresholded format of the IPI features}. 
+        Similarly, widely accepted thresholds may exist for other clinical and genetic 
         features.
     \item For already existing models, we can either include their continuous output or threshold 
         it. For the IPI, we can include its output as a single continuous feature. We can also 
@@ -322,7 +323,7 @@ For a missing categorical feature, every dummy feature then holds the marginal B
 probability that the feature is in the $k$-th category. This is efficient, transparent and easily 
 applicable to new data.
 
-\subsubsection{Adding combinations of discrete features to the predictor}
+\subsubsection{Adding combinations of categorical features to the predictor}
 
 Next, we add all combinations of at most $n_\text{combi}$ categorical features that are positive in a 
 share of at least $s_\text{min}$ patients to $\mathbf{x}$; e.g., we add a column ``female \& ABC-type 
@@ -343,7 +344,8 @@ of the combined feature.
 Defining a patient as high-risk if and only if the PFS is less than two years
 is a clinically accepted, yet quite arbitrary decision. It may not be the time cutoff that 
 separates PFS best from a biological point of view. Therefore, we can provide the fitting 
-algorithm a refined response $y$, governed by the \textit{training survival cutoff} $T > 0$.
+algorithm a refined response $y$, governed by the \textit{training survival cutoff} $T \in 
+\RR_{> 0} \cup \{ +\infty \}$.
 \begin{itemize}
     \item For $y$ in the binary format, we set $y_i = 1$ if the PFS 
         of patient $i$ is less than $T$ and $y_i = 0$ otherwise. The higher $T$ is, the more 

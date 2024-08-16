@@ -15,17 +15,36 @@ of heuristics that aim to do precisely that.
 We have seen that we should nest models predicting from hundreds or even thousands of 
 gene-expression levels together with more features into another model with care. Our way to do 
 this, which uses the cross-validated predictions of the early model to train the late model, 
-delivers way too optimistic validated errors for the late model. The early model, usually involving 
+delivers way too optimistic validated errors for the late model. Two aspects may make this 
+validation approach unreliable.
+First, the early model, usually involving 
 much more features than training samples, has plenty of freedom to overfit and it will exploit this 
 freedom when we tune its hyperparameters in a cross-validation. The algorithm of the late model then 
 recognizes the output of the early model as a very predictive feature and is misled to make it 
 a prominent feature in the final model. On independent test data, the input for the late model 
-systematically differs from the training, causing it to generalize poorly.
+systematically differs from the training, causing it to generalize poorly. Second, we call Alg.\ 
+\ref{alg:nested-pcv} nested \textit{pseudo} validation for a good reason because the model that 
+outputs the validated prediction of a sample saw this sample during its training. 
 
-Instead, we need to present the late model training data identically distributed to the test 
-data. An easy and successful way to this is to not train and tune the early model ourselves, but have 
-other people do this on an independent data set. In other words, we use already-existent signatures. 
-Specifically, we did this with cell of origin and the LAMIS. The LAMIS fulfills the 
+Nevertheless, we also witnessed that OOB predictions for the late model in Alg.\ 
+\ref{alg:nested-pcv} are more trustworthy than cross-validated predictions. A reason might be the 
+following: A sample's cross-validated prediction comes 
+from one model and we have one model per sample in the best case, a leave-one-out cross-validation 
+(which we did for all models involved in nested models). In contrast, a sample's OOB prediction 
+comes from a whole forest of models with expected size roughly $B/3$ because the probability of a 
+sample not being in a bootstrap sample is
+\begin{align}
+    \left( 1 - \frac{1}{n} \right)^n \to \frac{1}{e} \approx \frac{1}{3} \quad \text{as } n \to 
+    \infty,
+\end{align}
+and we can scale it by scaling $B$, which is cheap as we have laid out in subsection 
+\ref{subsec:elastic-net}. For nested models with random forests as the late model, test errros 
+are well in line with validation errors, but they are also pretty high.
+
+From the first point, we conclude that we must present the late model training data identically distributed to the 
+test data. An easy and successful way to this is to not train and tune the early model ourselves, 
+but have other people do this on an independent data set. In other words, we use already-existent 
+signatures. Specifically, we did this with cell of origin and the LAMIS. The LAMIS fulfills the 
 zero-sum constraint such that transferring it to a new data set with gene-expression levels 
 measured under another protocol only results in a constant shift. When using the output of such 
 a signature as a feature for one of our models, we have two options regarding its format.
@@ -33,10 +52,10 @@ First, we can threshold the signature -- as with cell of origin into ABC and GCB
 a high and low group --, thereby rendering the signature protocol-independent and ready to input 
 into any late model; this, of course, also works with violated zero-sum constraint and 
 $m^*_\text{Schmitz}$ from section \ref{sec:inter-trial} 
-does this quite successfully. Second, we can leave the signature output untouched and provide it as a 
-continuous feature to a GLM, for whose linear predictor a constant shift in an input feature results 
-in constant shift of its output. The most convincing model of this thesis, $m^*_\text{Reddy}$ does 
-this with the LAMIS score.
+does this quite successfully. Second, we can leave the signature output untouched and provide it as 
+a continuous feature to a GLM, for whose linear predictor a constant shift in an input feature 
+results in constant shift of its output. The most convincing model of this thesis, 
+$m^*_\text{Reddy}$ does this with the LAMIS score.
 
 \paragraph{Gene-expression levels}
 As a result, we refrain from incorporating gene-expression levels directly into the models trained 
