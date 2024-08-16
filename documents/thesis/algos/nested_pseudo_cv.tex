@@ -1,6 +1,6 @@
 \begin{algorithm}
     \begin{algorithmic}[1]
-        \Function{NestedPseudoCV}{$(x_i, y_i)_{i = 1, \ldots, n}$; $h = (h_1, h_2)$, $k$}
+        \Function{NestedPseudoValidation}{$(x_i, y_i)_{i = 1, \ldots, n}$; $h = (h_1, h_2)$, $k$}
             \State Fit $f_1$ to $(x_i; y_i)$, $i = 1, \ldots, n$, subject to $h_1$ , yielding 
                 validated predictions $o$.
             \State Fit $f$ to $(o_i, f_2(x_i), \ldots, f_m(x_i); y_i)$, 

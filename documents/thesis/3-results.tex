@@ -130,7 +130,7 @@ zero-sum weights are \num{0},
 because, at this point, we do not want to transfer our models to other data sets;
 we regularize with elastic-net penalty factor $\alpha \in \{ \num{0.1}, 1 \}$. We choose the 
 training survival cutoff $T \in \{ 1, \num{1.25}, \num{1.5}, \ldots, \num{2.5}\}$. For Cox models, 
-we additonally set $T = \infty$. For the Reddy data, we add \num{0.5} to these values of $T$ to 
+we additionally set $T = \infty$. For the Reddy data, we add \num{0.5} to these values of $T$ to 
 account for classifying OS $> \num{2.5}$ years as opposed to PFS $> \num{2}$ years.
 
 We train and validate a model for every combination of these hyperparameters.
@@ -198,7 +198,7 @@ IPI's precision is much harder than classifying patients into two groups with cl
 hazard. For this reason, the logrank test does not play a role in this thesis and we did not 
 introduce it in more detail in chapter \ref{chap:methods}.
 
-\subsection{Meta analysis}
+\subsection{Meta analysis}\label{subsec:results-intra-meta}
 
 Now that we have frozen all models and do not add further ones, we can unlock the test set and 
 evaluate the test performance of more models. Our main focus rests on the discrepancy between 
@@ -414,7 +414,7 @@ of the tIPI by more than \num{10}\%, but falls short of outrivaling the tIPI sig
 this demonstrates that transferring models between the Schmitz and LAMIS data works in both 
 directions.
 
-\subsection{Meta analysis}
+\subsection{Meta analysis}\label{subsec:results-inter-meta}
 
 We again freeze all of our models and unlock the test sets for all of them to analyze the discrepancy 
 between validated and test error and to gain insights into how stable thresholding the models on the 
@@ -454,17 +454,18 @@ predictions and might even consider sending analogous Gauss models into the race
 
 Regarding the question if the predictor should directly contain the gene-expression levels or not,
 Fig.\ \ref{fig:inter-val-test} speaks a plain language. In testing, the top ranking models are 
-always such models that do not use gene-expression levels; often the test errors of the models whose 
+always such models that do not use gene-expression levels. Often the test errors of the models whose 
 predictor excludes gene-expression features separate from the rest (cf.\ plots A.1, A.2, B.1). In 
-validation however, this distinction can be less obvious, especially for those models trained on 
-the Reddy data (cf.\ plots B.1, B.2). In summary, we suffer a lot from the curse of high dimensions 
-if we include gene-expression features in the predictor, but gain nothing in terms of test 
-performance. Indeed, the models that make the choice of the best validated model on the Reddy data 
-close and lucky with regard to testing all use gene-expression features. As the LAMIS does a very 
-good job at capturing gene-expression information and was trained on an independent data set, we 
-conclude that we should just include the LAMIS -- and maybe other widely accepted molecular 
-signatures -- as an ordinary feature in the predictor and leave aside any other gene-expression 
-levels.
+validation, however, this distinction can be less obvious, especially for those models trained on 
+the Reddy data (cf.\ plots B.1, B.2). In summary, we gain nothing in terms of test 
+performance, but risk choosing a low-performing model in the validation. Indeed, the models that 
+make the choice of the best validated model on the Reddy data 
+close and lucky with regard to testing all use gene-expression features. 
+% As the LAMIS does a very 
+% good job at capturing gene-expression information and was trained on an independent data set, we 
+% conclude that we should just include the LAMIS -- and maybe other widely accepted molecular 
+% signatures -- as an ordinary feature in the predictor and leave aside any other gene-expression 
+% levels.
 
 \subsubsection{Output thresholding}
 
@@ -474,14 +475,14 @@ levels.
 For all $i$, the best validated model $m_i^*$ outputs a continuous score and we need to threshold 
 these scores in a protocol-dependent manner to obtain a binary classifier. As a reminder, the errors 
 we presented so far are all optimized on the respective cohort: the maximum precision under the 
-constraint to have a prevalence of at least \num{15}\% for our models and of at least \num{10}\% 
+constraint to have a prevalence of at least \num{17}\% for our models and of at least \num{10}\% 
 for the tIPI. When given a new data set with blinded outcome, we suggested to threshold a model at 
-the \num{15}\%-quantile of its continuous output on this data set. This, by definition, leads to 
+the \num{17}\%-quantile of its continuous output on this data set. This, by definition, leads to 
 higher test errors than with the optimization procedure. The question is by how much the test error 
-of the optimally thresholded model and the \num{15}\%-quantile-thresholded model will differ.
+of the optimally thresholded model and the \num{17}\%-quantile-thresholded model will differ.
 
 If we rank patients by the scores a good model assigns them, high-risk patients accumulate at the 
-top of the ranking and low-risk patients at the bottom. As a result, as we decreases the threshold, 
+top of the ranking and low-risk patients at the bottom. As a result, as we decrease the threshold, 
 the group of patients with a score above a threshold tends to comprise a lower and lower proportion 
 of high-risk patients. Stated differently, for good models the precision tends to drop as the 
 threshold drops and the relationship between prevalence and precision is roughly monotonic. In the 
@@ -491,21 +492,22 @@ In the case of a somewhat violated monotonicity, we still have reason to hope th
 $\alpha$-quantile is a near-optimal threshold.
 
 To check this out in practice, we plotted prevalence versus precision for every possibility to 
-threshold $m^*_i$ for all $i$ and test cohorts in Fig.\ \ref{fig:inter-output-prec}. For a given 
-cohort of $n$ samples, a GLM with a non-zero coefficient $\beta_j$, $j > 0$, almost surely 
-outputs $n$ different scores. This leads to $n$ possible thresholds if we demand that at least one 
-sample be in the positive group. Indeed, all 
-plots reveal a clearly decreasing overall trend for prevalences $\geq \num{15}\%$; with the 
-exception of plots B.2 and C.2 this overall trend is never seriously compromised over smaller 
-prevalence intervals. This means, the \num{15}\%-quantile of the model output is a near optimal 
+threshold $m^*_i$ for all $i$ and test cohorts as long as the prevalence is in $[\num{0.15}, 
+\num{0.50}]$, in Fig.\ \ref{fig:inter-output-prec}. For a given 
+cohort of $n$ samples, a GLM with a non-zero coefficient $\beta_j$ for a continuous feature almost 
+surely outputs $n$ different scores. This leads to $n$ possible thresholds if we demand that at 
+least one sample be in the positive group. Indeed, all 
+plots reveal a clearly decreasing overall trend for prevalences $\geq \num{17}\%$. With the 
+exception of plot C.2, this overall trend is never seriously compromised over smaller 
+prevalence intervals. This means, the \num{17}\%-quantile of the model output is a near optimal 
 choice in all six cases -- as expected.
 
 In plots B.1--2 and C.1--2, the curve falls sharply for prevalences between \num{10}\% and \num{15}\%. 
-We might wonder if the sharply increasing precision as we reduce the prevalence from \num{15}\% 
-down to \num{10}\% overcompensates for the lost statistical power that we need to significantly 
-outperform the IPI. Fig.\ \ref{fig:inter-output-prec-ci} answers this question with a clear yes.
-With a reduced prevalence of \num{10}\%, we score two more significant victories over the tIPI, this 
-time on the Schmitz data: an easy one in the case of $m^*_\text{Reddy}$ and a close one
+We might wonder if the sharp increase in precision that we observe as we reduce the prevalence 
+from \num{15}\% to \num{10}\% overcompensates for the lost statistical power that we need to 
+significantly outperform the IPI. Fig.\ \ref{fig:inter-output-prec-ci} answers this question with a 
+clear yes. With a reduced prevalence of \num{10}\%, we score two more significant victories over the 
+tIPI, this time on the Schmitz data: an easy one in the case of $m^*_\text{Reddy}$ and a close one
 for $m^*_\text{Staiger}$. 
 
 This makes $m^*_\text{Reddy}$ a transferable, versatile model that is 

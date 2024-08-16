@@ -5,26 +5,31 @@ a high-risk and representative-risk setting. Moreover, we demonstrated that we c
 our trained models and pick a near-optimal if not optimal one if we restrict the methods from 
 chapter \ref{chap:methods} appropriately and increase the sample size.
 
-\section{Heuristics for candidate models}
+\section{Learnings from this thesis}\label{sec:discussion-learning}
 
-Key to ensuring realistic validated errors is excluding those candidate models from $H$ that sneak 
-in a validated error considerably below their test error. In this thesis, we developed a series 
-of heuristics that aim to do precisely that.
+\subsection{Heuristics for candidate models}
 
-\paragraph{Nesting models}
-We have seen that we should nest models predicting from hundreds or even thousands of 
-gene-expression levels together with more features into another model with care. Our way to do 
-this, which uses the cross-validated predictions of the early model to train the late model, 
-delivers way too optimistic validated errors for the late model. Two aspects may make this 
-validation approach unreliable.
-First, the early model, usually involving 
-much more features than training samples, has plenty of freedom to overfit and it will exploit this 
-freedom when we tune its hyperparameters in a cross-validation. The algorithm of the late model then 
+Key to ensuring realistic validated errors is excluding from $H$ in the first place those candidate 
+models that sneak in a validated error considerably below their test error and those that perform 
+poorly on test data. In this thesis, we developed a series of heuristics that aim to do precisely 
+that.
+
+\subsubsection{Nesting models}
+
+We saw that we should nest models predicting from hundreds or even thousands of 
+gene-expression levels together with more features into another model with care. 
+\textsc{NestedPseudoValidation} (cf.\ Alg.\ 
+\ref{alg:nested-pcv}), which fits an early and the late model to the same data and uses the 
+cross-validated predictions of the early model to train the late model, delivers way too optimistic 
+validated errors for the nested model. Two things may make this validation approach unreliable.
+First, the early model, which we usually train
+on much more features than training samples, has plenty of freedom to overfit and it will exploit this 
+freedom when we tune its hyperparameters in a cross validation. The algorithm of the late model then 
 recognizes the output of the early model as a very predictive feature and is misled to make it 
 a prominent feature in the final model. On independent test data, the input for the late model 
 systematically differs from the training, causing it to generalize poorly. Second, we call Alg.\ 
-\ref{alg:nested-pcv} nested \textit{pseudo} validation for a good reason because the model that 
-outputs the validated prediction of a sample saw this sample during its training. 
+\ref{alg:nested-pcv} nested \textit{pseudo} validation for a good reason, namely because the model 
+that outputs the validated prediction of a sample saw this sample during its training. 
 
 Nevertheless, we also witnessed that OOB predictions for the late model in Alg.\ 
 \ref{alg:nested-pcv} are more trustworthy than cross-validated predictions. A reason might be the 
@@ -37,109 +42,101 @@ sample not being in a bootstrap sample is
     \left( 1 - \frac{1}{n} \right)^n \to \frac{1}{e} \approx \frac{1}{3} \quad \text{as } n \to 
     \infty,
 \end{align}
-and we can scale it by scaling $B$, which is cheap as we have laid out in subsection 
-\ref{subsec:elastic-net}. For nested models with random forests as the late model, test errros 
+and we can scale it by scaling $B$, which is cheap as we laid out in subsection 
+\ref{subsec:elastic-net}. For nested models with random forests as the late model, test errors 
 are well in line with validation errors, but they are also pretty high.
 
-From the first point, we conclude that we must present the late model training data identically distributed to the 
-test data. An easy and successful way to this is to not train and tune the early model ourselves, 
-but have other people do this on an independent data set. In other words, we use already-existent 
-signatures. Specifically, we did this with cell of origin and the LAMIS. The LAMIS fulfills the 
-zero-sum constraint such that transferring it to a new data set with gene-expression levels 
-measured under another protocol only results in a constant shift. When using the output of such 
-a signature as a feature for one of our models, we have two options regarding its format.
-First, we can threshold the signature -- as with cell of origin into ABC and GCB or the LAMIS into 
-a high and low group --, thereby rendering the signature protocol-independent and ready to input 
-into any late model; this, of course, also works with violated zero-sum constraint and 
-$m^*_\text{Schmitz}$ from section \ref{sec:inter-trial} 
-does this quite successfully. Second, we can leave the signature output untouched and provide it as 
-a continuous feature to a GLM, for whose linear predictor a constant shift in an input feature 
-results in constant shift of its output. The most convincing model of this thesis, 
-$m^*_\text{Reddy}$ does this with the LAMIS score.
+\subsubsection{Gene-expression levels in the predictor}
 
-\paragraph{Gene-expression levels}
-As a result, we refrain from incorporating gene-expression levels directly into the models trained 
-by us, but only use their valuable information condensed into the output of already-existent models. 
-With the curse of high dimensions gone, we have observed much more trustworthy validated errors. 
-Furthermore, this reduces the training time and enables us to use more complex models.
+In subsection \ref{subsec:results-inter-meta}, core models that predict from the full range
+of gene-expression levels often misled in validation and, in testing, always failed to outperform 
+models that do not predict from any gene-expression levels directly.
+Considering this and the above-mentioned flaws of \textsc{NestedPseudoValidation}, we should refrain from 
+incorporating gene-expression levels directly into the models 
+trained on our data, but only use their valuable information condensed into the output of 
+already-existent models. We did the latter with the LAMIS and cell of origin. With the curse of high 
+dimensions gone, we observed much more 
+trustworthy validated errors. Furthermore, this reduces the training time and enables us to use 
+more complex models.  With gene-expression levels 
+always come batch effects, and we will elaborate on them further below.
 
-\paragraph{More heuristics}
+\subsubsection{More heuristics}
 
-The inter-trial experiments suggest that model performance benefits from using a lower training 
-survival cutoff $T$. Random forests, whose OOB predictions proved to yield a very accurate estimate 
-of the test error, fare worse than GLMs; unlike GLMs, they cannot deal with systemically shifted 
-features, which makes them unsuited to handle the continuous output of gene-expression signatures
-across protocols.
+The inter-trial experiments suggest that model performance benefits from using a training 
+survival cutoff $T$ that is lower than the time splitting the patients into the high-risk and 
+low-risk group for the ground truth. Random forests, whose OOB predictions proved to yield a very 
+accurate estimate of the test error, fare worse than GLMs in testing. Compared to GLMs, they 
+cannot deal with systemically shifted features, which makes them unsuited to leverage across 
+protocols the nuanced information that the continuous output of gene-expression signatures 
+may bear (cf.\ subsection \ref{subsec:nested-models}).
 
-\section{Increasing the sample size}
+\subsection{Data situation}\label{subsec:discussion-data}
 
 In addition to restricting the hyperparameter-tuple space $H$ carefully, we raised the number of 
-samples by combining three data sets. We hoped to get both more representative train and test 
-cohorts with less systematic differences and hence turn validated errors into better estimates 
-for test errors. Whatever the reason, in the latter we succeeded. To combine the data, we had to 
-make sacrifices: we discarded the features that are 
-not present in all three data sets -- and this included valuable features like MYC translocations -- 
-and we often trained models to predict PFS and then tested them on OS or vice versa. Still, our 
-best validated models defied this as well as systematic, especially technological and prognostic 
-differences between the data sets and, at roughly \num{15}\% prevalence, outperformed the IPI 
-significantly on the prospective Staiger data.
+samples by combining three data sets in section \ref{sec:inter-trial}. We hoped to get more representative train and 
+test cohorts, harder-to-overfit train cohorts and, as a result, validation errors that better 
+reflect test errors. Whatever the reason, in the latter we succeeded. To combine the data, we had to 
+make sacrifices. We discarded the features that are not present in all three data sets -- and this 
+included valuable features like MYC translocations -- and we often trained models to predict PFS 
+and then tested them for predicting OS or vice versa. Still, our best validated models defied this together 
+with technological differences between the data sets and, at roughly \num{17}\% prevalence, 
+outperformed the IPI significantly on the prospective Staiger data.
 
 In the inter-trial experiments, with more samples in the test cohort, we could lower the prevalence 
 of our selected models to \num{10}\%, drastically raise the precision and still retain enough 
 statistical power to significantly defeat the IPI in even more cases. For the best validated models, 
-we have seen an overwhelmingly monotonic relationship between the prevalence and the precision, 
-which made the \num{15}\%-quantile or -- even better -- \num{10}\%-quantile of the model output a 
-near-optimal threshold. 
+we saw an almost perfectly monotonic medium-term relationship between the prevalence 
+and the precision, which made the \num{17}\%-quantile or -- even better -- \num{10}\%-quantile of 
+the model output a near-optimal threshold. 
 
-The results of this thesis strongly suggest that sample size is a crucial factor 
-for our problem. Furthermore, we should be ready to make sacrifices -- less features, 
+This thesis strongly suggests that a sufficiently large sample size is a crucial advantage to solve 
+our problem. Furthermore, we should be ready to make sacrifices -- less features, 
 even a different kind of the response -- to increase the number of samples in both train and test 
 cohort. 
 
-\section{The future of MMML-Predict}\label{subsec:discussion-mmml}
+\section{Applying these learnings to MMML-Predict}\label{subsec:discussion-mmml}
 
 With $m^*_\text{Schmitz}$ and even more $m^*_\text{Reddy}$, this thesis presents two 
 models that meet all requirements of MMML-Predict: a prevalence of at least \num{10}\% and a 
-precision above \num{50}\% and significantly above the IPI on an independent, prospective data set. 
+precision above \num{50}\% and significantly above that of the IPI on an independent, prospective 
+data set. 
 
 And still, every percentage point we gain in prevalence will convince more clinicians, researchers 
 and pharmaceutical companies to pay attention to the high-risk group identified by the MMML-Predictor.
 Every percentage point we gain in precision will not just spur more interest of the above people and 
 companies, but will also convince more patients to let the MMML-Predictor guide their treatment and 
 will avoid both unnecessary and failed therapies. This thesis did not suggest that model performance 
-has already saturated, so we can go for even more in the future.
+has already saturated, so we can hope for more in the future.
 
-How might we do this? This thesis demonstrated that we can use data from already-existent trials, 
-even if they are not prospective and differ technologically, to train and validate a model and 
-then successfully test it on data from a prospective trial as MMML-Predict is about to conduct one.
-In the intra-trial experiments, we saw validation and test performance out of touch. We suspect 
-that too small, therefore non-representative and systematically differing train and test cohorts 
-could have played a key role in this. For the final MMML-Predictor, one might thus consider 
-using more than \num{100} of the \num{300} samples registered for MMML-Predict, maybe even all 
-\num{300}, for a sufficiently large, statistically more powerful test cohort. One might combine 
-a series of available data sets into a big training cohort. With combining data sets come two 
-caveats. 
+\subsection{Combining data sets}
+
+In light of subsection \ref{subsec:discussion-data}, we should strive to increase the sample size.
+For the final MMML-Predictor, one might thus consider using more than \num{100} of the \num{300} 
+samples registered for MMML-Predict, maybe even all \num{300}, for a sufficiently large, 
+statistically more powerful test cohort. One can combine a series of available data sets into a 
+big training cohort. With combining data sets come two caveats. 
 
 First, we need to intersect over the sets of features, which amounts to discarding plenty 
-of features. Nevertheless, many modern DLBCL data sets include gender, age, the five thresholded 
-IPI features as clinical features and gene-expression levels as molecular features. More modern data 
+of features. Nevertheless, many modern DLBCL data sets include gender, age, the IPI features in 
+their thresholded format and gene-expression levels as molecular features. More modern data 
 sets also hold the double-hit and triple-hit status, which refers to the simultaneous translocation 
-of MYC and either BCL2 or BCL6, or MYC, BCL2 and BCL6, respectively. From gene-expression 
+of MYC and either BCL2 or BCL6, or MYC, BCL2 and BCL6, respectively. From the gene-expression
 features, we can calculate already-existent molecular signatures as well as the double-expressor and 
-triple-expressor, which describe the phenomena analogous to double- and triple-hit status with 
-overexpression instead of translocation of the three involved genes.
+triple-expressor status, which describe the phenomena analogous to double- and triple-hit status 
+with overexpression instead of translocation of the three involved genes.
 
-Second, we need to take care of batch effects. Among the features mentioned above, this concerns 
+Second, we need to take care of inter-technical variability. Among the features mentioned above, this concerns 
 the gene-expression levels. The first option is to get rid of protocol effects by once and for all
 thresholding the output of molecular signatures. Most signatures come with canonical thresholds, 
-such as the group for the LAMIS, and we can calculate them on the respective data set even before 
-combining. In this case, we can deploy quite any model as we no longer need to fight the curse 
-of high dimensions or batch effects. The second option is to only apply zero-sum signatures (or 
-scale the gene-expression levels to an $\ell_1$ norm of \num{1} across all samples). Using the 
-output of these signatures as continuous features of a GLM again results in a protocol-dependent 
-shift in output of the GLM. For training, we can add the data set the sample was taken from as a 
-categorical 
-feature to the predictor so we can correct for the data-set-dependent shifts in the loss function. 
+such as the \num{75}\%-quantile to obtain the LAMIS group, and we can calculate them on the 
+respective data set even before combining the data sets. In this case, we can deploy quite any model as we no 
+longer need to fight the curse of high dimensions or batch effects. The second option is to only 
+apply zero-sum signatures (or scale the gene-expression levels to an $\ell_1$ norm of \num{1} 
+across all samples). Using the output of these signatures as continuous features of a GLM again 
+results in a protocol-dependent shift in the output of the GLM according to our reasoning in subsection 
+\ref{subsec:nested-models} -- a reasoning that practice in chapter \ref{chap:results} did not refute. 
+For training, we can add the data set the sample was taken from as a categorical feature to the 
+predictor so we can correct for the data-set-dependent shifts in the loss function. 
 After training, we remove the data-set feature from the model. In testing, 
 we threshold the continuous output of the GLM at the $\alpha$-quantile for some $\alpha$, as we did 
 in this thesis. A shortcoming of this testing procedure is that we always need a sufficiently large 
@@ -148,10 +145,43 @@ involve internal standards, i.e.\ a small number of samples one has measured for
 which we already know a good threshold and that we can measure again for any new protocol to shift 
 the threshold accordingly. Even for MMML-Predict, this is a problem for the distant future.
 
-Our last idea concerns the sample weights in loss functions. Almost every loss function is derived 
-from the log likelihood of i.i.d.\ samples and thus sums over the training samples. Therefore, they 
+\subsection{Custom gene-expression signatures}
+
+In this thesis, we failed to integrate the output of gene-expression signatures that we trained 
+on our data as a feature into another model and obtain a model with both a low validation and test 
+error. In addition to resorting to signatures that \textit{other} people trained on other data, we can train 
+our \textit{own} signatures on other data. The project would then consist of two training data 
+sets. On the first one, we train and validate gene-expression signatures tailored for our problem.
+We then take the best validated gene-expression signature and write its output as a new feature into the 
+second training data set. We might not just do this for the very best gene-expression signature 
+from the first training set, but for the top $k$ validated gene-expression signatures. On the second 
+training data set, we fit and validate the final models.
+
+\subsection{Choice of the error function}
+
+Validation always depends on decisions we cannot uniquely derive from the problem at hand. 
+While we strive to make them as natural as possible, they remain arbitrary to a certain degree. 
+The most important example for this in this thesis is the error function $\text{err}$ we use for 
+validation and testing.
+
+While, for testing, our choice of $\text{err}$ is indeed quite natural for our problem and 
+$\text{err}$ is easy to interpret, there might be better error functions for validation. E.g., our 
+choice of $\text{err}$ is totally unaware of a steep decline in the prevalence-versus-precision 
+curve for prevalences below \num{17}\% as we see it in plot B.1 of Fig.\ \ref{fig:inter-output-prec}. 
+Defining $\text{err}$ as the average negative precision for prevalences in $[a, b]$, with e.g. 
+$a = \num{0.10}$ and $b = \num{0.17}$, takes more information from the prevalence-versus-precision 
+curve into account and, in particular, better catches this phenomenon.
+
+Still, with our choice of $\text{err}$, validated and test errors were pretty much in line in 
+section \ref{sec:inter-trial}. This underscores that, under the conditions we described in 
+section \ref{sec:discussion-learning}, our choice of $\text{err}$ already is a pretty good one.
+
+\subsection{A natural way to choose sample weights}
+
+Our last idea concerns the sample weights in loss functions. Many loss functions are derived 
+from the log likelihood of i.i.d.\ samples and thus sum over the training samples. Therefore, they 
 offer to weight every summand with a sample weight, as we have seen in the loss functions of the 
-presented GLMs in Eq.\ \eqref{eq:loss-glm-no-lasso} and \eqref{eq:cox-log-lh}. One can even provide 
+presented GLMs in Eq.\ \eqref{eq:loss-glm-no-lasso} and \eqref{eq:cox-loss}. One can even provide 
 sample weights for random forests. We have a huge amount of 
 freedom in how we choose the sample weights and trying out too many choices risks torpedoing 
 validation. We will now describe a single, natural choice. Let $q$ denote the 
@@ -161,5 +191,6 @@ high-risk and $w_i = 1/(1-q)$ for low-risk samples perfectly balances the classi
 the sense that the sum of sample weights belonging to high-risk samples equals the sum of sample 
 weights belonging to low-risk samples.
 
+\subsection*{}
 Looking back at this thesis, we can say with confidence: the state of MMML-Predict is strong and 
 it is getting stronger.

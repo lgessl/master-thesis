@@ -59,7 +59,9 @@ For every hyperparameter tuple $h \in H$, we
         Doing this for all 
         folds, we obtain a cross-validated prediction for every training sample.
     \item Afterwards, we calculate the validation error 
-        $\text{err}(y_\text{train}, \hat{y}_\text{train})$.
+        $\text{err}(y_\text{train}, \hat{y}_\text{train})$. We will lay out our choice of the 
+        error function $\text{err}$ in subsection \ref{subsec:error-function}. For now, its 
+        exact definition does not matter.
 \end{itemize}
 Finally, we select the model $m^*$ with minimal validated error defined by the hyperparameter tuple 
 \begin{align}
@@ -115,7 +117,7 @@ best validated model $m^*$ on the test cohort and estimate its performance on in
     \text{err}(y_\text{test}, \hat{y}_\text{test}).
 \end{align}
 
-\subsection{Choice of the error function}\label{sec:error-function}
+\subsection{Choice of the error function}\label{subsec:error-function}
 
 As stated in section \ref{sec:intro-mmml}, the MMML-Predictor should detect a high-risk group 
 with an as-high-as-possible precision under the constraint that its prevalence must surpass 
@@ -269,7 +271,7 @@ Second, we need to make a couple of more decisions regarding the format of some 
 \begin{itemize}
     \item Concerning the IPI, we can include the five features involved in the IPI in their original
         format, i.e.\ age and LDH level as a continuous feature, Ann Arbor stage and performance 
-        status as a categorical feature and the number of extranodal sites as a discrete feataure.
+        status as a categorical feature and the number of extranodal sites as a discrete feature.
         We can also binarize them with the same thresholds as the IPI inventors and include five 
         binary features. We call this the \textit{thresholded format of the IPI features}. 
         Similarly, widely accepted thresholds may exist for other clinical and genetic 
@@ -278,7 +280,7 @@ Second, we need to make a couple of more decisions regarding the format of some 
         it. For the IPI, we can include its output as a single continuous feature. We can also 
         include the so-called IPI group, a partitioning of the IPI output into three groups, which 
         one obtains by thresholding it at \num{1.5} and \num{3.5}. As another example, 
-        cell-of-origin signatures, whose output is continous to begin with, can be thresholded into 
+        cell-of-origin signatures, whose output is continuous to begin with, can be thresholded into 
         ABC, GCB and unclassified subtypes. Data sets often only provide this grouping and not the 
         raw, continuous output. 
 \end{itemize}
@@ -403,7 +405,7 @@ We have $\mu_i(\tbeta_0, \tbeta) = E(Y \cond X = \mathbf{x}_i)$.
 
 \paragraph{Gauss model}
 Here, $g = \text{id}$. $Y$ and $Y \cond X = x$ for all $x \in \RR^p$ follow a normal
-distribution with fixed standard deviation $\sigma > 0$ (a property called homoscadasticity), but 
+distribution with fixed standard deviation $\sigma > 0$ (a property called homoscedasticity), but 
 varying mean. For a normal distribution with standard deviation $\sigma$, the log likelihood of an 
 expected value -- or equivalently mean -- $\mu$ given an observation $y \in \RR$ is
 \begin{align}
@@ -791,7 +793,7 @@ we demand that every rectangle set $R_m$ contain at least $n_\text{min}$ samples
 constraint still leaves us with a computationally infeasible number of possible trees, and this is 
 why we fit $T$ with a greedy algorithm. We recursively split every rectangle set along a 
 feature into two sub-rectangles in such a way that the impurity measure gets minimal and stop if 
-a rectagle set comprises less than $n_\text{min}$ samples. Formally, for a rectangle set $R$, a 
+a rectangle set comprises less than $n_\text{min}$ samples. Formally, for a rectangle set $R$, a 
 feature $j \in \{1, \ldots, p\}$ and split point $s \in \RR$, we define 
 the pair of sub-rectangles
 \begin{align}
@@ -847,7 +849,7 @@ these $m$ features. We denote the modified function with the appended parameter 
 
 \input{algos/forest.tex}
 
-In constrast to GLMs with their continuous output, random forests output a binary classification,
+In contrast to GLMs with their continuous output, random forests output a binary classification,
 so we cannot control their prevalence. Widely used default values are $m = \floor{\sqrt{p}}$ and 
 $n_\text{min} = 1$. As for $B$, we have 
 shown above that increasing it reduces the variance at constant bias; in practice, therefore, only 

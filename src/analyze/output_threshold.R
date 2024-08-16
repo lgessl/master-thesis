@@ -10,7 +10,8 @@ generate_pdf <- function(
     test_cohort,
     file,
     ass2d,
-    benchmark_precision
+    benchmark_precision,
+    vline_at
 ){
     row_list <- vector("list", 3)
     c_letters <- stringr::str_to_upper(letters)
@@ -31,6 +32,9 @@ generate_pdf <- function(
                     "dashed", color = "darkgray") +
                 ggtitle(paste0(c_letters[i], ".", j, " \u2013 Tested on ", 
                 stringr::str_to_title(data$cohort))) + ggsci::scale_color_lancet(guide = "none")
+            if (!is.null(vline_at))
+                plt <- plt + ggplot2::geom_vline(xintercept = vline_at, linetype = "dashed", 
+                    color = "darkgray")
             plt_list[[j]] <- plt
         }
         row_list[[i]] <- wrap_elements(plt_list[[1]] + plt_list[[2]] +
@@ -51,7 +55,9 @@ test_cohort <- list(c("reddy", "staiger"), c("schmitz", "staiger"), c("schmitz",
 ipi_prec <- c(schmitz = 0.652, reddy = 0.541, staiger = 0.382)
 files <- c("results/inter_output_prec.pdf", "results/inter_output_prec_ci.pdf")
 ass2d_list <- list(prev_prec_as2, prec_ci_as2)
+vline_at <- list(NULL, NULL)
 
 for (i in seq_along(files)) {
-    generate_pdf(data, train_cohort, test_cohort, files[i], ass2d_list[[i]], ipi_prec)
+    generate_pdf(data, train_cohort, test_cohort, files[i], ass2d_list[[i]], ipi_prec, vline_at = 
+        vline_at[[i]])
 }
