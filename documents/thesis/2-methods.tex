@@ -51,7 +51,8 @@ For every hyperparameter tuple $h \in H$, we
         A validated prediction for a sample is a prediction made by a model fit 
         subject to $h$ to data that does not include this sample. We obtain a vector of validated 
         predictions $\hat{y}_\text{train} = \text{val}(h)$ with $|I_\text{train}$| entries.
-        The most common method to obtain validated predictions is a $k$-fold cross validation.
+        The most common method to obtain validated predictions is a $k$-fold cross validation 
+        \cite{stone74}.
         This means we randomly assign the training samples into $k$ equally sized subsets, called 
         folds, and then fit $k$ models: for every $i = 1, \ldots, k$, we fit a model to all 
         samples that are \textit{not} in the $i$-th fold and obtain its predictions for the samples 
@@ -536,8 +537,7 @@ where $S(t) = 1 - F_T(t)$ is the survival function, and $h(t)$ is well-defined a
 > 0$.
 
 \paragraph{Conditional hazard}
-The Cox model, proposed by Sir David Cox in a ground-braking paper in \num{1972} \cite{cox72}, wants 
-to get a hand on \textit{conditional} hazards.
+The Cox model, proposed in \cite{cox72}, wants to get a hand on \textit{conditional} hazards.
 Intuitively, it is clear that the population with one value of $X$ can have a vastly different 
 hazard function than the population with another value of $X$ if $X$ has predictive power for $T$.
 Formally, however, it is hard to define a conditional hazard function: $X$ may very well 
@@ -758,8 +758,8 @@ More precisely, we talk about classification random forests (RFs), hence $Y$ is 
 subsection. To simplify notation, \num{-1} instead of \num{0} encodes the negative class of 
 the response, hence $Y$ maps to $\im(Y) \subset \{ \pm 1 \}$. When we say random 
 forests in this thesis, we mean classification 
-random forests. Random forests are an ensemble of classification trees -- in short: 
-trees -- and aggregate the classification of every constituent tree.
+random forests. Random forests, introduced in \cite{breiman01}, are an ensemble of classification 
+trees -- in short: trees -- and aggregate the classification of every constituent tree.
 
 \paragraph{Trees}
 A tree is a simple function
@@ -806,7 +806,7 @@ With respect to the impurity measure, there are only finitely many split points 
 we only have finitely many samples in $R$, and hence we need to consider no more than $n(R) \cdot p$ split 
 points when 
 considering $R$ for partitioning. All of this allows us to compactly describe a procedure to grow a 
-tree in Alg.\ \ref{alg:tree}.
+tree in Alg.\ \ref{alg:tree}, cf.\ \cite{breiman84}.
 \input{algos/tree.tex}
 
 \paragraph{Forests}
@@ -817,7 +817,8 @@ then fitting a tree to them according to Alg.\ \ref{alg:tree}). On the other han
 trees have pretty low \textit{bias}, meaning for fixed $x \in \RR^p$ the expectation $E_\mathbf{z}(T(x))$ 
 is close to $E(Y \cond X = x)$. High variance and low bias makes trees 
 ideal candidates for a method called \textit{bagging}, which averages the predictions of many noisy, 
-approximately unbiased models with the goal to reduce their variance. Given trees $T_b$, $b = 1, 
+approximately unbiased models with the goal to reduce their variance, cf.\ \cite{breiman96}. Given 
+trees $T_b$, $b = 1, 
 \ldots, B$, fitted to identically distributed training data $\mathbf{z}_b$, we denote the new model 
 by 
 \begin{align}
