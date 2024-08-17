@@ -384,15 +384,18 @@ say samples in this subsection, we always refer to the training samples.
 
 Here, we work with binary response, i.e. $\mathrm{im}(Y) \subset \{0, 1\}$. Both ordinary 
 linear models and logistic regression models are generalized linear models (GLMs). In 
-a GLM, $Y$ follows an exponential-family distribution and there is an invertible link function 
+a GLM, $Y$ follows an \textit{overdispersed exponential family of distributions} and there is an 
+invertible \textit{link function}
 $g: \RR \to \RR$ and parameters $(\tbeta_0, \tbeta) \in \RR^{p+1}$ such that
 \begin{align}
     g(E(Y \cond X = x)) = \tbeta_0 + \sum_{j=1}^p \tbeta_j x_j \quad 
     \text{for all } x \in \im(X) \subset \RR^p.
 \end{align}
-where $E(Y \cond X = x)$ is the expected value of $Y$ given $X = x$. We can express the 
+where $E(Y \cond X = x)$ is the expected value of $Y$ given $X = x$ \cite{glm72}. We can express the 
 \textit{linear predictor} $\sum_{j=1}^p \tbeta_j x_j$ in terms of the Euclidean scalar product 
-as $x^T \tbeta$, where $x^T$ denotes the transpose of the column vector $x$. 
+as $x^T \tbeta$, where $x^T$ denotes the transpose of the column vector $x$. We will only introduce 
+the two special cases of an overdispersed exponential family of distributions that matter to us in 
+this thesis below. For a general definition, see \cite[section 1.1]{glm72}.
 
 In practice, we do not know the (true) parameters
 $(\tbeta_0, \tbeta)$. But we do have our $n$ i.i.d.\ observations $(\mathbf{x}_i, y_i)$

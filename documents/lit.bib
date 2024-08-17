@@ -19,7 +19,6 @@
     pages = {219-226},
     year = {2016},
     month = {09},
-    abstract = "{In biomedicine, every molecular measurement is relative to a reference point, like a fixed aliquot of RNA extracted from a tissue, a defined number of blood cells, or a defined volume of biofluid. Reference points are often chosen for practical reasons. For example, we might want to assess the metabolome of a diseased organ but can only measure metabolites in blood or urine. In this case, the observable data only indirectly reflects the disease state. The statistical implications of these discrepancies in reference points have not yet been discussed.Here, we show that reference point discrepancies compromise the performance of regression models like the LASSO. As an alternative, we suggest zero-sum regression for a reference point insensitive analysis. We show that zero-sum regression is superior to the LASSO in case of a poor choice of reference point both in simulations and in an application that integrates intestinal microbiome analysis with metabolomics. Moreover, we describe a novel coordinate descent based algorithm to fit zero-sum elastic nets.The R-package “zeroSum” can be downloaded at https://github.com/rehbergT/zeroSum. Moreover, we provide all R-scripts and data used to produce the results of this manuscript as Supplementary Material.Supplementary material is available at Bioinformatics online.}",
     issn = {1367-4803},
     doi = {10.1093/bioinformatics/btw598},
     eprint = {https://academic.oup.com/bioinformatics/article-pdf/33/2/219/49037371/bioinformatics\_33\_2\_219.pdf},
@@ -46,7 +45,7 @@
     note = {R package version 0.16.2}
 }
 @Manual{survival-cran,
-    title = {A Package for Survival Analysis in R},
+    title = {A Package for Survival Analysis in {R}},
     author = {Terry M Therneau},
     year = {2024},
     note = {R package version 3.7.0},
@@ -100,12 +99,9 @@
     doi = {10.1016/j.cell.2017.09.027},
     author = {Anupama Reddy and Jenny Zhang and Nicholas S. Davis and Andrea B. Moffitt and others},
     keywords = {exome sequencing, genetic mutations, diffuse large B cell lymphoma, DLBCL, TCGA, The Cancer Genome Atlas},
-    abstract = {Summary
-    Diffuse large B cell lymphoma (DLBCL) is the most common form of blood cancer and is characterized by a striking degree of genetic and clinical heterogeneity. This heterogeneity poses a major barrier to understanding the genetic basis of the disease and its response to therapy. Here, we performed an integrative analysis of whole-exome sequencing and transcriptome sequencing in a cohort of 1,001 DLBCL patients to comprehensively define the landscape of 150 genetic drivers of the disease. We characterized the functional impact of these genes using an unbiased CRISPR screen of DLBCL cell lines to define oncogenes that promote cell growth. A prognostic model comprising these genetic alterations outperformed current established methods: cell of origin, the International Prognostic Index comprising clinical variables, and dual MYC and BCL2 expression. These results comprehensively define the genetic drivers and their functional roles in DLBCL to identify new therapeutic opportunities in the disease.}
 }
 
 @article{staiger20,
-	abstract = {Diffuse large B-cell lymphoma (DLBCL) is a disease with heterogeneous outcome. Stromal signatures have been correlated to survival in DLBCL. Their use, however, is hampered by the lack of assays for formalin-fixed paraffin-embedded material (FFPE). We constructed a lymphoma-associated macrophage interaction signature (LAMIS) interrogating features of the microenvironment using a NanoString assay applicable to FFPE. The clinical impact of the signature could be validated in a cohort of 466 patients enrolled in prospective clinical trials of the German High-Grade Non-Hodgkin Lymphoma Study Group (DSHNHL). Patients with high expression of the signature (LAMIShigh) had shorter EFS, PFS, and OS. Multivariate analyses revealed independence from IPI factors in EFS (HR 1.7, 95{\%} CI 1.2--2.4, p-value = 0.001), PFS (HR 1.8, 95{\%} CI 1.2--2.5, p-value = 0.001) and OS (HR 1.8, 95{\%} CI 1.3--2.7, p-value = 0.001). Multivariate analyses adjusted for the IPI factors showed the signature to be independent from COO, MYC rearrangements and double expresser status (DE). LAMIShigh and simultaneous DE status characterized a patient subgroup with dismal prognosis and early relapse. Our data underline the importance of the microenvironment in prognosis. Combined analysis of stromal features, the IPI and DE may provide a new rationale for targeted therapy.},
 	author = {Staiger, Annette M. and Altenbuchinger, Michael and Ziepert, Marita and Kohler, Christian and others},
 	date = {2020/02/01},
 	date-added = {2024-06-27 10:57:49 +0200},
@@ -130,7 +126,6 @@
     pages = {i333-i340},
     year = {2017},
     month = {07},
-    abstract = "{Molecular signatures for treatment recommendations are well researched. Still it is challenging to apply them to data generated by different protocols or technical platforms.We analyzed paired data for the same tumors (Burkitt lymphoma, diffuse large B-cell lymphoma) and features that had been generated by different experimental protocols and analytical platforms including the nanoString nCounter and Affymetrix Gene Chip transcriptomics as well as the SWATH and SRM proteomics platforms. A statistical model that assumes independent sample and feature effects accounted for 69–94\\% of technical variability. We analyzed how variability is propagated through linear signatures possibly affecting predictions and treatment recommendations. Linear signatures with feature weights adding to zero were substantially more robust than unbalanced signatures. They yielded consistent predictions across data from different platforms, both for transcriptomics and proteomics data. Similarly stable were their predictions across data from fresh frozen and matching formalin-fixed paraffin-embedded human tumor tissue.The R-package ‘zeroSum’ can be downloaded at https://github.com/rehbergT/zeroSum. Complete data and R codes necessary to reproduce all our results can be received from the authors upon request.}",
     issn = {1367-4803},
     doi = {10.1093/bioinformatics/btx241},
     eprint = {https://academic.oup.com/bioinformatics/article-pdf/33/14/i333/50315106/bioinformatics\_33\_14\_i333.pdf},
@@ -149,7 +144,8 @@
 }
 
 @article{glass17,
-    title = {Refractory or relapsed aggressive B-cell lymphoma failing (R)-CHOP: an analysis of patients treated on the RICOVER-60 trial},
+    title = {{Refractory or relapsed aggressive B-cell lymphoma failing (R)-CHOP: an analysis of 
+        patients treated on the RICOVER-60 trial}},
     journal = {Annals of Oncology},
     volume = {28},
     number = {12},
@@ -163,7 +159,8 @@
 
 @article{ipi-stay-strong,
 author = {Ziepert, Marita and Hasenclever, Dirk and Kuhnt, Evelyn and Glass, Bertram and Schmitz, Norbert and Pfreundschuh, Michael and Loeffler, Markus},
-title = {Standard International Prognostic Index Remains a Valid Predictor of Outcome for Patients With Aggressive CD20+ B-Cell Lymphoma in the Rituximab Era},
+title = {Standard International Prognostic Index Remains a Valid Predictor of Outcome for Patients 
+    With Aggressive {CD20+} {B}-Cell Lymphoma in the Rituximab Era},
 journal = {Journal of Clinical Oncology},
 volume = {28},
 number = {14},
@@ -172,7 +169,6 @@ year = {2010},
 doi = {10.1200/JCO.2009.26.2493},
 note ={PMID: 20385988},
 URL = {https://doi.org/10.1200/JCO.2009.26.2493},
-abstract = { Purpose The International Prognostic Index (IPI) is widely used for risk stratification of patients with aggressive B-cell lymphoma. The introduction of rituximab has markedly improved outcome, and R-CHOP (rituximab + cyclophosphamide, doxorubicin, vincristine, prednisone) has become the standard treatment for CD20+ diffuse large B-cell lymphoma. To investigate whether the IPI has maintained its power for risk stratification when rituximab is combined with CHOP, we analyzed the prognostic relevance of IPI in three prospective clinical trials. Patients and Methods In total, 1,062 patients treated with rituximab were included (MabThera International Trial [MInT], 380 patients; dose-escalated regimen of cyclophosphamide, doxorubicin, vincristine, etoposide, and prednisone (MegaCHOEP) trial, 72 patients; CHOP + rituximab for patients older than age 60 years [RICOVER-60] trial, 610 patients). A multivariate proportional hazards modeling was performed for single IPI factors under rituximab on event-free, progression-free, and overall survival. Results IPI score was significant for all three end points. Rituximab significantly improved treatment outcome within each IPI group resulting in a quenching of the Kaplan-Meier estimators. However, IPI was a significant prognostic factor in all three end points and the ordering of the IPI groups remained valid. The relative risk estimates of single IPI factors and their order in patients treated with R-CHOP were similar to those found with CHOP. Conclusion The effects of rituximab were superimposed on the effects of CHOP with no interactions between chemotherapy and antibody therapy. These results demonstrate that the IPI is still valid in the R-CHOP era. }
 }
 
 @article{lasso18,
@@ -184,7 +180,6 @@ abstract = { Purpose The International Prognostic Index (IPI) is widely used for
     pages = {267-288},
     year = {2018},
     month = {12},
-    abstract = "{We propose a new method for estimation in linear models. The 'lasso' minimizes the residual sum of squares subject to the sum of the absolute value of the coefficients being less than a constant. Because of the nature of this constraint it tends to produce some coefficients that are exactly 0 and hence gives interpretable models. Our simulation studies suggest that the lasso enjoys some of the favourable properties of both subset selection and ridge regression. It produces interpretable models like subset selection and exhibits the stability of ridge regression. There is also an interesting relationship with recent work in adaptive function estimation by Donoho and Johnstone. The lasso idea is quite general and can be applied in a variety of statistical models: extensions to generalized regression models and tree-based models are briefly described.}",
     issn = {0035-9246},
     doi = {10.1111/j.2517-6161.1996.tb02080.x},
     url = {https://doi.org/10.1111/j.2517-6161.1996.tb02080.x},
@@ -194,7 +189,6 @@ abstract = { Purpose The International Prognostic Index (IPI) is widely used for
 @article{ridge70,
  ISSN = {00401706},
  URL = {http://www.jstor.org/stable/1267351},
- abstract = {In multiple regression it is shown that parameter estimates based on minimum residual sum of squares have a high probability of being unsatisfactory, if not incorrect, if the prediction vectors are not orthogonal. Proposed is an estimation procedure based on adding small positive quantities to the diagonal of X'X. Introduced is the ridge trace, a method for showing in two dimensions the effects of nonorthogonality. It is then shown how to augment X′X to obtain biased estimates with smaller mean square error.},
  author = {Arthur E. Hoerl and Robert W. Kennard},
  journal = {Technometrics},
  number = {1},
@@ -295,8 +289,8 @@ abstract = { Purpose The International Prognostic Index (IPI) is widely used for
 }
 
 @Article{biomart09,
-  title = {Mapping identifiers for the integration of genomic datasets with the R/Bioconductor 
-    package biomaRt},
+  title = {{Mapping identifiers for the integration of genomic datasets with the R/Bioconductor 
+    package biomaRt}},
   author = {Steffen Durinck and Paul T. Spellman and Ewan Birney and Wolfgang Huber},
   journal = {Nature Protocols},
   year = {2009},
@@ -306,7 +300,7 @@ abstract = { Purpose The International Prognostic Index (IPI) is widely used for
 }
 
 @article{regularization-path10,
-  title={Regularization Paths for Generalized Linear Models via Coordinate Descent.},
+  title={Regularization Paths for Generalized Linear Models via Coordinate Descent},
   author={Jerome H. Friedman and Trevor J. Hastie and Robert Tibshirani},
   journal={Journal of statistical software},
   year={2010},
@@ -320,4 +314,17 @@ abstract = { Purpose The International Prognostic Index (IPI) is widely used for
   title   = {Zero-sum regression: scale-invariant molecular data analysis},
   school  = "University of Regensburg",
   year    = "2018"
+}
+
+@article{glm72,
+    author = {Nelder, J. A. and Wedderburn, R. W. M.},
+    title = {Generalized Linear Models},
+    journal = {Journal of the Royal Statistical Society: Series A (General)},
+    volume = {135},
+    number = {3},
+    pages = {370-384},
+    doi = {https://doi.org/10.2307/2344614},
+    url = {https://rss.onlinelibrary.wiley.com/doi/abs/10.2307/2344614},
+    eprint = {https://rss.onlinelibrary.wiley.com/doi/pdf/10.2307/2344614},
+    year = {1972}
 }
