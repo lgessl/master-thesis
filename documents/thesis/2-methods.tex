@@ -447,7 +447,7 @@ We can augment $L$ with two hyperparameters, sample weights $w_i > 0$, $i = 1, \
 zero-sum constraint with respect to zero-sum weights $u_j \geq 0$, $j = 1, \ldots, p$, yielding 
 \begin{align} \label{eq:loss-glm-no-lasso}
     L(\beta_0, \beta) &= \sum_{i=1}^n w_i \ell\left( g^{-1}\left( \beta_0 + \mathbf{x}_i^T \beta \right); 
-    y_i \right) \quad \text{subject to } \sum_{j=1}^p \beta_j u_j = 0.
+    y_i \right) \quad \text{for } \beta \in \RR^p \text{ with } u^T \beta = 0.
 \end{align}
 While we do not deviate from the default value $1/n$ for the sample weights in the results chapter 
 \ref{chap:results}, we will discuss in chapter \ref{chap:discussion} how we can use them in the 
@@ -598,8 +598,7 @@ which we now call a loss function, reads
 \begin{align}\label{eq:cox-loss}
 \begin{split}
     L(\beta) &= \sum_{i \in E} w_i \mathbf{x}_i^T \beta - \log \left( \sum_{j \in R_i} w_j \exp(\mathbf{x}_j^T
-    \beta) \right) \\
-    & \text{subject to } \sum_{j=1}^p \beta_j u_j = 0.
+    \beta) \right) \quad \text{for } \beta \in \RR^p \text{ with } u^T \beta = 0.
 \end{split}
 \end{align}
 As with GLMs, we can leverage the zero-sum constraint to reach invariance under sample-wise shifts. 
@@ -614,6 +613,12 @@ mean the output of the linear predictor. In light of all these similarities,
 in this thesis we refer to both GLMs in the typical sense and Cox models as GLMs. Looking closely,
 the Cox model gets along without an intercept. We will therefore always ignore $\beta_0$ if 
 mentioned in the context of a Cox model in the following.
+
+We say that a subset of the coefficients of a GLM indexed by $J \subset \{1, \ldots, p \}$ fulfills 
+the \textit{zero-sum property} if $\sum_{j \in J} \beta_j = 0$. If $J = \{1, \ldots, p \}$, we say 
+that the GLM fulfills the zero-sum property. If, additionally, the GLM is a signature, we call it a 
+\textit{zero-sum signature}. By Eq.\ \ref{eq:zerosum-sample-shifts}, being a \textit{zero-sum} 
+signature can be a crucial advantage.
 
 \paragraph{Hazard ratio}
 
@@ -674,9 +679,10 @@ weights $v \in \RR_{\geq 0}^p$ into
 \end{align}
 Multiplied with the regularization strength $\lambda \in \RR_{\geq 0}$, we can add it to the loss 
 function $L$ from Eq.\ \eqref{eq:loss-glm-no-lasso} and Eq.\ \eqref{eq:cox-loss} to obtain the 
-regularized loss function
+regularized loss function in its Lagrangian form as 
 \begin{align}\label{eq:loss-elastic-net}
-    \mathcal{L}(\beta_0, \beta) = -L(\beta_0, \beta) + \lambda p_{\text{enet}, \alpha, v}(\beta).
+    \mathcal{L}(\beta_0, \beta) = -L(\beta_0, \beta) + \lambda p_{\text{enet}, \alpha, v}(\beta) 
+    \quad \text{ for } \beta \in \RR^p \text{ with } u^T \beta = 0.
 \end{align}
 
 In all three cases -- Gauss, logistic and Cox model -- it is possible to approximately minimize 

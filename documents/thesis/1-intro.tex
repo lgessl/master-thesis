@@ -70,22 +70,28 @@ patients and clinicians early in the treatment cycle to make an informed decisio
 continue with the standard R-CHOP-like treatment or switch to a novel, more experimental treatment. 
 
 In a discovery phase, MMML-Predict will enroll \num{200} patients in a prospective trial at first 
-diagnosis and 
-collect a bunch of clinical and molecular risk features.
-They include clinical scores (like the IPI), gene-expression-based factors (like cell-of-origin 
-signatures, immune scores) and genetic determinants (like MYC, BCL2, TP53, germline and somatic 
-signatures). Many of of these features rely on measuring \textit{gene-expression levels} for a set 
+diagnosis and collect a bunch of clinical and molecular risk features.
+They include clinical scores (like the IPI), gene-expression-based factors (like cell-of-origin and 
+prognostic signatures) and genetic determinants (like MYC, BCL2, BCL6, TP53 and genetic
+signatures). 
+
+There are plenty of biological terms in the last sentence and we want hold on for a second to 
+define those that will become relevant over the course of this thesis.
+Many of the above-mentioned features rely on measuring \textit{gene-expression levels} for a set 
 of genes. 
 For a single gene, its expression level reflects the number of RNA transcripts copied from 
 this gene in a tissue, in our case a lymphoma biopsy. Gene-expression levels catch the tissue
 state on a molecular level. Measuring gene-expression levels for all 
-or at least a high number of genes that an organism expresses, yields a gene-expression profile. 
-\textit{Cell-of-origin signatures} indicate if the gene-expression profile 
+or at least a high number of the genes that an organism expresses, yields a gene-expression 
+profile. \textit{Cell-of-origin signatures} indicate if the gene-expression profile 
 of a tumor is more similar to that of a germinal-center B-cell (GCB) or an activated B-cell (ABC), 
-which refer to two states of a B cell over its life cycle.
+which refer to two states of a B cell over its life cycle. Biologists call predictive models that 
+predict from genetic features, especially gene-expression levels, \textit{signatures}. The genes 
+MYC, BCL2, BCL6 and TP53 are known to play a crucial role in DLBCL.
+
 In a novel approach, MMML-Predict will measure dynamic response determinants during treatment. It is 
 unknown if these features capture similar or different 
-risks; combining them may finally bring to the patients' bedside the significant progress in the 
+risks. Combining them may finally bring to the patients' bedside the significant progress in the 
 understanding of the DLBCL biology researchers have made over the last decades.
 
 The group around Markus Loeffler in Leipzig plans to evaluate the readily trained MMML-Predictor on 
