@@ -85,7 +85,7 @@ for (model in all_combo[1:4]) {
     rf <- model$clone()
     rf$name <- stringr::str_replace(model$name, "gauss-gauss", "gauss-rf")
     rf$directory <- stringr::str_replace(model$directory, "gauss-gauss", "gauss-rf")
-    rf$hyperparams[["fitter2"]] <- hypertune(ptk_ranger)
+    rf$hyperparams[["fitter2"]] <- multitune(ptk_ranger)
     rf$hyperparams[["hyperparams2"]] <- list(
         num.trees = 600,
         min.node.size = 1:10, 
@@ -126,7 +126,7 @@ for (model in all_combo) {
         no_expr_rf <- no_expr_gauss$clone()
         no_expr_rf$name <- stringr::str_replace(no_expr_rf$name, "gauss ei", "rf ei")
         no_expr_rf$directory <- stringr::str_replace_all(no_expr_rf$directory, "gauss", "rf")
-        no_expr_rf$fitter <- hypertune(ptk_ranger, select = TRUE)
+        no_expr_rf$fitter <- multitune(ptk_ranger, select = TRUE)
         no_expr_rf$hyperparams <- list(
             num.trees = 1000,
             min.node.size = 1:10, 

@@ -89,7 +89,7 @@ for (m in ei) {
 rf <- Model$new(
     name = "rf lamis high, rest, no expr",
     directory = "rf/early-int/rf-lamis-high-rest-no-expr",
-    fitter = hypertune(ptk_ranger, select = TRUE),
+    fitter = multitune(ptk_ranger, select = TRUE),
     time_cutoffs = seq(1.4, 2.2, 0.2),
     val_error_fun = neg_prec_with_prev_greater(0.17),
     hyperparams = list(

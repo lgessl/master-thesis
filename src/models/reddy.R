@@ -89,7 +89,7 @@ for (model in ei_li[1:4]) {
     rf <- model$clone()
     rf$name <- stringr::str_replace(model$name, "gauss-gauss", "gauss-rf")
     rf$directory <- stringr::str_replace(model$directory, "gauss-gauss", "gauss-rf")
-    rf$hyperparams[["fitter2"]] <- hypertune(ptk_ranger)
+    rf$hyperparams[["fitter2"]] <- multitune(ptk_ranger)
     rf$hyperparams[["hyperparams2"]] <- list(
         num.trees = 600,
         min.node.size = 1:10,
@@ -126,7 +126,7 @@ for (model in ei_li) {
         rf <- cox$clone()
         rf$name <- stringr::str_replace(rf$name, "cox ei", "rf ei")
         rf$directory <- stringr::str_replace_all(cox$directory, "cox", "rf")
-        rf$fitter <- hypertune(ptk_ranger)
+        rf$fitter <- multitune(ptk_ranger)
         rf$hyperparams <- list(
             num.trees = 600,
             min.node.size = 1:10, 

@@ -95,7 +95,7 @@ prec_ci_as2 <- Ass2d$new(
     x_lab = "prevalence",
     y_lab = "lower limit of precision CI",
     theme = plot_themes[["thesis"]],
-    ci_level = 0.95
+    confidence_level = 0.95
 )
 
 pan_ass_scalar <- AssScalar$new(
