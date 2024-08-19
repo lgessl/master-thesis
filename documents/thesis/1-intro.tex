@@ -7,7 +7,7 @@ representing almost 30\% of all diagnoses of non-Hodgkin's lymphoma.
 This aggressive and heterogeneous group of 
 lymphoid neoplasms exhibits
 diverse phenotypic, genetic, and clinical characteristics. The clinical presentation of 
-DLBCL varies significantly, with differences in tumor load and patient performance status, leading 
+DLBCL varies significantly, with differences in tumor load and patients' performance status, leading 
 to varied outcomes \cite{dlbcl-review21}.
 
 Despite being an aggressive and fatal disease, DLBCL is highly curable with the 
@@ -30,8 +30,7 @@ reliably without batch effects: Is the patient older than \num{60} years? Is the
 level? Is the patient already 
 bedridden (performance status > 1)? Is the patient's cancer in more than one extranodal site? The 
 \textit{IPI score} is then the number of positive answers to these questions, an integer between 0 
-and 5. Although 
-primitive and arbitrary at first glance, the IPI is the result of a rigorous statistical analysis 
+and 5. The IPI is the result of a rigorous statistical analysis 
 of a large dataset of \num{1872} patients: out of twelve candidate features, the IPI inventors
 first selected those features that were independently and significantly associated with survival 
 (namely the five above-mentioned features), and fit a Cox proportional-hazards model to them;
@@ -56,8 +55,8 @@ standard, R-CHOP-like therapy.
 
 For this thesis, we define high-risk DLBCL patients as those who face cancer progression 
 within two years after the start of the treatment. Two years is a time frame accepted by both 
-patients and clinicians, which makes roughly a fourth of DLBCL patients high-risk \cite{staiger20}.
-It is also the threshold used in the MMML-Predict we will introduce next.
+patients and clinicians, which makes roughly a quarter of DLBCL patients high-risk \cite{staiger20}.
+It is also the threshold used in the MMML-Predict project we will introduce next.
 
 \section{The MMML-Predict project} \label{sec:intro-mmml}
 
@@ -65,13 +64,14 @@ Renowned lymphoma experts from across academic Germany -- clinical trialists, bi
 bioinformaticians, lymphoma pathologists and translational lymphoma biologists -- have formed the 
 consortium MMML-Predict to develop and roll out a robust, simple-to-use and cost-effective 
 prognostic tool for DLBCL 
-which yields a clinically more relevant high-risk group. This tool, the MMML-Predictor, will allow 
+which yields a clinically more relevant high-risk group \cite{mmml-chapuy,mmml-idw}. This tool, the 
+MMML-Predictor, aims to 
 patients and clinicians early in the treatment cycle to make an informed decision if they want to 
 continue with the standard R-CHOP-like treatment or switch to a novel, more experimental treatment. 
 
 In a discovery phase, MMML-Predict will enroll \num{200} patients in a prospective trial at first 
-diagnosis and collect a bunch of clinical and molecular risk features.
-They include clinical scores (like the IPI), gene-expression-based factors (like cell-of-origin and 
+diagnosis and collect various clinical and molecular risk features.
+They include clinical scores (like the IPI), gene-expression-based factors (like cell of origin and 
 prognostic signatures) and genetic determinants (like MYC, BCL2, BCL6, TP53 and genetic
 signatures). 
 In a novel approach, MMML-Predict will measure dynamic response determinants during treatment. It is 
@@ -79,19 +79,22 @@ unknown if these features capture similar or different
 risks. Combining them may finally bring to the patients' bedside the significant progress in the 
 understanding of the DLBCL biology researchers have made over the last decades.
 
-There are plenty of biological terms in the last paragraph and we want hold on for a second to 
+There are plenty of biological terms in the last paragraph and we want hold on for a moment to 
 introduce those that will become relevant over the course of this thesis.
 Many of the above-mentioned features rely on measuring \textit{gene-expression levels} for a set 
 of genes. 
-For a single gene, its expression level reflects the number of RNA transcripts copied from 
-this gene in a tissue, in our case a lymphoma biopsy. Gene-expression levels catch the tissue
-state on a molecular level. Measuring gene-expression levels for all 
+For a single gene, its expression level reflects the number of RNA transcripts derived from 
+this gene in a tissue, in our case a lymphoma biopsy. Measuring gene-expression levels for all 
 or at least a high number of the genes that an organism expresses, yields a gene-expression 
 profile. \textit{Cell-of-origin signatures} indicate if the gene-expression profile 
 of a tumor is more similar to that of a germinal-center B-cell (GCB) or an activated B-cell (ABC), 
-which refer to two states of a B cell over its life cycle. Biologists call predictive models that 
+which refer to two states of a B cell over its life cycle; GCB-like DLBCLs have 
+significantly better survival than ABC-like DLBCLs \cite{abc-gcb00}.
+Biologists call predictive models that 
 predict from genetic features, especially gene-expression levels, \textit{signatures}. The genes 
-MYC, BCL2, BCL6 and TP53 are known to play a crucial role in DLBCL.
+MYC, BCL2, BCL6 and TP53 are known to predict survival in DLBCL and have been subject to 
+extensive research in the last years
+\cite{hummel06, zenz17, aukema11, horn13, johnson09, klapper08, kretzmer15, rosenwald19}.
 
 The group around Markus Loeffler in Leipzig plans to evaluate the readily trained MMML-Predictor on 
 a test cohort of another \num{100} patients enrolled for this project for whom only those features 
@@ -102,13 +105,13 @@ precision -- i.e.\ the proportion of \textit{truly} high-risk patients among the
 \textit{labeled} as high-risk -- must be \textit{significantly} above that of the group defined by
 $\text{IPI} \geq 4$. 
 
-In more detail, being high-risk or not is a Bernoullie random variable. 
+In more detail, being high-risk or not is a Bernoulli random variable. 
 The precision is the success probability of this random variable under the condition that the 
 MMML-Predictor predicts a high risk. The test cohort comprises independent, identically distributed 
 (i.i.d) samples. They stay independent under the condition of being labeled high-risk by the 
 MMML-Predictor. The precision on the test cohort is therefore tailored for the Clopper-Pearson 
 method, which calculates exact $\gamma$-confidence intervals (CIs) for the success probability 
-of i.i.d.\ Bernoullie random variables for an arbitrary confidence level $\gamma \in (0, 1)$
+of i.i.d.\ Bernoulli random variables for an arbitrary confidence level $\gamma \in (0, 1)$
 \cite{clopper34}.
 By significantly outperforming the precision of the IPI, we mean that the \num{95}\%-CI
 of the new classifier's precision according to the Clopper-Pearson method must not include the 
@@ -125,7 +128,7 @@ patients pooled from prospective trials of the German High-Grade Non-Hodgkin Lym
 
 \section{The role of this thesis within MMML-Predict}
 
-Inside MMML-Predict, Rainer Spang's group in Regensburg will develop the MMML-Predictor. 
+Within MMML-Predict, Rainer Spang's group in Regensburg will develop the MMML-Predictor. 
 This is 
 a supervised-learning task with a classification problem with binary response: PFS of less 
 than two years -- or high-risk DLBCL -- is the positive group, PFS of more than two 

@@ -59,7 +59,7 @@ For every hyperparameter tuple $h \in H$, we
         \textit{in} the $i$-th fold. These predictions serve as (cross-validated) predictions. 
         Doing this for all 
         folds, we obtain a cross-validated prediction for every training sample.
-    \item Afterwards, we calculate the validation error 
+    \item Next, we calculate the validation error 
         $\text{err}(y_\text{train}, \hat{y}_\text{train})$. We will lay out our choice of the 
         error function $\text{err}$ in subsection \ref{subsec:error-function}. For now, its 
         exact definition does not matter.
@@ -82,8 +82,8 @@ $t \in \RR$ with $P(X_1 \geq t) < 1$,
     \text{as } n \to \infty.
 \end{align}
 
-To avoid this disaster, which is nothing but overfitting the validated predictions to the training 
-data, we need $\text{err}(y_\text{train}, \text{val}(h))$, $h \in H$, with clearly distinct 
+To avoid this disaster -- overfitting the validated predictions to the training 
+data --, we need $\text{err}(y_\text{train}, \text{val}(h))$, $h \in H$, with clearly distinct 
 distributions. 
 How can we achieve this this? First, we can choose $H$ in such a way that the fit models are 
 notably distinct. There is, however, a trade-off: the rougher and smaller $H$ is, the more distinct 
@@ -130,9 +130,10 @@ the error function more robust as we will see next.
 Usually, we need 
 to take a minimum over \textit{several} precisions because most models do not output the final 
 classification.
-Instead, they return a continuous score where a higher score means a higher vote of being
+Instead, they return a continuous score where a higher score means a higher certainty of being
 in the positive class, in our case being high-risk. This continuous score needs 
-\textit{thresholding} via $\hat{y}_i > t$ for some $t \in \RR$.
+\textit{thresholding} via $\hat{y}_i > t$ for some $t \in \RR$. We call $t$ the \textit{output
+threshold} of the model. 
 We notice that as we increase $t$ and thereby decrease the prevalence, the obtained 
 adjacent precision values fluctuate less and less; for high $t$ and low 
 prevalences, fluctuations of up to \num{50} percentage points would be possible, but requiring a 
@@ -187,7 +188,7 @@ If we
 measure the same $p$ features of the $n$ patients in $\mathbf{x} \in \RR^{n \times p}$ again under 
 another protocol, we end up with another predictor 
 $\mathbf{z} \in \RR^{n \times p}$.
-For logarithmized gene-expression levels,
+Following \cite{transplatform17}, for logarithmized gene-expression levels,
 we can often well model the discrepancies with two independent biases, sample-wise effects $\theta_i$
 and feature-wise effects $\omega_j$, leading to
 \begin{align}\label{eq:inter-tech-exact}
@@ -205,14 +206,15 @@ and obtain
     &= \beta_0 + \sum_{j=1}^p \beta_j \mathbf{x}_{ij} + \sum_{j=1}^p \beta_j \theta_i + \sum_{j=1}^p \beta_j \omega_j.
 \end{split}
 \end{align}
-The third summand is zero under the zero-sum constraint $\sum_{j = 1}^p \beta_j = 0$. The fourth 
-summand is constant across all samples and can be absorbed by the intercept, cf.\ 
-\cite{transplatform17}. 
+The third summand is zero if $\sum_{j = 1}^p \beta_j = 0$, a special case of the \textit{zero-sum 
+constraint}, which we will introduce in more detail in subsection \ref{subsec:core-models}. 
+The fourth summand is constant across all samples and can be absorbed by the intercept. 
 
-Under these assumptions, which are pretty realistic,
+Under these assumptions, which are realistic by \cite{transplatform17},
 going from one protocol to another just leads to a constant shift of the model 
 output; even for generalized linear models, i.e. a Gauss model composed with some monotonic link function,
-inter-technical variability does not change the ordering of the samples. All one needs to do to 
+inter-technical variability does not change the ordering of the output scores belonging to the 
+samples. All one needs to do to 
 obtain a final classification is calibrating the threshold for the output scores. However, this 
 also demonstrates that while generalized linear models can cope with inter-technical variability 
 pretty well, there is no point in using the same output threshold across all protocols.
@@ -234,7 +236,7 @@ can provide the response in two formats.
         event} and \textit{censoring status}. If the censoring status is 1, the event -- in our case 
         cancer progression -- occurs \textit{at} the time to the event. If the censoring status is 
         0, 
-        we only know that the event will occurs at some point \textit{after} the time to the event.
+        we only know that the event will occur at some point \textit{after} the time to the event.
         We call this the \textit{Cox format}. More on this in subsection \ref{subsec:core-models} 
         when we present the Cox model. 
 \end{itemize}
@@ -264,7 +266,7 @@ on this in subsection \ref{subsec:elastic-net}.
 \paragraph{Gene-expression data}
 The first and most important decision to make is: do we want to include the high-dimensional
 gene-expression part of the data at all? If we do not, we suddenly have $p \ll n$ instead of 
-$p > n$ or even $p \gg n$. This strongly effects the models we fit, hence also $H$ and 
+$p > n$ or even $p \gg n$. This strongly affects the models we fit, hence also $H$ and 
 validation.
 
 \paragraph{Features in different formats}
@@ -322,9 +324,8 @@ feature with $c$ categories into $c-1$ binary dummy features; if for a sample th
 available, all $c-1$ dummy features will be \texttt{NA}. This yields a modified $\mathbf{x}$ that 
 bears exactly the same information as before. For \textit{every} column in $\mathbf{x}$, we calculate the 
 mean of the available features in $\mathbf{x}$ and replace the \texttt{NA} values with it. 
-For a missing categorical feature, every dummy feature then holds the marginal Bernoullie 
-probability that the feature is in the $k$-th category. This is efficient, transparent and easily 
-applicable to new data.
+For a missing categorical feature, every dummy feature then holds the marginal Bernoulli 
+probability that the feature is in the $k$-th category. 
 
 \subsubsection{Adding combinations of categorical features to the predictor}
 
@@ -336,9 +337,9 @@ themselves, otherwise we set $n_\text{combi} = 3$.
 
 Technically, we need to combine the binary features we derived from distinct categorical features 
 in the previous step. We realize this by multiplying the corresponding columns in 
-$\mathbf{x}$ element-wise. We thereby keep treating the value of a binary feature as a Bernoullie
+$\mathbf{x}$ element-wise. We thereby keep treating the value of a binary feature as a Bernoulli
 probability under the assumption that the binary dummy features involved in the combination are 
-independent, which is not always justified. The average of a combined (Bernoullie) feature over all 
+independent, which is not always justified. The average of a combined (Bernoulli) feature over all 
 samples, for which we apply the threshold $s_\text{min}$, therefore approximates the expected value 
 of the combined feature.
 
@@ -429,7 +430,7 @@ Here, the linear predictor is the log-odds for $Y = 1$ over $Y = 0$ given $X = x
     \frac{1}{1 + \exp(-\eta)}.
 \end{align}
 Y and $Y \cond X = x$ for all $x \in \RR^p$ follow a Bernoulli distribution with varying success 
-probability. For the Bernoullie distribution, the log likelihood of an expected value -- or 
+probability. For the Bernoulli distribution, the log likelihood of an expected value -- or 
 equivalently success probability -- $\mu$ given an observation $y \in \{0, 1\}$ is
 \begin{align}
     \ell(\mu; y) &= \log\left( \mu^{y} (1 - \mu)^{1 - y} \right) 
