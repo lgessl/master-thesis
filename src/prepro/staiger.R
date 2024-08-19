@@ -1,10 +1,8 @@
 # Preprocess, store and split 562 DLBCL RNAseq bulks provided by Staiger et al. 
-# (2018), https://doi.org/10.1038/s41375-019-0573-y.
-# Make sure you have the toscdata R package from our gitlab installed: 
-# https://gitlab.spang-lab.de/sct39258/toscdata.
+# (2019), https://doi.org/10.1038/s41375-019-0573-y.
 
-# This script yields three files: two csv files with pheno and expression data, respectively, and one json 
-# file holding info. Modify the names and directories for these files via the below global variables
+# This script yields three files: two csv files with pheno and expression data, and one json 
+# file with meta info. 
 
 library(patroklos)
 
@@ -39,7 +37,7 @@ if(!dir.exists(data_dir)){
 }
 
 cat("Reading in data\n")
-df <- toscdata::staiger_v2
+df <- toscdata::lamis_test2_v2
 
 cat("Cutting out pheno and expression data\n")
 pheno_tbl <- tibble::as_tibble(df, rownames = "patient_id")[, 1:26]

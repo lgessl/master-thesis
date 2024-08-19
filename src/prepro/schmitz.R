@@ -1,16 +1,18 @@
-# Download, preprocess, store and split 562 DLBCL RNAseq bulks provided by Schmitz et al. (2018), 
+# Download, preprocess, store and split 562 DLBCL RNAseq bulks used by Schmitz et al. (2018), 
 # PMID: 29641966
 
-# This script yields three files: two csv files with pheno and expression data, respectively, and one json 
-# file holding info. Modify the names and directories for these files via the below global variables
+# This script yields three files: two csv files with pheno and expression data, respectively, and 
+# one json file holding info. Modify the names and directories for these files via the below 
+# global variables
 
 library(patroklos)
 
 set.seed(237)
 
 data_dir <- "data/schmitz"
+volume_data_dir <- "/data/mmml-predict/schmitz" # on volume shared across spang lab compute servers
 clean <- FALSE
-only_with_survival_analyis <- TRUE
+only_with_survival_analysis <- TRUE
 training_prop <- 0.75 
 pivot_time_cutoff <- 2
 time_to_event_col <- "pfs_years"
@@ -46,14 +48,28 @@ if(!dir.exists(data_dir)){
 }
 
 # Download
-if(!file.exists(expr_fname)){
-    cat("Downloading expression data to", expr_fname, "\n")
-    download.file(expr_url, expr_fname)
+if (!file.exists(expr_fname)){
+    volume_fname <- file.path(volume_data_dir, "expr.tsv")
+    if (file.exists(volume_fname)) {
+        cat("Copying file from volume mounted into spang lab compute servers to ", 
+            expr_fname, ".\n")
+        file.copy(volume_fname, expr_fname)
+    } else {
+        cat("Downloading expression data to ", expr_fname, "\n")
+        download.file(expr_url, expr_fname)
+    }
 }
-if(!file.exists(pheno_fname)){
-    cat("Downloading pheno data to", pheno_fname, "\n")
-    download.file(pheno_url, pheno_fname)
+if (!file.exists(pheno_fname)){
+    volume_fname <- file.path(volume_data_dir, "pheno.xlsx")
+    if (file.exists(volume_fname)) {
+        cat("Copying file from volume mounted into spang lab compute servers.\n")
+        file.copy(volume_fname, pheno_fname)
+    } else {
+        cat("Downloading pheno data to", pheno_fname, "\n")
+        download.file(pheno_url, pheno_fname)
+    }
 }
+
 cat("Reading in data\n")
 expr_tbl <- readr::read_tsv(expr_fname, col_types = expr_coltypes)
 pheno_tbl <- readxl::read_excel(pheno_fname, sheet = pheno_sheet_no)
@@ -71,7 +87,7 @@ names(pheno_tbl) <- names(pheno_tbl) |>
     stringr::str_replace_all("_+", "_") |>
     stringr::str_remove("_$")
 pheno_tbl[["ipi"]] <- ifelse(pheno_tbl[["ipi_range"]] <= 5, pheno_tbl[["ipi_range"]], NA)
-if(only_with_survival_analyis){
+if(only_with_survival_analysis){
     pheno_tbl <- pheno_tbl[pheno_tbl[["pfs_years"]] > 0 & !is.na(pheno_tbl[["pfs_years"]]), ]
 }
 
@@ -104,7 +120,7 @@ lamis_sig <- toscdata::lamis_signature
 data$expr_mat <- t(as.matrix(expr_tbl[, -1]))
 colnames(data$expr_mat) <- expr_tbl[["gene_id"]]
 cat("Are all LAMIS genes in Schmitz? ")
-cat(all(names(lamis_sig) %in% colnames(data$expr_mat)))
+cat(all(names(lamis_sig) %in% colnames(data$expr_mat)), "\n")
 data$pheno_tbl[["lamis_score"]] <- (data$expr_mat[, names(lamis_sig)] %*% lamis_sig)[, 1]
 data$pheno_tbl[["lamis_high"]] <- (data$pheno_tbl[["lamis_score"]] > 
     quantile(data$pheno_tbl[["lamis_score"]], 0.75)) * 1
