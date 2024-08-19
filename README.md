@@ -18,7 +18,7 @@ that outperform R-CHOP on this subpopulation.
 
 This thesis aims to develop a computational method that identifies DLBCL patients with 
 progression-free survival (PFS) below two years with higher prevalence and significantly 
-higher precision than the IPI and to show this on independent data. It also deals with the 
+higher precision than the IPI and wants to show this on independent data. It also deals with the 
 question under which circumstances we can do so reliably. By a *significantly* higher precision, 
 we mean that the 95%-confidence interval of the precision of our model must not include the 
 precision of the IPI on independent test data. We develop the models in a train-validation-test 
@@ -27,8 +27,8 @@ validated model and test it on a test set.
 
 ## The results
 
-We apply our method to three different data sets and one big data set comprised of these three 
-data sets. We show that we can indeed deliver a model with the desired properties. Analysis after 
+We apply our methods to three different data sets and a big one comprised of these three. 
+We show that we can indeed deliver a model with the desired properties. Analysis after 
 freezing the models and unlocking the test data suggest that, for a reliable internal 
 validation and high test performance, 
 
@@ -41,8 +41,8 @@ play a key role.
 
 ## The structure of this repository
 
-- [`data`](data) is supposed to hold the data sets. We used three of them for this thesis and one 
-    big data sets combining all three of them in [`data/all`](data/all).
+- [`data`](data) is supposed to hold the data sets. We used three of them for this thesis and a 
+    big one combining all three of them in [`data/all`](data/all).
 - [`documents`](documents) holds presentation slides for the 
     [progress talk](documents/progress-report/main.pdf) and the 
     [final talk](documents/final-talk/) — compiling them from source does not work due to missing 
@@ -51,7 +51,7 @@ play a key role.
 - [`results`](results) holds validation and testing results as well meta analysis in the form of 
     tables and plots.
 - [`src`](src) holds all the source code to preprocess data and reproduce the results of this 
-    thesis. It is key to this repo and we therefore dedicate it the next section.
+    thesis. It takes the center role in this repo and we therefore dedicate the next section to it.
  
 ## Reproducing the results
 
@@ -62,23 +62,58 @@ We recommend reading the [thesis](documents/thesis/main.pdf) first.
 #### Software
 
 - We used R version 4.4.1.
-- Install the [`patroklos`](https://github.com/lgessl/patroklos) from GitHub (see there for more).
-  Installing it will make sure you have installed almost all depending R packages already as well.
+- Install the latest version of [`patroklos`](https://github.com/lgessl/patroklos) from GitHub 
+  (see there for more). Installing it will make sure you have installed almost all depending R 
+  packages already as well.
 - If you want to use the Fira Sans font by Mozilla 
-    in plots, install it [from GitHub](https://github.com/mozilla/Fira/tree/master/ttf) and install 
-    the sysfonts package from CRAN (we used version 0.8.9) in plots. Otherwise set 
-    `use_fira_sans = FALSE` in `src/assess/ass.R`.
+  in plots, install it [from GitHub](https://github.com/mozilla/Fira/tree/master/ttf) and install 
+  the sysfonts package from CRAN (we used version 0.8.9) in plots. Otherwise set 
+  `use_fira_sans <- FALSE` in `src/assess/ass.R`.
 
 #### Data
 
-Only one of the thee data sets is publicly available and [`src/prepro/schmitz.R] will download it 
+Only one of the thee data sets, the Schmitz data, is publicly available. 
+[`src/prepro/schmitz.R`](src/prepro/schmitz.R) will download it 
 if it is not available locally. To gain access to the two other data sets (and hence to the 
-combined data set), 
+combined data set), ask the system administrator of the Spang lab, 
+[Christian Kohler](mailto:christian.kohler@ur.de), for access to our compute servers 
+where we provide all three data sets on a mounted volume.
 
-- ask the system administrator of the spang lab for access to our compute servers where we provide 
-  the Schmitz and Reddy data on a mounted volume,
-- ask Tobias Schmidt for his `toscdata` R package, which holds the Staiger data and the LAMIS 
-  signature.
+### All in one run
 
+With the above requisites fulfilled, you can now run
 
-### All at once
+```
+Rscript src/run_all.R 
+```
+
+in your terminal from the root directory of this repo. In general, all scripts below `src` are 
+expected to be run with the repo root directory as the current working directory.
+
+### The structure of [`src`](src)
+
+- [`src/prepro`](src/prepro/) holds the scripts preprocessing the four data sets into 
+  [`Data`](https://lgessl.github.io/patroklos/reference/Data.html) 
+  R6 objects, the data format `patroklos` works with.
+- [`src/models`](src/models) holds the scripts that define all trained and validated models with 
+  their hyperparameters for every data set. We do so by initializing a bunch of 
+  [`Model`](https://lgessl.github.io/patroklos/reference/Model.html) 
+  R6 objects, the model format `patroklos` works with.
+- [`src/train`](src/train/) holds the scripts that fit the models defined below `src/models` and 
+  validate them `Model`-internally by calling 
+  [`patroklos::training_camp()`](https://lgessl.github.io/patroklos/reference/training_camp.html). 
+  They store the readily trained models with their validated predictions below [`models`](models).
+- [`src/assess`](src/assess/) holds the scripts that finalize validation, pick the best model 
+  according to validation on the respective training cohort and test it on the test cohort.
+  Beyond the error, they calculate a bunch of model properties that show up as tables below 
+  [`results`](results). The 
+  [`AssScalar`](https://lgessl.github.io/patroklos/reference/AssScalar.html) 
+  R6 class from `patroklos` is the working horse of this directory.
+- [`src/analyze`](src/analyze/) holds the scripts that unfreeze the respective test data for all 
+  models to do some meta analysis about the trained models and the validation: reporting the 
+  non-zero coefficients of the picked models, plots on thresholding the continuous output of the 
+  picked models and plots on validation versus test error for all models. The 
+  [`Ass2d`](https://lgessl.github.io/patroklos/reference/Ass2d.html) 
+  R6 class from `patroklos` and 
+  [`patroklos::val_vs_test()`](https://lgessl.github.io/patroklos/reference/val_vs_test.html) 
+  are the stars of this directory.
