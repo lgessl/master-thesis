@@ -1,3 +1,9 @@
+# Plot prevalence vs. precision and prevalence vs. lower limit of precision 95%-CI for 
+# prevalences in [0.10, 0.50] for best validated models in inter-trial experiments on the two 
+# remaining cohorts. The best validated models are all GLMs, whose linear predictor outputs 
+# continuous scores 
+# (-> results/inter_output_prec.pdf, results/inter_output_prec_ci.pdf)
+
 library(patroklos)
 library(ggplot2)
 library(patchwork)

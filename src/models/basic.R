@@ -11,7 +11,6 @@ cox = Model$new(
     time_cutoffs = c(seq(1, 2.5, .25), Inf), # seq(1.5, 2, .25)
     val_error_fun = neg_prec_with_prev_greater(0.17),
     hyperparams = list(family = "cox", alpha = 1, zeroSum = FALSE, nFold = 1000),
-    continuous_output = TRUE
 )
 cox_std = Model$new(
     name = "cox std",
@@ -21,7 +20,6 @@ cox_std = Model$new(
     time_cutoffs = c(seq(1, 2.5, .25), Inf),
     hyperparams = list(family = "cox", alpha = 1, zeroSum = FALSE,
         standardize = TRUE, nFold = 1000),
-    continuous_output = TRUE
 )
 # zerosum
 cox_zerosum = Model$new(
@@ -31,7 +29,6 @@ cox_zerosum = Model$new(
     time_cutoffs = c(seq(1.5, 2., .25), Inf), # seq(1.5, 2, .25)
     val_error_fun = neg_prec_with_prev_greater(0.17),
     hyperparams = list(family = "cox", alpha = 1, nFold = 1000),
-    continuous_output = TRUE
 )
 # LOGISTIC
 # vanilla
@@ -43,7 +40,6 @@ log = Model$new(
     val_error_fun = neg_prec_with_prev_greater(0.17),
     hyperparams = list(family = "binomial", alpha = 1, zeroSum = FALSE, 
         nFold = 1000),
-    continuous_output = TRUE
 )
 log_std = Model$new(
     name = "log std",
@@ -53,7 +49,6 @@ log_std = Model$new(
     val_error_fun = neg_prec_with_prev_greater(0.17),
     hyperparams = list(family = "binomial", alpha = 1, zeroSum = FALSE,
         standardize = TRUE, nFold = 1000),
-    continuous_output = TRUE
 )
 # zerosum
 log_zerosum = Model$new(
@@ -63,7 +58,6 @@ log_zerosum = Model$new(
     time_cutoffs = seq(1.0, 2, .25), # seq(1.5, 2, .25)
     val_error_fun = neg_prec_with_prev_greater(0.17),
     hyperparams = list(family = "binomial", alpha = 1, nFold = 1000),
-    continuous_output = TRUE
 )
 
 # GAUSS
@@ -75,7 +69,6 @@ gauss = Model$new(
     time_cutoffs = seq(1, 2.5, .25), # seq(1.5, 2, .25)
     val_error_fun = neg_prec_with_prev_greater(0.17),
     hyperparams = list(family = "gaussian", alpha = 1, zeroSum = FALSE, nFold = 1000),
-    continuous_output = TRUE
 )
 gauss_std = Model$new(
     name = "gauss std",
@@ -85,7 +78,6 @@ gauss_std = Model$new(
     val_error_fun = neg_prec_with_prev_greater(0.17),
     hyperparams = list(family = "gaussian", alpha = 1, zeroSum = FALSE,
         standardize = TRUE, nFold = 1000),
-    continuous_output = TRUE
 )
 # zerosum
 gauss_zerosum = Model$new(
@@ -95,7 +87,6 @@ gauss_zerosum = Model$new(
     time_cutoffs = seq(1.5, 2, .25), # seq(1.5, 2, .25)
     val_error_fun = neg_prec_with_prev_greater(0.17),
     hyperparams = list(family = "gaussian", alpha = 1),
-    continuous_output = TRUE
 )
 
 models <- list(

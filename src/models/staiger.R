@@ -1,12 +1,15 @@
-# Models trained on Staiger et al. (2018)
+# Models trained on Staiger data
 
-# Basic (only expression data)
+# Basic (gene-expression only)
 
 source("src/models/basic.R")
 
 basic <- general
 
-# Early and late integration
+# Models with all features and combinations (-> integrate gene-expression signatures)
+
+# Nested models (early model only predicts from gene-expression levels)
+# Vary the IPI format
 
 include_from_discrete_pheno <- c("gender", "ipi_group", "gene_expression_subgroup",
     "exbm", "bm", "lamis_high")
@@ -34,7 +37,6 @@ ipi_group <- Model$new(
     include_expr = TRUE,
     combine_n_max_categorical_features = 1:3,
     combined_feature_min_positive_ratio = 0.05,
-    continuous_output = TRUE
 )
 
 ipi_disc <- ipi_group$clone()
@@ -63,7 +65,8 @@ ipi_all$include_from_continuous_pheno <- c("ipi", "lamis_score")
 
 ei_li <- list(ipi_group, ipi_disc, ipi_cont, ipi_all)
 
-# Early integration with Cox
+# Provide all features to a single core model at once
+
 for (model in ei_li[1:4]) {
     ei_cox <- model$clone()
     ei_cox$name <- stringr::str_replace(model$name, "-cox", " ei")
@@ -75,7 +78,8 @@ for (model in ei_li[1:4]) {
     ei_li <- c(ei_li, ei_cox)
 }
 
-# Late integration with rf, logistic as late model
+# More nested models, this time with rf, log as late model
+
 for (model in ei_li[1:4]) {
     rf <- model$clone()
     rf$name <- stringr::str_replace(model$name, "cox-cox", "cox-rf")
@@ -89,7 +93,6 @@ for (model in ei_li[1:4]) {
         classification = TRUE,
         skip_on_invalid_input = TRUE
     )
-    rf$continuous_output <- FALSE
     log <- model$clone()
     log$name <- stringr::str_replace(model$name, "cox-cox", "cox-log")
     log$directory <- stringr::str_replace(model$directory, "cox-cox", "cox-log")
@@ -100,7 +103,7 @@ for (model in ei_li[1:4]) {
     ei_li <- c(ei_li, rf, log)
 }
 
-# No expression
+# Everything-at-once models without gene-expression levels as features
 for (model in ei_li) {
     if (stringr::str_detect(model$name, "cox ei")) {
         # Cox
@@ -134,7 +137,6 @@ for (model in ei_li) {
             classification = TRUE,
             skip_on_invalid_input = TRUE
         )
-        no_expr_rf$continuous_output <- TRUE
         ei_li <- c(ei_li, no_expr_cox, log, gauss, no_expr_rf)
     }
 }

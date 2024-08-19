@@ -55,7 +55,7 @@ cat("T:", model$fit_obj$time_cutoff, "\n\n")
 
 # Trained on Staiger
 cat(str_pad("Trained on Staiger ", width = 100, "right", pad = "*"), "\n\n")
-model <- readRDS("models/all/on_lamis/cox/early-int/cox-ei-lamis-score-rest-no-expr/model.rds")
+model <- readRDS("models/all/on_staiger/cox/early-int/cox-ei-lamis-score-rest-no-expr/model.rds")
 cat(model$name, "\n\n")
 print(non_zero_coefs(model$fit_obj))
 cat("\nn_combi:", model$fit_obj$combine_n_max_categorical_features, "\n")

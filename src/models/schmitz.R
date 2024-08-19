@@ -1,14 +1,15 @@
-# Models to be trained on Schmitz et al. (2018)
+# Models trained on Schmitz data
 
-# Basic (only expression data)
+# Basic (gene-expression only)
 
 source("src/models/basic.R")
 
 basic <- general
 
-# Models with all features and combinations
+# Models with all features and combinations (-> integrate gene-expression signatures)
 
-# Late integration
+# Nested models (early model only predicts from gene-expression levels)
+# Vary the IPI format
 
 include_from_discrete_pheno <- c("gender", "ipi_group", "gene_expression_subgroup",
     "genetic_subtype", "lamis_high")
@@ -36,7 +37,6 @@ ipi_group <- Model$new(
     include_expr = TRUE,
     combine_n_max_categorical_features = 1:4,
     combined_feature_min_positive_ratio = 0.05,
-    continuous_output = TRUE
 )
 
 ipi_disc <- ipi_group$clone()
@@ -66,7 +66,7 @@ ipi_all$include_from_continuous_pheno <- c("ipi", "age", "ldh_ratio",
 
 all_combo <- list(ipi_group, ipi_disc, ipi_cont, ipi_all)
 
-# Same for early integration
+# Provide all features to a single core model at once
 
 for(model in all_combo[1:4]){
     model_ei <- model$clone()
@@ -79,7 +79,7 @@ for(model in all_combo[1:4]){
     all_combo <- c(all_combo, model_ei)
 }
 
-# rf as late model
+# More nested models, now with rf and Cox as late model
 
 for (model in all_combo[1:4]) {
     rf <- model$clone()
@@ -94,7 +94,6 @@ for (model in all_combo[1:4]) {
         classification = TRUE,
         skip_on_invalid_input = TRUE
     )
-    rf$continuous_output <- FALSE
     cox <- model$clone()
     cox$name <- stringr::str_replace(model$name, "gauss-gauss", "gauss-cox")
     cox$directory <- stringr::str_replace(cox$directory, "gauss-gauss", "gauss-cox")
@@ -102,7 +101,7 @@ for (model in all_combo[1:4]) {
     all_combo <- c(all_combo, rf, cox)
 }
 
-# Early integration without expression
+# Everything-at-once models without gene-expression levels as features
 
 for (model in all_combo) {
     if (stringr::str_detect(model$directory, "3-early-int")) {
@@ -135,12 +134,12 @@ for (model in all_combo) {
             classification = TRUE,
             skip_on_invalid_input = TRUE
         )
-        no_expr_rf$continuous_output <- FALSE
         all_combo <- c(all_combo, no_expr_gauss, cox, log, no_expr_rf)
     }
 }
 
 # Put them all together
+
 models <- c(basic, all_combo)
 names(models) <- sapply(models, function(x) x$name)
 prepend_to_directory(models, "models/schmitz")

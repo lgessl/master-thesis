@@ -1,4 +1,5 @@
-# Unite Schmitz, Reddy and Staiger into one dataset
+# Combine Schmitz, Reddy and Staiger into one dataset
+# Schmitz, Reddy, Staiger need to have been preprocessed in advance
 
 library(patroklos)
 
@@ -6,7 +7,9 @@ schmitz <- readRDS("data/schmitz/data.rds")$read()
 reddy <- readRDS("data/reddy/data.rds")$read()
 staiger <- readRDS("data/staiger/data.rds")$read()
 
-# Map gene names to HGCN (only need to do this for Reddy)
+if (!dir.exists("data/all")) dir.create("data/all")
+
+# Map gene names to HGNC (only need to do this for Reddy)
 ensemble <- biomaRt::useMart("ensembl", dataset = "hsapiens_gene_ensembl")
 mapping <- biomaRt::getBM(attributes = c("ensembl_gene_id", "hgnc_symbol"), 
     filters = "ensembl_gene_id", values = colnames(reddy$expr_mat), mart = ensemble)

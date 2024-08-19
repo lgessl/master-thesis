@@ -119,6 +119,14 @@ data$pheno_tbl <- discretize_tbl_cols(
 )
 
 # Add LAMIS signature to pheno data
+if ("toscdata" %in% installed.packages()[, "Package"]) {
+    lamis_sig <- toscdata::lamis_signature
+} else {
+    if (!file.exists("/data/mmml-predict/toscdata4mmml.rds")) 
+        stop("You either need to have the toscdata package installed or be on the spang-lab ", 
+            "compute server")
+    lamis_sig <- readRDS("/data/mmml-predict/toscdata4mmml.rds")["lamis_signature"]
+}
 lamis_sig <- toscdata::lamis_signature
 data$expr_mat <- t(as.matrix(expr_tbl[, -1]))
 colnames(data$expr_mat) <- expr_tbl[["gene_id"]]

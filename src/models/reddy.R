@@ -1,6 +1,6 @@
-# Models trained on Reddy et al. (2017
+# Models trained on Reddy data
 
-# Basic (only expression data)
+# Basic (gene-expression only)
 
 source("src/models/basic.R")
 
@@ -11,7 +11,10 @@ for(i in seq_along(basic)) {
     basic[[i]]$time_cutoffs <- sort(time_cutoffs)
 }
 
-# Early and late integration
+# Models with all features and combinations (-> integrate gene-expression signatures)
+
+# Nested models (early model only predicts from gene-expression levels)
+# Vary the IPI format
 
 include_from_discrete_pheno <- c("gender", "ipi_group", "b_symptoms_at_diagnosis", 
     "testicular_involvement", "cns_involvement",
@@ -42,7 +45,6 @@ ipi_group <- Model$new(
     include_expr = TRUE,
     combine_n_max_categorical_features = 1:3,
     combined_feature_min_positive_ratio = 0.05,
-    continuous_output = TRUE
 )
 
 ipi_disc <- ipi_group$clone()
@@ -72,7 +74,8 @@ ipi_all$include_from_continuous_pheno <- c("ipi", "lamis_score")
 
 ei_li <- list(ipi_group, ipi_disc, ipi_cont, ipi_all)
 
-# Early integration with gauss
+# Provide all features to a single core model (Gauss) at once
+
 for(model in ei_li[1:4]){
     gauss <- model$clone()
     gauss$name <- stringr::str_replace(model$name, "gauss-gauss", "gauss ei")
@@ -84,7 +87,8 @@ for(model in ei_li[1:4]){
     ei_li <- c(ei_li, gauss)
 }
 
-# Late integration with rf, cox
+# More nested models, now with rf, Cox as late models
+
 for (model in ei_li[1:4]) {
     rf <- model$clone()
     rf$name <- stringr::str_replace(model$name, "gauss-gauss", "gauss-rf")
@@ -98,7 +102,6 @@ for (model in ei_li[1:4]) {
         classification = TRUE,
         skip_on_invalid_input = TRUE
     )
-    rf$continuous_output <- FALSE
     cox <- model$clone()
     cox$name <- stringr::str_replace(model$name, "gauss-gauss", "gauss-cox")
     cox$directory <- stringr::str_replace(model$directory, "gauss-gauss", "gauss-cox")
@@ -107,7 +110,7 @@ for (model in ei_li[1:4]) {
     ei_li <- c(ei_li, rf, cox)
 }
 
-# No expression for Gauss, rf
+# Everything-at-once models without gene-expression levels as features
 for (model in ei_li) {
     if (stringr::str_detect(model$name, "gauss ei")) {
         gauss <- model$clone()
@@ -135,7 +138,6 @@ for (model in ei_li) {
             classification = TRUE,
             skip_on_invalid_input = TRUE
         )
-        rf$continuous_output <- FALSE
         rf$time_cutoffs <- 2.5
         ei_li <- c(ei_li, gauss, cox, log, rf)
     }

@@ -1,9 +1,18 @@
+# Plot validation vs. test error and highlight model groups
+# Do this for
+# - gene-expression-only models on Schmitz, Reddy, Staiger on respective training and test cohort
+#   (-> results/intra_val_test_geo.pdf),
+# - whole range of models trained on Schmitz, Reddy, Staiger training cohort, tested on respective 
+#   test cohort (-> results/intra_val_test_more.pdf),
+# - whole range of models trained on whole Schmitz, Reddy, Staiger cohort and tested on the two 
+#   remaining cohorts in big, combined data set (-> results/inter_val_test.pdf)
+
 library(patroklos)
 library(patchwork)
 
 make_plot1 <- TRUE
 make_plot2 <- TRUE
-make_plot3 <- FALSE
+make_plot3 <- TRUE
 
 generate_plot_list <- function(
     data_sets,
@@ -54,14 +63,16 @@ generate_plot_list <- function(
 
 source("src/assess/ass.R")
 
+# Intra-trial experiments
+
 schmitz <- readRDS("data/schmitz/data.rds")
 reddy <- readRDS("data/reddy/data.rds")
 staiger <- readRDS("data/staiger/data.rds")
 data_sets <- list(schmitz = schmitz, reddy = reddy, staiger = staiger)
 staiger_sets <- list(staiger = staiger, staiger = staiger, staiger = staiger)
 
+# Gene-expression only
 if (make_plot1){
-# GE only
 models_subset <- c("cox", "cox std", "log", "log std", "gauss", "gauss std", "cox ridge", 
     "cox std ridge", "log ridge", "log std ridge", "gauss ridge", "gauss std ridge")
 # spot 1: model class
@@ -80,7 +91,6 @@ regex2_list <- list(enet_regex, std_regex)
 name2_list <- list(enet_name, std_name)
 legendtitle1_list <- list("model class", "model class")
 legendtitle2_list <- list("regularization", "standardize X")
-
 
 plt_list <- generate_plot_list(
     data_sets = data_sets,
@@ -109,7 +119,7 @@ ggplot2::ggsave(pw, file = "results/intra_val_test_geo.pdf",
 showtext::showtext_auto(FALSE)
 }
 
-# More features 
+# Whole range of models
 if (make_plot2) {
 # Schmitz & Reddy
 data_sets <- list(schmitz = schmitz, reddy = reddy)
@@ -178,7 +188,6 @@ showtext::showtext_auto(FALSE)
 
 # Inter trial
 if (make_plot3) {
-
 all_data <- readRDS("data/all/data.rds")
 
 mclass_regex <- c("rf", "cox", "log", "gauss", "^ipi$")

@@ -40,7 +40,17 @@ if(!dir.exists(data_dir)){
 }
 
 cat("Reading in data\n")
-df <- toscdata::lamis_test2_v2
+if ("toscdata" %in% installed.packages()[, "Package"]) {
+    lamis_sig <- toscdata::lamis_signature
+    df <- toscdata::lamis_test2_v2
+} else {
+    if (!file.exists("/data/mmml-predict/toscdata4mmml.rds")) 
+        stop("You either need to have the toscdata package installed or be on a spang-lab ", 
+            "compute server")
+    toscdata4mmml <- readRDS("/data/mmml-predict/toscdata4mmml.rds")
+    lamis_sig <- toscdata4mmml["lamis_signature"]
+    df <- toscdata4mmml["lamis_test2_v2"]
+}
 
 cat("Cutting out pheno and expression data\n")
 pheno_tbl <- tibble::as_tibble(df, rownames = "patient_id")[, 1:26]
@@ -62,8 +72,8 @@ pheno_tbl[["efs_years"]] <- pheno_tbl[["efs_years"]]/12
 ipi_group_mapper <- c("low", "low", "intermediate", "intermediate", "high", "high")
 pheno_tbl[["ipi_group"]] <- ipi_group_mapper[pheno_tbl[["ipi"]]+1]
 # Add LAMIS score
-pheno_tbl[["lamis_score"]] <- (expr_mat[, attr(toscdata::lamis_signature, "names")] %*% 
-    toscdata::lamis_signature)[, 1]
+pheno_tbl[["lamis_score"]] <- (expr_mat[, names(lamis_sig)] %*% 
+    lamis_sig)[, 1]
 pheno_tbl[["lamis_high"]] <- as.numeric(pheno_tbl[["lamis_score"]] >
     quantile(pheno_tbl[["lamis_score"]], 0.75))
 

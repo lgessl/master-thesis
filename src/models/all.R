@@ -1,8 +1,8 @@
-# Models trained on Schmitz, Reddy, Lamis
+# Models trained on big data set: combined Schmitz, Reddy, Lamis data
 
 library(patroklos)
 
-# Basic (only expression data)
+# Basic (gene-expression only)
 
 models <- list()
 
@@ -28,7 +28,8 @@ m$time_cutoffs <- c(m$time_cutoffs, Inf)
 m$hyperparams[["family"]] <- "cox"
 models <- c(models, m)
 
-# Early integration of LAMIS signature
+# Everything-at-once core models (in particular integration of LAMIS signature)
+# Varying LAMIS format
 
 ei <- list()
 
@@ -85,7 +86,8 @@ for (m in ei) {
     ei <- c(ei, m)
 }
 
-# rf on lamis high, without expression
+# Nested model with rf as late model, no expression
+
 rf <- Model$new(
     name = "rf lamis high, rest, no expr",
     directory = "rf/early-int/rf-lamis-high-rest-no-expr",
@@ -113,6 +115,7 @@ ei <- c(ei, rf)
 models <- c(models, ei)
 
 # IPI
+
 ipi <- Model$new(
     name = "ipi",
     directory = "ipi",
@@ -126,7 +129,5 @@ ipi <- Model$new(
     enable_imputation = FALSE
 )
 models <- c(models, ipi)
-
-# Major lazer: light it up
 
 names(models) <- sapply(models, function(x) x$name)
