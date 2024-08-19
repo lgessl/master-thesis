@@ -1,8 +1,11 @@
 # Download, preprocess, store and split 562 DLBCL RNAseq bulks used by Schmitz et al. (2018), 
 # DOI: 10.1056/NEJMoa1801445
 
-# This script yields four files: two csv files with pheno and expression data, an rds file 
-# tracking the split into train and test cohort and one json file with meta info. 
+# This script yields the following files in data/schmitz: 
+# - two csv files with preprocessed pheno and expression data, expr.csv and pheno.csv
+# - an rds file tracking the split into train and test cohort, cohort.rds, 
+# - one json file with meta info, info.json,
+# - an rds file holding the whole Data object with expr_mat, pheno_tbl read in, data.rds.
 
 library(patroklos)
 
@@ -10,7 +13,7 @@ set.seed(237)
 
 data_dir <- "data/schmitz"
 volume_data_dir <- "/data/mmml-predict/schmitz" # on volume shared across spang lab compute servers
-clean <- FALSE
+clean <- TRUE
 only_with_survival_analysis <- TRUE
 training_prop <- 0.75 
 pivot_time_cutoff <- 2
@@ -51,7 +54,7 @@ if (!file.exists(expr_fname)){
     volume_fname <- file.path(volume_data_dir, "expr.tsv")
     if (file.exists(volume_fname)) {
         cat("Copying file from volume mounted into spang lab compute servers to ", 
-            expr_fname, ".\n")
+            expr_fname, "\n")
         file.copy(volume_fname, expr_fname)
     } else {
         cat("Downloading expression data to ", expr_fname, "\n")

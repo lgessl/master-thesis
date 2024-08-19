@@ -1,8 +1,11 @@
-# Preprocess, store and split 562 DLBCL RNAseq bulks provided by Staiger et al. 
-# (2019), https://doi.org/10.1038/s41375-019-0573-y.
+# Preprocess, store and split 562 DLBCL RNAseq bulks provided by Staiger et al. (2019) 
+#  DOI: 10.1038/s41375-019-0573-y
 
-# This script yields three files: two csv files with pheno and expression data, and one json 
-# file with meta info. 
+# This script yields the following files in data/staiger: 
+# - two csv files with preprocessed pheno and expression data, expr.csv and pheno.csv
+# - an rds file tracking the split into train and test cohort, cohort.rds, 
+# - one json file with meta info, info.json,
+# - an rds file holding the whole Data object with expr_mat, pheno_tbl read in, data.rds.
 
 library(patroklos)
 
