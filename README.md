@@ -44,18 +44,24 @@ play a key role.
 - [`data`](data) is supposed to hold the data sets. We used three of them for this thesis and a 
     big one combining all three of them in [`data/all`](data/all).
 - [`documents`](documents) holds presentation slides for the 
-    [progress talk](documents/progress-report/main.pdf) and the 
-    [final talk](documents/final-talk/) — compiling them from source does not work due to missing 
-    included plot files — and the [thesis](documents/thesis/main.pdf) itself.
+  [progress talk](documents/progress-report/main.pdf) and the 
+  [final talk](documents/final-talk/) — compiling them from source does not work due to missing 
+  included plot files — and the [thesis](documents/thesis/main.pdf) itself.
 - [`models`](models) is supposed to hold the models we train and validate as `.rds` files.
 - [`results`](results) holds validation and testing results as well meta analysis in the form of 
-    tables and plots.
+  tables and plots.
 - [`src`](src) holds all the source code to preprocess data and reproduce the results of this 
-    thesis. It takes the center role in this repo and we therefore dedicate the next section to it.
+  thesis. It takes the center role in this repo and we therefore dedicate the next section to it.
  
 ## Reproducing the results
 
-We recommend reading the [thesis](documents/thesis/main.pdf) first.
+We recommend reading the [thesis](documents/thesis/main.pdf) first. 
+
+We outsourced all reusable 
+code of this thesis to the R package [`patroklos`](https://github.com/lgessl/patroklos), which 
+is tailored for this thesis and still applicable to a more general class of problems, namely 
+machine-learning projects that aim to develop a model predicting thresholded survival in the 
+classical train-validate-test split.
 
 ### Prerequisites
 
