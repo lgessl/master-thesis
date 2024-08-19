@@ -1,9 +1,8 @@
 # Download, preprocess, store and split 562 DLBCL RNAseq bulks used by Schmitz et al. (2018), 
-# PMID: 29641966
+# DOI: 10.1056/NEJMoa1801445
 
-# This script yields three files: two csv files with pheno and expression data, respectively, and 
-# one json file holding info. Modify the names and directories for these files via the below 
-# global variables
+# This script yields four files: two csv files with pheno and expression data, an rds file 
+# tracking the split into train and test cohort and one json file with meta info. 
 
 library(patroklos)
 
@@ -62,7 +61,8 @@ if (!file.exists(expr_fname)){
 if (!file.exists(pheno_fname)){
     volume_fname <- file.path(volume_data_dir, "pheno.xlsx")
     if (file.exists(volume_fname)) {
-        cat("Copying file from volume mounted into spang lab compute servers.\n")
+        cat("Copying file from volume mounted into spang lab compute servers to", 
+            pheno_fname, "\n")
         file.copy(volume_fname, pheno_fname)
     } else {
         cat("Downloading pheno data to", pheno_fname, "\n")
