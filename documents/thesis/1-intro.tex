@@ -49,14 +49,16 @@ approaches. E.g., in the prospective trial comprising \num{466} patients used as
 is too low 
 to gain special attention in clinical practice and to incentivize the pharmaceutical industry to 
 develop new treatments. All other cohorts defined via $\text{IPI} \geq i, i = 0, 1, 2, 3, 4$, lack 
-precision: the proportion of patients with progression-free survival (PFS) less than two years is below 
-\num{50}\% -- too low to persuade a patient to undergo an experimental treatment instead of a 
-standard, R-CHOP-like therapy.
+precision: the proportion of patients with \textit{progression-free survival} (PFS) less than two 
+years is below \num{50}\% -- too low to persuade a patient to undergo an experimental treatment 
+instead of a standard, R-CHOP-like therapy. PFS is the time from the start of the treatment to tumor 
+progression or death from any cause \cite{saad09}.
 
-For this thesis, we define high-risk DLBCL patients as those who face cancer progression 
-within two years after the start of the treatment. Two years is a time frame accepted by both 
-patients and clinicians, which makes roughly a quarter of DLBCL patients high-risk \cite{staiger20}.
-It is also the threshold used in the MMML-Predict project we will introduce next.
+For this thesis, we define high-risk DLBCL patients as those patients with PFS below two years. 
+Two years is a time 
+frame accepted by both patients and clinicians, which makes roughly a quarter of DLBCL patients 
+high-risk \cite{staiger20}. It is also the threshold used in the MMML-Predict project we will 
+introduce next.
 
 \section{The MMML-Predict project} \label{sec:intro-mmml}
 
@@ -71,9 +73,8 @@ continue with the standard R-CHOP-like treatment or switch to a novel, more expe
 
 In a discovery phase, MMML-Predict will enroll \num{200} patients in a prospective trial at first 
 diagnosis and collect various clinical and molecular risk features.
-They include clinical scores (like the IPI), gene-expression-based factors (like cell of origin and 
-prognostic signatures) and genetic determinants (like MYC, BCL2, BCL6, TP53 and genetic
-signatures). 
+They include clinical scores (like the IPI), gene-expression-derived features (like cell of origin) 
+and genetic aberrations (like the translocation MYC). 
 In a novel approach, MMML-Predict will measure dynamic response determinants during treatment. It is 
 unknown if these features capture similar or different 
 risks. Combining them may finally bring to the patients' bedside the significant progress in the 
@@ -91,9 +92,9 @@ of a tumor is more similar to that of a germinal-center B-cell (GCB) or an activ
 which refer to two states of a B cell over its life cycle; GCB-like DLBCLs have 
 significantly better survival than ABC-like DLBCLs \cite{abc-gcb00}.
 Biologists call predictive models that 
-predict from genetic features, especially gene-expression levels, \textit{signatures}. The genes 
-MYC, BCL2, BCL6 and TP53 are known to predict survival in DLBCL and have been subject to 
-extensive research in the last years
+predict from genetic features, especially gene-expression levels, \textit{signatures}. The status 
+of the genes MYC, BCL2, BCL6 and TP53 are known to predict survival in DLBCL and have been subject 
+to extensive research in the last years
 \cite{hummel06, zenz17, aukema11, horn13, johnson09, klapper08, kretzmer15, rosenwald19}.
 
 The group around Markus Loeffler in Leipzig plans to evaluate the readily trained MMML-Predictor on 

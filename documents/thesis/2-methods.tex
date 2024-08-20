@@ -863,7 +863,7 @@ these $m$ features. We denote the modified function with the appended parameter 
 
 In contrast to GLMs with their continuous output, random forests output a binary classification,
 so we cannot control their prevalence. Widely used default values are $m = \floor{\sqrt{p}}$ and 
-$n_\text{min} = 1$. As for $B$, we have 
+$n_\text{min} = 1$ \cite{breiman01}. As for $B$, we have 
 shown above that increasing it reduces the variance at constant bias; in practice, therefore, only 
 computation time limits the number of trees in the forest. We can go for a large $B$ as fitting the 
 constituent trees is an embarrassingly parallel problem. We can 
@@ -968,9 +968,8 @@ $\mathbf{z} \in \RR^{n \times p}$ holds the same features for the same samples a
 predictor matrix $\mathbf{x}$, but measured under a different protocol. Let $J = \{1, \ldots, p\}$ 
 denote the features that are affected by the change of protocol, e.g. the gene-expression levels.
 Let $\beta$ fulfill the zero-sum constraint $\sum_{j \in J} \beta_j = 0$.
-We assume that Eq.\ \eqref{eq:inter-tech-exact} holds with small residues $\epsilon_{ij}$. For $j 
-\notin J$, we this is trivial since we even have $\epsilon_{ij} = 0$. For $j \in J$, this is also 
-a realistic assumption since, in this thesis, $f_1$ is always a gene-expression signature.
+We assume that, for the features in $J$, Eq.\ \eqref{eq:inter-tech-exact} holds with small residues 
+$\epsilon_{ij}$, $i = 1, \ldots, n$, $j \in J$. 
 
 With Eq.\ \eqref{eq:inter-tech}, we obtain
 \begin{align}\label{eq:inter-tech-nested}
@@ -985,7 +984,7 @@ for some $c \in \RR$ and all samples $i = 1, \ldots, n$. The sample-wise shift i
 $f_1$ propagates into a sample-wise shift in the output of $g$ -- qualitatively this is the same 
 as in Eq.\ \ref{eq:inter-tech}. The residuals $\epsilon_{ij}$, $\beta$ and $\gamma$ impact the 
 above approximation. From our 
-perspective, where output ordering matters most, we can say: the better this approximation, the more 
+perspective, where output ordering matters, we can say: the better this approximation, the more 
 monotonic the $g(\mathbf{z}_i)$ are in $g(\mathbf{x}_i)$. We do not elaborate on this theoretically any further; 
 in our practice in section \ref{sec:inter-trial}, we will see that the approximation is indeed
 very good.

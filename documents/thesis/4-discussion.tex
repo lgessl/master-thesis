@@ -2,8 +2,8 @@
 
 The previous chapter showed that our best models can significantly outperform the IPI in both 
 a high-risk and representative-risk setting. Moreover, we demonstrated that we can reliably validate 
-our trained models and pick a near-optimal if not optimal one if we restrict the methods from 
-chapter \ref{chap:methods} appropriately and increase the sample size.
+our trained models and pick a near-optimal if not optimal one after we restricted the methods from 
+chapter \ref{chap:methods} appropriately and increased the sample size.
 
 \section{Learnings from this thesis}\label{sec:discussion-learning}
 
@@ -44,7 +44,8 @@ sample not being in a bootstrap sample is
 \end{align}
 and we can scale it by scaling $B$, which is cheap as we laid out in subsection 
 \ref{subsec:elastic-net}. For nested models with random forests as the late model, test errors 
-are well in line with validation errors, but they are also pretty high.
+are well in line with validation errors, but they are also high compared to other, GLM-based 
+candidate models.
 
 \subsubsection{Gene-expression levels in the predictor}
 
@@ -52,12 +53,12 @@ In subsection \ref{subsec:results-inter-meta}, core models that predict from the
 of gene-expression levels often misled in validation and, in testing, always failed to outperform 
 models that do not predict from any gene-expression levels directly.
 Considering this and the above-mentioned flaws of \textsc{NestedPseudoValidation}, we should refrain from 
-incorporating gene-expression levels directly into the models 
+incorporating gene-expression levels directly into the predictor of the models 
 trained on our data, but only use their valuable information condensed into the output of 
-already-existent models. We did the latter with the LAMIS and cell of origin. With the curse of high 
-dimensions gone, we observed much more 
+already-existent models as single feature. We did the latter with the LAMIS and cell of origin. 
+With the curse of high dimensions gone, we observed much more 
 trustworthy validated errors. Furthermore, this reduces the training time and enables us to use 
-more complex models.  With gene-expression levels 
+more complex models. With gene-expression levels 
 always come batch effects, and we will elaborate on them further below.
 
 \subsubsection{More heuristics}
@@ -68,23 +69,24 @@ low-risk group for the ground truth. Random forests, whose OOB predictions prove
 accurate estimate of the test error, fare worse than GLMs in testing. Compared to GLMs, they 
 cannot deal with systemically shifted features, which makes them unsuited to leverage across 
 protocols the nuanced information that the continuous output of gene-expression signatures 
-may bear (cf.\ subsection \ref{subsec:nested-models}).
+may bear, cf.\ subsection \ref{subsec:nested-models}.
 
 \subsection{Data situation}\label{subsec:discussion-data}
 
 In addition to restricting the hyperparameter-tuple space $H$ carefully, we raised the number of 
 samples by combining three data sets in section \ref{sec:inter-trial}. We hoped to get more representative train and 
 test cohorts, harder-to-overfit train cohorts and, as a result, validation errors that better 
-reflect test errors. Whatever the reason, in the latter we succeeded. To combine the data, we had to 
+reflect test errors. Indeed, we could achieve a reliable validation, which is 
+a solid foundation to train and validate more models in the future. To combine the data, we had to 
 make sacrifices. We discarded the features that are not present in all three data sets -- and this 
-included valuable features like MYC translocations -- and we often trained models to predict PFS 
-and then tested them for predicting OS or vice versa. Still, our best validated models defied this together 
-with technological differences between the data sets and, at roughly \num{17}\% prevalence, 
-outperformed the IPI significantly on the prospective Staiger data.
+included valuable features like MYC-translocation status \cite{klapper08} -- and we often trained 
+models to predict PFS and then tested them for predicting OS or vice versa. Still, our best 
+validated models defied this together with technological differences between the data sets and, at 
+roughly \num{17}\% prevalence, outperformed the IPI significantly on the prospective Staiger data.
 
 In the inter-trial experiments, with more samples in the test cohort, we could lower the prevalence 
 of our selected models to \num{10}\%, drastically raise the precision and still retain enough 
-statistical power to significantly defeat the IPI in even more cases. For the best validated models, 
+statistical power to significantly outperform the IPI in even more cases. For the best validated models, 
 we saw an almost perfectly monotonic medium-term relationship between the prevalence 
 and the precision, which made the \num{17}\%-quantile or -- even better -- \num{10}\%-quantile of 
 the model output a near-optimal threshold. 
@@ -105,7 +107,7 @@ And still, every percentage point we gain in prevalence will convince more clini
 and pharmaceutical companies to pay attention to the high-risk group identified by the MMML-Predictor.
 Every percentage point we gain in precision will not just spur more interest of the above people and 
 companies, but will also convince more patients to let the MMML-Predictor guide their treatment and 
-will avoid both unnecessary and failed therapies. This thesis did not suggest that model performance 
+will avoid both unnecessary and failed therapies. This thesis does not suggest that model performance 
 has already saturated, so we can hope for more in the future.
 
 \subsection{Combining data sets}
@@ -118,12 +120,13 @@ big training cohort. With combining data sets come two caveats.
 
 First, we need to intersect over the sets of features, which amounts to discarding plenty 
 of features. Nevertheless, many modern DLBCL data sets include gender, age, the IPI features in 
-their thresholded format and gene-expression levels as molecular features. More modern data 
-sets also hold the double-hit and triple-hit status, which refers to the simultaneous translocation 
-of MYC and either BCL2 or BCL6, or MYC, BCL2 and BCL6, respectively. From the gene-expression
-features, we can calculate already-existent molecular signatures as well as the double-expressor and 
-triple-expressor status, which describe the phenomena analogous to double- and triple-hit status 
-with overexpression instead of translocation of the three involved genes.
+their thresholded format, cell of origin and gene-expression levels as molecular features. More 
+modern data sets also hold the double-hit and triple-hit status, which refers to the co-observed 
+translocation of MYC and either BCL2 or BCL6, or MYC, BCL2 and BCL6, respectively \cite{aukema11}. 
+From the gene-expression features, we can calculate already-existent molecular signatures as well 
+as the double-expressor and triple-expressor status, which describe the phenomena analogous to 
+double- and triple-hit status with overexpression instead of translocation of the three involved 
+genes \cite{horn13}.
 
 Second, we need to take care of inter-technical variability. Among the features mentioned above, this concerns 
 the gene-expression levels. The first option is to get rid of protocol effects by once and for all
@@ -143,7 +146,7 @@ in this thesis. A shortcoming of this testing procedure is that we always need a
 test cohort to be able estimate the $\alpha$-quantile reliably. An alternative approach might 
 involve internal standards, i.e.\ a small number of samples one has measured for a test cohort for 
 which we already know a good threshold and that we can measure again for any new protocol to shift 
-the threshold accordingly. Even for MMML-Predict, this is a problem for the distant future.
+the threshold accordingly. Even for MMML-Predict, this is a problem for the more distant future.
 
 \subsection{Custom gene-expression signatures}
 
@@ -164,7 +167,7 @@ While we strive to make them as natural as possible, they remain arbitrary to a 
 The most important example for this in this thesis is the error function $\text{err}$ we use for 
 validation and testing.
 
-While, for testing, our choice of $\text{err}$ is indeed quite natural for our problem and 
+Whereas, for testing, our choice of $\text{err}$ is indeed quite natural for our problem and 
 $\text{err}$ is easy to interpret, there might be better error functions for validation. E.g., our 
 choice of $\text{err}$ is totally unaware of a steep decline in the prevalence-versus-precision 
 curve for prevalences below \num{17}\% as we see it in plot B.1 of Fig.\ \ref{fig:inter-output-prec}. 
@@ -192,5 +195,5 @@ the sense that the sum of sample weights belonging to high-risk samples equals t
 weights belonging to low-risk samples.
 
 \subsection*{}
-Looking back at this thesis, we can say with confidence: the state of MMML-Predict is strong and 
+Looking at this thesis, we can say with confidence: the state of MMML-Predict is strong and 
 it is getting stronger.

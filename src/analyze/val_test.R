@@ -10,8 +10,8 @@
 library(patroklos)
 library(patchwork)
 
-make_plot1 <- TRUE
-make_plot2 <- TRUE
+make_plot1 <- FALSE
+make_plot2 <- FALSE
 make_plot3 <- TRUE
 
 generate_plot_list <- function(
@@ -220,7 +220,7 @@ for (i in seq_along(cohort_list)) {
         regex2_list = regex2_list,
         name1_list = list(mclass_name),
         name2_list = name2_list,
-        legendtitle1_list = list("architecture"),
+        legendtitle1_list = list("model class"),
         legendtitle2_list = list("features"),
         prepend_to_model_dir = c("models/all/on_schmitz", "models/all/on_reddy", 
             "models/all/on_staiger"),
