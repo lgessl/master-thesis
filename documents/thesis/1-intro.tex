@@ -14,8 +14,8 @@ Despite being an aggressive and fatal disease, DLBCL is highly curable with the
 application of intensive immunochemotherapy even in the elderly population. The standard treatment 
 for DLBCL has long been immunochemotherapy in the R-CHOP (rituximab, cyclophosphamide, doxorubicin, 
 vincristine, and prednisone) regimen. R-CHOP-like therapies
-have significantly improved survival rates, with approximately two-thirds of patients 
-achieving a cure. However, the remaining one-third of patients, especially 
+have significantly improved survival rates, curing approximately two-thirds of the patients. 
+However, the remaining one-third of patients, especially 
 those with relapsed or refractory disease, continue to face poor outcomes and in most cases finally 
 succumb to their disease \citep{glass17}. This underscores the clinical 
 need for an accurate, robust, affordable, and easy-to-use tool that can identify patients at high risk 
@@ -114,17 +114,10 @@ method, which calculates exact $\gamma$-confidence intervals (CIs) for the succe
 of i.i.d.\ Bernoulli random variables for an arbitrary confidence level $\gamma \in (0, 1)$
 \cite{clopper34}.
 By significantly outperforming the precision of the IPI, we mean that the \num{95}\%-CI
-of the new classifier's precision according to the Clopper-Pearson method must not include the 
+of the precision of the new classifier according to the Clopper-Pearson method must not include the 
 precision of the group determined by $\text{IPI} \geq 4$. According to data with \num{2721} 
 patients pooled from prospective trials of the German High-Grade Non-Hodgkin Lymphoma Study Group 
 (DSHNHL), this precision of the IPI is at around \num{35}\%. 
-% Taking this number, a prevalence of \num{15}\% and the test cohort size into 
-% account, a calculation of the MMML-Predict consortium suggests that a precision of at least \num{50}\%
-% of the MMML-Predictor suffices with \num{95}\% statistical power. A prevalence of \num{10}\% would 
-% probably already be enough to trigger clinical and pharmaceutical interest in the high-risk group 
-% identified by the MMML-Predictor, 
-% but to statistically prove that the MMML-Predictor is better than the IPI, with the cohort sizes of 
-% the MMML-Predict trial we need five more points prevalence.
 
 \section{The role of this thesis within MMML-Predict}
 

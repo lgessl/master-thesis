@@ -174,7 +174,7 @@ curve into account and, in particular, better catches this phenomenon.
 
 Still, with our choice of $\text{err}$, validated and test errors were pretty much in line in 
 section \ref{sec:inter-trial}. This underscores that, under the conditions we described in 
-section \ref{sec:discussion-learning}, our choice of $\text{err}$ already is a pretty good one.
+section \ref{sec:discussion-learning}, our choice of $\text{err}$ already is a rather good one.
 
 \subsection{A natural way to choose sample weights}
 
@@ -182,7 +182,7 @@ Our last idea concerns the sample weights in loss functions. Many loss functions
 from the log likelihood of i.i.d.\ samples and thus sum over the training samples. Therefore, they 
 offer to weight every summand with a sample weight, as we have seen in the loss functions of the 
 presented GLMs in Eq.\ \eqref{eq:loss-glm-no-lasso} and \eqref{eq:cox-loss}. One can even provide 
-sample weights for random forests. We have a huge amount of 
+sample weights for random forests \cite{ranger17}. We have a huge amount of 
 freedom in how we choose the sample weights and trying out too many choices risks torpedoing 
 validation. We will now describe a single, natural choice. Let $q$ denote the 
 proportion of high-risk samples in the training data. In the prospective Staiger data, we had 

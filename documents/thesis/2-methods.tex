@@ -10,7 +10,7 @@ introduce a method that lets us train compositions of multiple models.
 
 \section{Training, validation and testing}\label{sec:train-val-test}
 
-The design of MMML-Predict with its train and test cohort, where the people developing the predictor 
+The design of MMML-Predict with its train and test cohort, where the developers of the predictor 
 never get to see the test cohort, sets the scene for the standard two-step approach in 
 supervised-learning tasks: We use the training cohort to fit multiple models (training) and choose the model
 among these models that we have confidence performs best on new data (validation). We then touch 
@@ -19,9 +19,9 @@ world we have come up with model worth deploying.
 
 Since we want to have the same conditions for data used in this thesis as later in MMML-Predict,
 we randomly split given data into a train and a test cohort. In more detail, we are initially given 
-a cohort of samples $(\mathbf{x}_i, y_i)$, $i = 1, \ldots, n$. Every \textit{observation} or \textit{sample}
+a \textit{cohort} of samples $(\mathbf{x}_i, y_i)$, $i = 1, \ldots, n$. Every \textit{sample}
 $(\mathbf{x}_i, y_i)$ corresponds to a DLBCL patient: $\mathbf{x}_i \in \RR^p$ is a vector of $p$ 
-features, the \textit{predictor}, that we want to use to predict the corresponding \textit{response} 
+features, the \textit{predictor}, which we want to use to predict the corresponding \textit{response} 
 $y_i \in \{0, 1\} \cup (\RR \times \{0, 1\})$; we will explain in section \ref{sec:candidate-models} 
 what this odd-looking format for the response encodes, but in this thesis it is always derived from 
 the patient's survival. We summarize the 
@@ -45,18 +45,18 @@ a candidate model and there is a one-to-one mapping between $H$ and the set of c
 
 For every hyperparameter tuple $h \in H$, we
 \begin{itemize}
-    \item fit the model to the training cohort subject to $h$ and provide 
-        \textit{validated predictions} for 
+    \item fit the model to the training cohort subject to $h$ and provide a
+        \textit{validated prediction} for 
         every sample in the training cohort.
         A validated prediction for a sample is a prediction made by a model fit 
         subject to $h$ to data that does not include this sample. We obtain a vector of validated 
-        predictions $\hat{y}_\text{train} = \text{val}(h)$ with $|I_\text{train}$| entries.
+        predictions $\hat{y}_\text{train} = \text{val}(h)$ with $|I_\text{train}|$ entries.
         The most common method to obtain validated predictions is a $k$-fold cross validation 
         \cite{stone74}.
         This means we randomly assign the training samples into $k$ equally sized subsets, called 
-        folds, and then fit $k$ models: for every $i = 1, \ldots, k$, we fit a model to all 
-        samples that are \textit{not} in the $i$-th fold and obtain its predictions for the samples 
-        \textit{in} the $i$-th fold. These predictions serve as (cross-validated) predictions. 
+        folds, and then fit $k$ models: for every $\ell = 1, \ldots, k$, we fit a model to all 
+        samples that are \textit{not} in the $\ell$-th fold and obtain its predictions for the samples 
+        \textit{in} the $\ell$-th fold. These predictions serve as (cross-validated) predictions. 
         Doing this for all 
         folds, we obtain a cross-validated prediction for every training sample.
     \item Next, we calculate the validation error 
@@ -70,7 +70,7 @@ Finally, we select the model $m^*$ with minimal validated error defined by the h
 \end{align}
 
 $\text{val}$ is not a deterministic mapping. The procedure to calculate validated predictions often 
-involves randomness, e.g. we randomly assign the training samples into folds in a cross validation 
+involves randomness, e.g., we randomly assign the training samples into folds in a cross validation 
 and many fitting algorithms like that of random forests resort to randomness. The computer does this 
 independently between the $\text{val}(h)$. Therefore, we treat the validation errors
 $\text{err}(y_\text{train}, \text{val}(h))$ as independent 
@@ -85,7 +85,7 @@ $t \in \RR$ with $P(X_1 \geq t) < 1$,
 To avoid this disaster -- overfitting the validated predictions to the training 
 data --, we need $\text{err}(y_\text{train}, \text{val}(h))$, $h \in H$, with clearly distinct 
 distributions. 
-How can we achieve this this? First, we can choose $H$ in such a way that the fit models are 
+How can we achieve this? First, we can choose $H$ in such a way that the fit models are 
 notably distinct. There is, however, a trade-off: the rougher and smaller $H$ is, the more distinct 
 the models and their validated errors are, but the higher the chance is that we miss out on a very good 
 model. Vice versa, the larger and more granular $H$ is, the more likely one of the $h \in H$ 
@@ -98,13 +98,13 @@ also so-called out-of-bag predictions in the case of random forests in this thes
 magic bullet of machine learning also helps cure this problem: more training samples will make it 
 harder to overfit the validated predictions.
 
-What do we conclude from this for practice? First, we aim to choose $H$ in a smart and lean way. 
+What do we conclude from this for practice? First, we aim to choose $H$ not too large.
 We do not want to have big subsets of $H$ that specify more or less the same model. This is hard 
 to foresee, but criteria may be theoretical considerations and experience by both us and others 
 like default or automatically generated hyperparameters. Second, once we have fit and validated 
 all models specified in $H$ and tested the chosen one, we can unlock the test data for all other 
 models to analyze the relationship between validated and tested errors. We can look out for subsets 
-of $H$ with validated errors strikingly deviating from tested errors or with high test errors and 
+of $H$ with validation errors strikingly deviating from test errors or subsets with high test errors and 
 exclude them from $H$ in the future. Third, we try to increase the number of samples in training 
 and test data by combining data sets. This comes with some caveats and compromises we will deal with 
 later, but we hope that more reliable validation errors and better models will compensate for this.
@@ -123,9 +123,11 @@ best validated model $m^*$ on the test cohort and estimate its performance on in
 As stated in section \ref{sec:intro-mmml}, the MMML-Predictor should detect a high-risk group 
 with an as-high-as-possible precision under the constraint that its prevalence must surpass 
 \num{10}\%. Since an error should be the lower, the better the model is, we choose 
-$\text{err}$ to be the minimum of the negative precisions with a prevalence of at least 17\%. We 
+$\text{err}$ to be the minimum of the negative precisions with a prevalence of at least \num{17}\%. We 
 add seven percentage points to the \num{10}\% prevalence as it increases statistical power and makes 
-the error function more robust as we will see next. 
+the error function more robust as we will see next. The exact number \num{17}\%, admittedly, is 
+arbitrary, so we will check for alternatives in subsection \ref{subsec:results-inter-meta} of the 
+results.
 
 Usually, we need 
 to take a minimum over \textit{several} precisions because most models do not output the final 
@@ -135,11 +137,11 @@ in the positive class, in our case being high-risk. This continuous score needs
 \textit{thresholding} via $\hat{y}_i > t$ for some $t \in \RR$. We call $t$ the \textit{output
 threshold} of the model. 
 We notice that as we increase $t$ and thereby decrease the prevalence, the obtained 
-adjacent precision values fluctuate less and less; for high $t$ and low 
-prevalences, fluctuations of up to \num{50} percentage points would be possible, but requiring a 
-prevalence of at least 17\% caps such fluctuations at 
+adjacent precision values fluctuate less and less; for high $t$, fluctuations of up to \num{50} 
+percentage points would be possible, but requiring a prevalence of at least 17\% caps such 
+fluctuations at 
 \begin{align}
-    \frac{1}{\ceil*{\num{0.17} \cdot |I_\text{test}|}}
+    \frac{1}{\ceil*{\num{0.17} \cdot |I_\text{test}|}},
 \end{align}
 as an easy calculation shows, cf. also Fig.\ 
 \ref{fig:inter-output-prec} in practice. This gives us an error function that is tailored 
@@ -149,11 +151,10 @@ As indicated by the notation $\text{err}(y_\text{train}, \hat{y}_\text{train})$ 
 $\text{err}(y_\text{test}, \hat{y}_\text{test})$, we optimize $t$ on the true outcomes 
 of the training cohort when validating and we optimize it again on the true outcomes of the test cohort 
 when testing. Strictly speaking, $t$ is a hyperparameter, which we optimize on the 
-test cohort during testing; this sounds delicate. The results however will show that the optimal 
-choice for $t$ (or at least an 
-almost optimal choice) on both train and test cohort corresponds to a prevalence of 
-slightly above 17\% such that one can agree on the following when it will come to the MMML-Predict 
-data: choose $t$ as the 17\%-quantile of the continuous model output on the test cohort.
+test cohort during testing; this sounds delicate. We suggest the following for test data with 
+blinded true outcomes like the MMML-Predict data: choose $t$ as the 17\%-quantile of the continuous 
+model output on this test data. We will evaluate this idea in subsection 
+\ref{subsec:results-inter-meta} of the results.
 
 Similarly, given some cohort, we threshold the IPI in such a way that it maximizes the precision under 
 the constraint of a prevalence of at least \num{10}\% on this cohort and call this truly 
@@ -179,10 +180,10 @@ An always-present problem in bioinformatics, inter-technical variability refers 
 one and the same sample measured on different platforms, in different labs or at different times, 
 in short: under different protocols, may lead to different values for the same feature. 
 Values for the same feature and sample measured in different batches, even if the lab, preparation 
-and technology are the same, may differ. We will therefore also use the term batch effects for 
-inter-technical variability. Every data set adheres to its own protocol, so we need to deal with 
-inter-technical variability whenever we combine data sets or have a model predict on a data set 
-other than the one it was trained on.
+and technology are the same, may differ. We will therefore also use the term \textit{batch effects} 
+for inter-technical variability. Every data set adheres to its own protocol, so we need to keep
+inter-technical variability in mind whenever we combine data sets or have a model predict on a 
+data set other than the one it was trained on.
 
 If we 
 measure the same $p$ features of the $n$ patients in $\mathbf{x} \in \RR^{n \times p}$ again under 
@@ -194,7 +195,7 @@ and feature-wise effects $\omega_j$, leading to
 \begin{align}\label{eq:inter-tech-exact}
     \Delta_{ij} = \mathbf{z}_{ij} - \mathbf{x}_{ij} = \theta_i + \omega_j + \epsilon_{ij}
 \end{align}
-for residues $\epsilon_{ij}$. Assuming accurate modeling, i.e. small residues, we can well approximate
+for residues $\epsilon_{ij}$. Assuming accurate modeling, i.e.\ small residues, we can well approximate
 \begin{align}
     \mathbf{z}_{ij} \approx \tilde{\mathbf{z}}_{ij} = \mathbf{x}_{ij} + \theta_i + \omega_j.
 \end{align}
@@ -210,11 +211,11 @@ The third summand is zero if $\sum_{j = 1}^p \beta_j = 0$, a special case of the
 constraint}, which we will introduce in more detail in subsection \ref{subsec:core-models}. 
 The fourth summand is constant across all samples and can be absorbed by the intercept. 
 
-Under these assumptions, which are realistic by \cite{transplatform17},
+Under these assumptions, which are realistic according to \cite{transplatform17},
 going from one protocol to another just leads to a constant shift of the model 
-output; even for generalized linear models, i.e. a Gauss model composed with some monotonic link function,
-inter-technical variability does not change the ordering of the output scores belonging to the 
-samples. All one needs to do to 
+output; even for generalized linear models, i.e. a linear model composed with some monotonic link 
+function, inter-technical variability does not change the ordering of the output scores belonging 
+to the samples. All one needs to do to 
 obtain a final classification is calibrating the threshold for the output scores. However, this 
 also demonstrates that while generalized linear models can cope with inter-technical variability 
 pretty well, there is no point in using the same output threshold across all protocols.
@@ -225,13 +226,14 @@ pretty well, there is no point in using the same output threshold across all pro
 
 Model-agnostic hyperparameters are those hyperparameters we can set and tune for every model. They 
 concern the predictor matrix $\mathbf{x} \in \RR^{n \times p}$ and the response vector $y \in 
-(\{0, 1\} \cup (\RR \times \{ 0, 1 \}))^n$. The union in the latter set reflects the fact that 
+(\{0, 1\} \cup (\RR \times \{ 0, 1 \}))^n$. The union in the latter set reflects the fact that we
 can provide the response in two formats. 
 \begin{itemize}
     \item In the first case, the response is a binary vector with 1 encoding the positive class, 
         high-risk DLBCL, and 0 encoding the negative class, low-risk DLBCL. We call this the 
-        \textit{binary format}. Here, we need to discard samples censored before two years, but this 
-        is typically only a small proportion of the samples in the data set. 
+        \textit{binary format}. Here, we need to discard samples that dropped out of the trial 
+        before two years, but this is typically only a small proportion of the samples in the data 
+        set. 
     \item In the second case, the response has two entries per sample: the \textit{time to the 
         event} and \textit{censoring status}. If the censoring status is 1, the event -- in our case 
         cancer progression -- occurs \textit{at} the time to the event. If the censoring status is 
@@ -242,7 +244,7 @@ can provide the response in two formats.
 \end{itemize}
 
 Which of these two formats we provide for a sample 
-depends on the model class. Our choice of $\text{err}$ ultimately needs the true response $y$ in 
+depends on the model class. Our definition of $\text{err}$ ultimately needs the true response $y$ in 
 the binary format, which $\text{err}$ can easily derive from $y$ in the Cox format if necessary.
 
 \subsubsection{A-priori feature selection}
@@ -359,8 +361,8 @@ algorithm a refined response $y$, governed by the \textit{training survival cuto
 \end{itemize}
 Patients may separate much more clearly for some $T \neq 2$ and as long as we come up 
 with a positive cohort that comprises at least 15\% of the samples of the test data, this allows us 
-to fulfill our task more easily. We stress that $T$ only influences how we train models. For 
-validation and testing, a PFS of \num{2} years stays the crucial cutoff.
+to fulfill our task more easily. We stress that $T$ only influences how we \textit{train} models. 
+For validation and testing, a PFS of \num{2} years stays the crucial cutoff.
 
 \subsection{Core models}\label{subsec:core-models}
 
@@ -377,8 +379,7 @@ we only get in touch with two random variables
 \end{align}
 the predictor and the response, respectively. More 
 precisely, we observe independent training samples $(\mathbf{x}_i, y_i) \in \RR^{p+1}, i = 1, \ldots, n$, 
-distributed according to $(X, Y)$; $\mathbf{x}_i$ is the $i$-th row of the predictor matrix $\mathbf{x}$ and
-$y_i$ is the $i$-th entry of the response vector $y$. The i.i.d.\ test samples follow the same 
+distributed according to $(X, Y)$. The i.i.d.\ test samples follow the same 
 distribution as the training samples, but in this subsection everything is about training. If we 
 say samples in this subsection, we always refer to the training samples.
 
@@ -400,7 +401,7 @@ the two special cases of an overdispersed exponential family of distributions th
 this thesis below. For a general definition, see \cite[section 1.1]{glm72}.
 
 In practice, we do not know the (true) parameters
-$(\tbeta_0, \tbeta)$. But we do have our $n$ i.i.d.\ observations $(\mathbf{x}_i, y_i)$
+$(\tbeta_0, \tbeta)$. But we do have our $n$ i.i.d.\ samples $(\mathbf{x}_i, y_i)$
 and we will use them together with a likelihood to estimate $(\tbeta_0, \tbeta)$. For an 
 arbitrary $(\beta_0, \beta) \in \RR^{p+1}$, we can try to predict the conditional expectation as
 \begin{align}\label{eq:glm-mu}
@@ -409,7 +410,7 @@ arbitrary $(\beta_0, \beta) \in \RR^{p+1}$, we can try to predict the conditiona
 We have $\mu_i(\tbeta_0, \tbeta) = E(Y \cond X = \mathbf{x}_i)$.
 
 \paragraph{Gauss model}
-Here, $g = \text{id}$. $Y$ and $Y \cond X = x$ for all $x \in \RR^p$ follow a normal
+Here, $g = \text{id}$. $Y \cond X = x$ for all $x \in \RR^p$ follow a normal
 distribution with fixed standard deviation $\sigma > 0$ (a property called homoscedasticity), but 
 varying mean. For a normal distribution with standard deviation $\sigma$, the log likelihood of an 
 expected value -- or equivalently mean -- $\mu$ given an observation $y \in \RR$ is
@@ -429,7 +430,7 @@ Here, the linear predictor is the log-odds for $Y = 1$ over $Y = 0$ given $X = x
     g: \mu \mapsto \log\left( \frac{\mu}{1 - \mu} \right), \text{ hence } g^{-1}: \eta \mapsto
     \frac{1}{1 + \exp(-\eta)}.
 \end{align}
-Y and $Y \cond X = x$ for all $x \in \RR^p$ follow a Bernoulli distribution with varying success 
+$Y \cond X = x$ for all $x \in \RR^p$ follow a Bernoulli distribution with varying success 
 probability. For the Bernoulli distribution, the log likelihood of an expected value -- or 
 equivalently success probability -- $\mu$ given an observation $y \in \{0, 1\}$ is
 \begin{align}
@@ -439,21 +440,21 @@ equivalently success probability -- $\mu$ given an observation $y \in \{0, 1\}$ 
 
 \paragraph{Loss function}
 Using Eq.\ \eqref{eq:glm-mu}, the log likelihood for $(\beta_0, \beta)$ given our i.i.d.\ samples 
-$(\mathbf{x}_i, y_i)$, $i = 1, \ldots, n$, for both the Gauss and logistic model therefore is
+$(\mathbf{x}_i, y_i)$, $i = 1, \ldots, n$, for both the Gauss and the logistic model can therefore 
+be written as
 \begin{align}
     L(\beta_0, \beta) &= \sum_{i=1}^n \ell(\mu_i; y_i) 
     = \sum_{i=1}^n \ell\left( g^{-1}\left( \beta_0 + \mathbf{x}_i^T \beta \right); y_i \right).
 \end{align}
 We can augment $L$ with two hyperparameters, sample weights $w_i > 0$, $i = 1, \ldots, n$, and the 
-zero-sum constraint with respect to zero-sum weights $u_j \geq 0$, $j = 1, \ldots, p$, yielding 
+zero-sum constraint \cite{zerosum16} with respect to zero-sum weights 
+$u_j \geq 0$, $j = 1, \ldots, p$, yielding 
 \begin{align} \label{eq:loss-glm-no-lasso}
     L(\beta_0, \beta) &= \sum_{i=1}^n w_i \ell\left( g^{-1}\left( \beta_0 + \mathbf{x}_i^T \beta \right); 
     y_i \right) \quad \text{for } \beta \in \RR^p \text{ with } u^T \beta = 0.
 \end{align}
 While we do not deviate from the default value $1/n$ for the sample weights in the results chapter 
-\ref{chap:results}, we will discuss in chapter \ref{chap:discussion} how we can use them in the 
-future in a natural way without getting lost in the vast amount of freedom that one has in 
-choosing them. 
+\ref{chap:results}, we will discuss an alternative choice in chapter \ref{chap:discussion}. 
 With these augmentations, $L$ is no longer a log likelihood, so we call it a \textit{loss function}.
 
 Fitting a Gauss or logistic model to the data means minimizing $L$ with respect to 
@@ -461,10 +462,9 @@ $(\beta_0, \beta)$ and coming up with a minimizer $(\hbeta_0, \hbeta)$, which is
 $(\tbeta_0, \tbeta)$. Subsection \ref{subsec:elastic-net} will deal with the question how we can 
 make $(\hbeta_0, \hbeta)$ a \textit{unique} minimizer.
 
-We want to demonstrate what the zero-sum constraint is good for in a more general setting. Imagine, 
-part of the features suffer from sample-wise 
-shifts. We denote these features by $J \subset \{1, \ldots, p\}$ and the shifts by $s_i \in R$, 
-$i = 1, \ldots, n$. We now set the zero-sum 
+We want to show a use case the zero-sum constraint where only part of the features suffer from 
+sample-wise shifts. We denote these features by $J \subset \{1, \ldots, p\}$ and the shifts by 
+$s_i \in R$, $i = 1, \ldots, n$. We now set the zero-sum 
 weights  
 \begin{align}
     u_j =
@@ -480,9 +480,9 @@ and hence $\sum_{j \in J} \beta_j = 0$; apart from that, $(\beta_0, \beta)$ is a
 In this situation, the linear predictor 
 \begin{align}\label{eq:zerosum-sample-shifts}
     \beta_0 + \sum_{j=1}^p \beta_j (\mathbf{x}_{ij} + s_i \chi_J(j))
-    = \beta_0 + \mathbf{x}_i^T \beta + \sum_{j \in J} \beta_j s_i = \beta_0 + \mathbf{x}_i^T \beta,
+    = \beta_0 + \mathbf{x}_i^T \beta + \sum_{j \in J} \beta_j s_i = \beta_0 + \mathbf{x}_i^T \beta
 \end{align}
-as $\sum_{j \in J} \beta_j s_i = s_i \sum_{j \in J} \beta_j = 0$, is invariant. If $J$ consists of 
+does not depend on the sample-wise shifts $s_i$. If $J$ consists of 
 exactly the features holding gene-expression levels, we can transfer our model to other protocols 
 and only need to re-calibrate the intercept, as shown in Eq. \eqref{eq:inter-tech}. Moreover, we 
 can switch off the zero-sum constraint for all features by setting $u_j = 0$ for all 
@@ -490,11 +490,11 @@ $j = 1, \ldots, p$. The zero-sum constraint is cheap in terms of model complexit
 one degree of freedom; but it is expensive in terms of computational complexity: enforcing it in
 every step of the coordinate descent leads to a considerably higher computation time. 
 
-As we have stressed several times already, the threshold that makes a GLM a binary classifier 
+As we have stressed several times already, the output threshold that makes a GLM a binary classifier 
 is rather a property of the underlying data set than of the model itself. The essential information 
 the modelling function contributes to the classification of a cohort of samples is therefore the 
-ordering of the output scores. Because $g$ and therefore also $g^{-1}$ are monotonically increasing, 
-the essential part of the model is the linear predictor $\mathbf{x}_i^T \beta$. For this reason, when we 
+\textit{ordering} of the output scores. Because $g$ and therefore also $g^{-1}$ are monotonically increasing, 
+the essential part of a GLM is the linear predictor $\mathbf{x}_i^T \beta$. For this reason, when we 
 talk about the output of a GLM, we always mean the output of the linear predictor. For us, this 
 makes $g$ more a tweak in the loss function, important for training, than a part of the modelling 
 function.
@@ -541,8 +541,8 @@ where $S(t) = 1 - F_T(t)$ is the survival function, and $h(t)$ is well-defined a
 The Cox model, proposed in \cite{cox72}, wants to get a hand on \textit{conditional} hazards.
 Intuitively, it is clear that the population with one value of $X$ can have a vastly different 
 hazard function than the population with another value of $X$ if $X$ has predictive power for $T$.
-Formally, however, it is hard to define a conditional hazard function: $X$ may very well 
-follow a continuous distribution, hence we condition on an event of probability $0$ when we write 
+Formally, however, it is hard to define a conditional hazard function: $X$ may very well follow a 
+density-defined distribution, hence we condition on an event of probability $0$ when we write 
 $P(t \leq T < t + \Delta t \cond T \geq t, X = x)$ -- it is hard to define this in a natural
 and straightforward way. In practice, the measurements in $X$ often fluctuate around their true 
 values anyway, so it is sensible to condition on a small neighborhood of $x$, say an $\epsilon$-ball 
@@ -559,9 +559,9 @@ we usually now have $P(\Omega_x) > 0$.
 \paragraph{Proportional hazards} The Cox model assumes \textit{proportional} conditional hazards, 
 i.e. 
 \begin{align}
-    h(t \cond X = x) = \lambda_x h_0(t) 
+    h(t \cond X = x) = \lambda_x h_0(t)
 \end{align}
-for all $x \in \im(X)$ and some (unspecified) baseline hazard $h_0$ and $\lambda_x > 0$. 
+for all $x \in \im(X), t \in \RR$ and some (unspecified) baseline hazard $h_0$ and $\lambda_x > 0$. 
 Moreover, it assumes $\lambda_x$ depends on $x$ via 
 \begin{align}\label{eq:cox-proportional-factor}
     \lambda_x = \exp(x^T \tbeta),
@@ -570,10 +570,10 @@ for parameters $\tbeta \in \RR^p$.
 
 \paragraph{Partial log likelihood}
 Given our independent samples $(\mathbf{x}_i, y_i, \delta_i) \in \RR^{p+2}$, $i = 1, \ldots, n$, distributed 
-according to $(X, Y, \delta)$, how can we estimate $\tbeta$? The Cox model is a semi-parametric 
+according to $(X, Y, \delta)$, we want to estimate $\tbeta$. The Cox model is a semi-parametric 
 model in that it leaves the baseline hazard $h_0$ unspecified. Consequently, estimation with maximum 
-likelihood is not possible. This led to another break-through invention in \cite{cox72}, the 
-\textit{partial} likelihood, which we will present now. Let $\beta \in \RR^n$ be arbitrary and let 
+likelihood is not possible. This led to the invention of the \textit{partial} likelihood 
+\cite{cox72}, which we will present now. Let $\beta \in \RR^n$ be arbitrary and let 
 $E \subset \{ 1, \ldots, n \}$ refer to the non-censored samples ($\delta_i = 1$). For $i \in E$, 
 let $R_i$ denote the set of samples 
 where no event has occurred until $y_i$, i.e. $y_j \geq y_i$ for all $j \in R_i$. For
@@ -591,7 +591,7 @@ Taking all events into account yields the partial likelihood
     \tilde{\ell}(\beta) = \prod_{i \in E} \frac{\exp(\mathbf{x}_i^T \beta)}{\sum_{j \in R_i} \exp(\mathbf{x}_j^T 
     \beta)}.
 \end{align}
-Because $T$ is continuous, there is a zero probability for two distinct samples having the same 
+Because $T$ has a density, there is a zero probability for two distinct samples having the same 
 event time, so we need not resort to one of the more sophisticated likelihoods capable of handling ties.
 Analogously to Eq. \eqref{eq:loss-glm-no-lasso}, we can equip the partial log likelihood with sample 
 weights $w_i > 0$ and zero-sum weights $u_j \geq 0$ such that the refined log partial likelihood, 
@@ -611,17 +611,15 @@ linear predictor with an increasing function. Given a cohort of samples, we are 
 interested in the ordering of the model output and the linear predictor $\mathbf{x}_i^T \beta$ 
 already uniquely determines this ordering. Again, when we talk about the output of a Cox model, we 
 mean the output of the linear predictor. In light of all these similarities,
-in this thesis we refer to both GLMs in the typical sense and Cox models as GLMs. Looking closely,
-the Cox model gets along without an intercept. We will therefore always ignore $\beta_0$ if 
-mentioned in the context of a Cox model in the following.
+in this thesis we refer to both GLMs in the classical sense from \cite{glm72} and Cox models as 
+GLMs. Looking closely, the Cox model gets along without an intercept. We will therefore always 
+ignore $\beta_0$ if mentioned in the context of a Cox model in the following.
 
 This paves the way to define some special cases of the zero-sum constraint for the three model 
 classes. We say that a subset of the coefficients of a GLM indexed by $J \subset \{1, \ldots, p \}$ 
 fulfills the \textit{zero-sum property} if $\sum_{j \in J} \beta_j = 0$. If $J = \{1, \ldots, p \}$, 
 we say that the GLM fulfills the zero-sum property. If, additionally, the GLM is a signature, we 
-call it a \textit{zero-sum signature}. By Eq.\ \ref{eq:zerosum-sample-shifts}, being a 
-\textit{zero-sum} gene-expression signature can be a crucial advantage over just being 
-gene-expression signature.
+call it a \textit{zero-sum signature}. 
 
 \paragraph{Hazard ratio}
 
@@ -631,7 +629,7 @@ the output of a binary classifier $f$. We now fit a univariate Cox model to $(g_
 $i = 1, \ldots, n$, by maximizing 
 the partial likelihood in Eq.\ \eqref{eq:cox-partial-lh} with respect to $\beta$ and obtain an estimate
 for the (scalar) model coefficient $\hbeta$. By Eq.\ \eqref{eq:cox-proportional-factor}, 
-$\exp(\hbeta)$ is the relative risk increase of being in group $g_i = 1$ compared to group 
+$\exp(\hbeta)$ is the relative hazard increase of being in group $g_i = 1$ compared to group 
 $g_i = 0$ and we call it hazard ratio.
 
 We can view the maximum partial-likelihood estimate $\hat{\beta}$ as a random variable that depends 
@@ -648,8 +646,8 @@ is
 \end{itemize}
 This justifies to treat $\hat{\beta}$ as normal with known variance and allows us to
 calculate confidence intervals for the HR $\exp(\tbeta)$ -- the mean of this normal distribution -- 
-as well as a two-sided p-value for the null-hypothesis $\exp(\tbeta) = 1$, i.e.\ identical risk 
-between the two groups. 
+as well as a two-sided p-value for the null-hypothesis $\exp(\tbeta) = 1$, i.e.\ identical hazard 
+of the two groups. 
 
 \subsection{Elastic-net regularization} \label{subsec:elastic-net}
 
@@ -663,9 +661,9 @@ meaningless and non-reproducible structures in the training data and generalize 
 data.
 
 A solution to this is to restrict the freedom of the model to the extent that it is forced to 
-learn the gist from the data. For that reason, we want to penalize model complexity. Elastic-net 
-regularization, a widely adopted method proposed by Zou and Hastie \cite{elasticnet05}, does this 
-job for us. The elastic net generalizes two well-established regularization methods,
+learn the gist from the data. For that reason, we want to penalize model complexity. We will do this 
+with \textit{elastic-net regularization}, a widely adopted method proposed by Zou and Hastie 
+\cite{elasticnet05}. The elastic net generalizes two well-established regularization methods,
 \begin{itemize}
     \item ridge regularization \cite{ridge70}, which forces the parameter vector $\beta$ to 
         stay inside a ball around the origin by limiting the squared $\ell_2$ norm 
@@ -685,8 +683,9 @@ function $L$ from Eq.\ \eqref{eq:loss-glm-no-lasso} and Eq.\ \eqref{eq:cox-loss}
 regularized loss function in its Lagrangian form as 
 \begin{align}\label{eq:loss-elastic-net}
     \mathcal{L}(\beta_0, \beta) = -L(\beta_0, \beta) + \lambda p_{\text{enet}, \alpha, v}(\beta) 
-    \quad \text{ for } \beta \in \RR^p \text{ with } u^T \beta = 0.
+    \quad \text{ for } \beta \in \RR^p \text{ with } u^T \beta = 0,
 \end{align}
+cf.\ \cite[Eq.\ (3.15)]{rehberg-thesis18}.
 
 In all three cases -- Gauss, logistic and Cox model -- it is possible to approximately minimize 
 $\mathcal{L}$ with respect to $(\beta_0, \beta)$ with a coordinate-descent algorithm 
@@ -703,7 +702,8 @@ we will deal with further below.
 \paragraph{Effect on correlated features}
 While both ridge and LASSO regularization shrink the coefficients, they act differently in the case 
 of correlated features. Ridge regression tends to force the coefficients of correlated features to 
-similar values while the LASSO tends to pick one of them and set the others to zero. E.g, in the 
+similar values while the LASSO tends to pick one of them and set the others to zero 
+\cite{elasticnet05}. E.g, in the
 extreme case of $k$ identical features, the LASSO arbitrarily picks one of them with, say, 
 coefficient $a$; the ridge regression, meanwhile, assigns every of the $k$ features the coefficient 
 $a/k$. Relying on very few features comes with the advantage of sparse models, for which we 
@@ -711,13 +711,12 @@ can cheaply generate new data, but it is very sensitive to measurement errors in
 features; in the latter case, ridge regularization would average out errors with the help of other 
 correlated features. Elastic-net regularization balances the sparsity of the LASSO with the 
 robustness of the ridge regularization, especially for values of $\alpha$ close to $1$ 
-\cite{elasticnet05}.
-
+\cite{regularization-path10}.
 
 \paragraph{Standardizing the predictor matrix} 
 The second application of the penalty weights is an aspect of a bigger topic: standardizing the
-predictor matrix. We can use the weights to standardize $\mathbf{x}$ by setting $v_j$ to an estimate 
-of the standard deviation of feature $X_j$. Why 
+predictor matrix \cite{elem-stat-learn01}. We can use the weights to standardize $\mathbf{x}$ by 
+setting $v_j$ to an estimate of the standard deviation of feature $X_j$. Why 
 should we do this? Let us consider two features $X_1$ and $X_2$ with standard deviation $\sigma_1$
 and $\sigma_2$, respectively, and $\sigma_1 < \sigma_2$. To change the output of the model by $1$ 
 when the feature changes by 
@@ -787,7 +786,7 @@ for a tree $\tilde{T}$. $\sgn$ is the signum function.
 How can we use our samples $(\mathbf{x}_i, y_i)$, $i = 1, \ldots, n$, to learn a tree $T$ that does 
 good job on Eq.\ \eqref{eq:rf-major}? While we can 
 trivially fulfill Eq.\ \eqref{eq:rf-major} exactly for our samples, this would only lead to heavily
-overfitted trees. Instead, we confine ourselves with simpler, rougher trees that will make errors on 
+overfit trees. Instead, we confine ourselves with simpler, rougher trees that will make errors on 
 training samples, but generalize better. 
 In the algorithm further below, we will only need to calculate an error for the samples inside a 
 rectangle set $R \subset \RR^p$. Let $n(R) = |\{ 1 \leq i \leq n: \mathbf{x}_i \in R \}|$ be the number of 
@@ -828,7 +827,7 @@ is close to $E(Y \cond X = x)$. High variance and low bias makes trees
 ideal candidates for a method called \textit{bagging}, which averages the predictions of many noisy, 
 approximately unbiased models with the goal to reduce their variance, cf.\ \cite{breiman96}. Given 
 trees $T_b$, $b = 1, 
-\ldots, B$, fitted to identically distributed training data $\mathbf{z}_b$, we denote the new model 
+\ldots, B$, fit to identically distributed training data $\mathbf{z}_b$, we denote the new model 
 by 
 \begin{align}
     \overline{T} = \frac{1}{B} \sum_{b=1}^B T_b.
@@ -889,7 +888,7 @@ LAMIS. Such $f_i$ are merely projections onto a feature.
 If we need to fit some of the early models to the training data ourselves, getting reliable 
 cross-validated predictions
 for $f$ becomes trickier. Without loss of generality, we assume the only early model left to be 
-fitted 
+fit 
 is $f_1$. We want to fit $f_1$ according to a hyperparameter tuple $h_1$ and $f$ according to $h_2$, 
 giving us the hyperparameter tuple $h = (h_1, h_2) \in H$ for the nested model. How do 
 we get realistic cross-validated predictions $\hat{y}_i$, $i \in F_\ell$, for the $\ell$-th fold? 
@@ -1035,7 +1034,7 @@ backbone. \texttt{ranger} fits random forests fast, also thanks to a performant 
 
 \paragraph{Validation and testing} 
 If fitting functions from existing R packages calculate a validated error of 
-their fitted models at all, they do so in a plethora of ways, usually using an error measure derived 
+their fit models at all, they do so in a plethora of ways, usually using an error measure derived 
 from the loss function they minimize. E.g., \texttt{zeroSum} uses the binomial deviance for 
 logistic models and \texttt{ranger} uses the classification error for classification random 
 forests. \texttt{patroklos} takes 

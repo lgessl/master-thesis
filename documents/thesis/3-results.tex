@@ -78,7 +78,7 @@ gene-expression signature with coefficients corresponding to single genes: the L
 (lymphoma-associated macrophage interaction signature). It is 
 based on \num{17} genes, but dominated by just two genes, CSF1 and CPT1A. 
 
-By dichotomizing the 
+By thresholding the 
 continuous output of the LAMIS, which we call the \textit{LAMIS score}, at the 75\%-quantile into 
 their \textit{LAMIS group} (low or high), Staiger et al.\ present two 
 groups on the Staiger data with significantly differing PFS and OS; 
@@ -90,7 +90,7 @@ zero-sum property, we apply the LAMIS unchanged on the two other data sets. Unde
 assumptions and according to Eq.\ \eqref{eq:inter-tech}, the LAMIS scores have a data-set-dependent 
 shift. This chapter, especially section \ref{sec:inter-trial}, will show how realistic these 
 assumptions are. 
-We also add the LAMIS group by dichotomizing the LAMIS output at its 75\%-quantile of the respective 
+We also add the LAMIS group by thresholding the LAMIS score at its 75\%-quantile of the respective 
 data set.
 
 \paragraph{Combined data}
@@ -449,7 +449,7 @@ data reveals how crucial this victory was as the closest validation competitors 
 $m^*_\text{Reddy}$ clearly lag behind in terms of the test error. Among the models trained on the 
 Staiger data, the same holds true with roles of Cox and logistic swapped. This shows that it 
 was important to try out both Cox and logistic models although they are closely related. Thanks to 
-more correlated validation and errors, we need to worry less about overfitted validated 
+more correlated validation and errors, we need to worry less about overfit validated 
 predictions and might even consider sending analogous Gauss models into the race.
 
 Regarding the question if the predictor should directly contain the gene-expression levels or not,
