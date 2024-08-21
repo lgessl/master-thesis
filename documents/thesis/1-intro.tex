@@ -1,58 +1,58 @@
 \chapter{Introduction} \label{chap:intro}
 
-\section{Diffuse large B-cell lymphoma: treatment and state-of-the-art risk prediction}
+\section{Diffuse large B-cell lymphoma}
 
 Diffuse large B-cell lymphoma (DLBCL) is the most common type of B-cell lymphoma in adults, 
 representing almost 30\% of all diagnoses of non-Hodgkin's lymphoma. 
 This aggressive and heterogeneous group of 
 lymphoid neoplasms exhibits
-diverse phenotypic, genetic, and clinical characteristics. The clinical presentation of 
+diverse phenotypic, genetic and clinical characteristics. The clinical presentation of 
 DLBCL varies significantly, with differences in tumor load and patients' performance status, leading 
 to varied outcomes \cite{dlbcl-review21}.
 
 Despite being an aggressive and fatal disease, DLBCL is highly curable with the 
 application of intensive immunochemotherapy even in the elderly population. The standard treatment 
-for DLBCL has long been immunochemotherapy in the R-CHOP (rituximab, cyclophosphamide, doxorubicin, 
+for DLBCL is immunochemotherapy in the R-CHOP (rituximab, cyclophosphamide, doxorubicin, 
 vincristine, and prednisone) regimen. R-CHOP-like therapies
 have significantly improved survival rates, curing approximately two-thirds of the patients. 
 However, the remaining one-third of patients, especially 
 those with relapsed or refractory disease, continue to face poor outcomes and in most cases finally 
 succumb to their disease \citep{glass17}. This underscores the clinical 
-need for an accurate, robust, affordable, and easy-to-use tool that can identify patients at high risk 
-for treatment failure early in their treatment course, ideally within the first three cycles of 
-induction chemotherapy. Clinicians can guide those patients labeled as high-risk by the tool to 
-alternative treatments like salvage chemotherapy and CAR-T cells. 
+need for an accurate, robust, affordable and easy-to-use tool that can identify patients at high risk 
+for treatment failure early in their treatment course. Clinicians can guide the patients labeled 
+as high-risk by the tool to alternative treatments like immunotherapy with CAR-T cells 
+\cite{wang20}.
 
 To this end, the International Prognostic Index for non-Hodgkin's lymphoma (IPI) was established in 
 the 1990s. It incorporates five binary clinical features one can measure cheaply and 
 reliably without batch effects: Is the patient older than \num{60} years? Is the cancer advanced 
-(Ann Arbor Stage III or IV)? Does the patient have a higher-than-normal lactate dehydrogenase (LDH) 
+(Ann Arbor Stage III or IV)? Does the patient's blood have a higher-than-normal lactate dehydrogenase (LDH) 
 level? Is the patient already 
 bedridden (performance status > 1)? Is the patient's cancer in more than one extranodal site? The 
 \textit{IPI score} is then the number of positive answers to these questions, an integer between 0 
 and 5. The IPI is the result of a rigorous statistical analysis 
-of a large dataset of \num{1872} patients: out of twelve candidate features, the IPI inventors
+of a large dataset of \num{1872} patients: Out of twelve candidate features, the IPI inventors
 first selected those features that were independently and significantly associated with survival 
-(namely the five above-mentioned features), and fit a Cox proportional-hazards model to them;
-since the relative risks for all five features turned out to be similar, they simplified the model 
+(namely the five above-mentioned features), and fit a Cox proportional-hazards model to them.
+Since the relative risks for all five features turned out to be similar, they simplified the model 
 by just counting the number of present risk factors~\cite{ipi93}. 
 
-The IPI is a simple yet robust clinical tool used globally to predict risk and guide 
+The IPI is a simple and robust clinical tool used globally to predict risk and guide 
 treatment decisions in DLBCL patients. It has been the cornerstone of risk assessment for the last 
 three decades, no alternative has gained widespread acceptance outside of clinical 
 trials~\citep{ipi-stay-strong}. 
-Despite its effectiveness in large cohorts, the IPI and other individual 
-biomarkers do not reliably predict the clinical course for each patient, particularly failing to 
-identify those at high risk for early treatment failure who may benefit from alternative therapeutic 
-approaches. E.g., in the prospective trial comprising \num{466} patients used as test set in 
-\citep{staiger20}, only \num{3.4}\% of patients have the maximum IPI score of 5 -- this proportion 
-is too low 
-to gain special attention in clinical practice and to incentivize the pharmaceutical industry to 
-develop new treatments. All other cohorts defined via $\text{IPI} \geq i, i = 0, 1, 2, 3, 4$, lack 
-precision: the proportion of patients with \textit{progression-free survival} (PFS) less than two 
-years is below \num{50}\% -- too low to persuade a patient to undergo an experimental treatment 
-instead of a standard, R-CHOP-like therapy. PFS is the time from the start of the treatment to tumor 
-progression or death from any cause \cite{saad09}.
+At the same time, pharma-sponsored randomized trials in the whole DLBCL population have failed to
+improve R-CHOP \cite{susanibar21}. The IPI fails to identify a high-risk DLBCL subpopulation that is 
+large enough to trigger research and enables clinical trials for new treatments that outperform 
+R-CHOP on this subpopulation: In the prospective trial comprising \num{466} patients used as test 
+set in \citep{staiger20}, only \num{3.4}\% of patients have the maximum IPI score of 5. All other 
+cohorts defined via $\text{IPI} \geq i, i = 0, 1, 2, 3, 4$, have a low high-risk content, i.e.,  
+the proportion of patients with 
+\textit{progression-free survival} (PFS) less than two years in all these cohorts is below 
+\num{50}\% -- too low to 
+persuade a patient to undergo an experimental treatment instead of a standard, R-CHOP-like therapy. 
+PFS is the time from the start of the treatment to tumor progression or death from any cause 
+\cite{saad09}.
 
 For this thesis, we define high-risk DLBCL patients as those patients with PFS below two years. 
 Two years is a time 
@@ -67,20 +67,20 @@ bioinformaticians, lymphoma pathologists and translational lymphoma biologists -
 consortium MMML-Predict to develop and roll out a robust, simple-to-use and cost-effective 
 prognostic tool for DLBCL 
 which yields a clinically more relevant high-risk group \cite{mmml-chapuy,mmml-idw}. This tool, the 
-MMML-Predictor, aims to 
+MMML-Predictor, aims to allow
 patients and clinicians early in the treatment cycle to make an informed decision if they want to 
 continue with the standard R-CHOP-like treatment or switch to a novel, more experimental treatment. 
 
 In a discovery phase, MMML-Predict will enroll \num{200} patients in a prospective trial at first 
 diagnosis and collect various clinical and molecular risk features.
 They include clinical scores (like the IPI), gene-expression-derived features (like cell of origin) 
-and genetic aberrations (like the translocation MYC). 
+and genetic aberrations (like the translocation of MYC). 
 In a novel approach, MMML-Predict will measure dynamic response determinants during treatment. It is 
 unknown if these features capture similar or different 
 risks. Combining them may finally bring to the patients' bedside the significant progress in the 
-understanding of the DLBCL biology researchers have made over the last decades.
+understanding of DLBCL biology researchers have made over the last decades.
 
-There are plenty of biological terms in the last paragraph, and we want hold on for a moment to 
+There are plenty of biological terms in the last paragraph, and we want to hold on for a moment to 
 introduce those that will become relevant over the course of this thesis.
 Many of the above-mentioned features rely on measuring \textit{gene-expression levels} for a set 
 of genes. 
@@ -95,15 +95,15 @@ Biologists call predictive models that
 predict from genetic features, especially gene-expression levels, \textit{signatures}. The status 
 of the genes MYC, BCL2, BCL6 and TP53 are known to predict survival in DLBCL and have been subject 
 to extensive research in the last years
-\cite{hummel06, zenz17, aukema11, horn13, johnson09, klapper08, kretzmer15, rosenwald19}.
+\cite{aukema11, horn13, hummel06, johnson09, klapper08, kretzmer15, rosenwald19, zenz17}.
 
 The group around Markus Loeffler in Leipzig plans to evaluate the readily trained MMML-Predictor on 
-a test cohort of another \num{100} patients enrolled for this project for whom only those features 
-used in the MMML-Predictor will be measured. The new classifier has to label at least \num{10}\% of 
-patients in the test cohort as high-risk; stated differently, we require a rate of positive 
-predictions or -- synonymously -- a precision of at least \num{10}\%. At the same time, the 
-precision -- i.e.\ the proportion of \textit{truly} high-risk patients among the patients 
-\textit{labeled} as high-risk -- must be \textit{significantly} above that of the group defined by
+a test cohort of another \num{100} patients enrolled for this project. The new classifier has to 
+label at least \num{10}\% of 
+patients in the test cohort as high-risk. Stated differently, we require a rate of positive 
+predictions or -- synonymously -- a \textit{prevalence} of at least \num{10}\%. At the same time, the 
+\text{precision} -- i.e.\ the proportion of \textit{truly} high-risk patients among the patients 
+\textit{labeled} as high-risk -- must be significantly above that of the group defined by
 $\text{IPI} \geq 4$. 
 
 In more detail, being high-risk or not is a Bernoulli random variable. 
@@ -115,45 +115,33 @@ method, which calculates exact $\gamma$-confidence intervals (CIs) for the succe
 of i.i.d.\ Bernoulli random variables for an arbitrary confidence level $\gamma \in (0, 1)$
 \cite{clopper34}.
 By significantly outperforming the precision of the IPI, we mean that the \num{95}\%-CI
-of the precision of the new classifier according to the Clopper-Pearson method must not include the 
-precision of the group determined by $\text{IPI} \geq 4$. According to data with \num{2721} 
-patients pooled from prospective trials of the German High-Grade Non-Hodgkin Lymphoma Study Group 
-(DSHNHL), this precision of the IPI is at around \num{35}\%. 
+of the precision of the new classifier must not include the 
+precision of the group determined by $\text{IPI} \geq 4$.
 
-\section{The role of this thesis within MMML-Predict}
+\section{The role of this thesis inside MMML-Predict}
 
-Within MMML-Predict, Rainer Spang's group in Regensburg will develop the MMML-Predictor. 
+Inside MMML-Predict, Rainer Spang's group in Regensburg will develop the MMML-Predictor. 
 This is 
 a supervised-learning task with a classification problem with binary response: PFS of less 
 than two years -- or high-risk DLBCL -- is the positive group, PFS of more than two 
-years -- or low-risk DLBCL -- is the negative group. Part of the task is figuring out which features
-are part of the model input, the predictor.
-While the number of samples is rather small, 
-the number of available features is large thanks to high-throughput measurements like RNA-seq or 
-NanoString. We have an enormous amount of freedom in how we design and train the classifier. 
-Hence, we need to deal with the curse of high dimensions if we want to use the high-dimensional part 
-of the data and, 
-more importantly, we need to take care that in our internal validation, usually a cross-validation,
-we do not overfit the data. While we should be able to tackle the first problem with regularization,
-for the latter one we need a trustworthy internal validation strategy and, most importantly, we 
-must not validate too many models in the first place.
-
-Since, as of July 2024, the MMML-Predict training cohort has not yet arrived in Regensburg, this thesis
-will imitate the train-test scenario of MMML-Predict on already-available DLBCL data sets. 
+years -- or low-risk DLBCL -- is the negative group. Since, as of July 2024, the MMML-Predict 
+training cohort has not yet arrived in Regensburg, this thesis will imitate the train-test scenario 
+of MMML-Predict on already-available DLBCL data sets. 
 
 This thesis has two main goals.
 \begin{itemize}
 \item First, we want to show that, with data including traditional clinical and modern 
-molecular features, we can indeed deliver 
-the desired model, which yields a larger and more precise high-risk group of DLBCL patients than 
-IPI and does so significantly. With an eye to rolling out the MMML-Predictor in clinical practice, 
+molecular features, we can deliver a model that identifies a DLBCL subpopulation with poor survival 
+that is larger and holds significantly more high-risk patients than that identified by the IPI on 
+independent test data. 
+With an eye to rolling out the MMML-Predictor in clinical practice, 
 we want to demonstrate that we can design this model in such a way that one can transfer it from 
-one lab protocol to another without seriously comprised performance.
-\item Second, we want to develop heuristics and recommendations to answer the question which candidate 
-models are worth training and validating and -- more importantly -- which are not. For this, we 
-need to find out which models we can reliably validate 
-and which perform well on independent test data. These findings will guide us on how to keep 
-the number of candidate models we fit to the MMML-Predict training data low. This helps
-us avoid overfitting in the internal validation and submitting a model that convinces 
+one measurement protocol to another without seriously compromising its performance.
+\item Second, we want to develop heuristics and recommendations to answer the question of which 
+candidate models under which circumstances are worth training and validating and -- equally 
+importantly -- which are not. We want to find out which models we can reliably validate and which 
+perform well on independent test data and what are the requirements for the data to do so. These 
+findings are meant for future MMML-Predict researchers to avoid 
+overfitting in the internal validation and submitting a model that convinces 
 in the validation, but disappoints on the test cohort in Leipzig.
 \end{itemize}
