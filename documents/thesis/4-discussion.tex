@@ -143,7 +143,7 @@ predictor so we can correct for the data-set-dependent shifts in the loss functi
 After training, we remove the data-set feature from the model. In testing, 
 we threshold the continuous output of the GLM at the $\alpha$-quantile for some $\alpha$, as we did 
 in this thesis. A shortcoming of this testing procedure is that we always need a sufficiently large 
-test cohort to be able estimate the $\alpha$-quantile reliably. An alternative approach might 
+test cohort to be able to estimate the $\alpha$-quantile reliably. An alternative approach might 
 involve internal standards, i.e.\ a small number of samples one has measured for a test cohort for 
 which we already know a good threshold and that we can measure again for any new protocol to shift 
 the threshold accordingly. Even for MMML-Predict, this is a problem for the more distant future.

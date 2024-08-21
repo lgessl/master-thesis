@@ -345,7 +345,7 @@ independent, which is not always justified. The average of a combined (Bernoulli
 samples, for which we apply the threshold $s_\text{min}$, therefore approximates the expected value 
 of the combined feature.
 
-\subsubsection{Tuning the definion of ``high risk''}
+\subsubsection{Tuning the definition of ``high risk''}
 
 Defining a patient as high-risk if and only if the PFS is less than two years
 is a clinically accepted, yet quite arbitrary decision. It may not be the time cutoff that 
@@ -392,7 +392,7 @@ invertible \textit{link function}
 $g: \RR \to \RR$ and parameters $(\tbeta_0, \tbeta) \in \RR^{p+1}$ such that
 \begin{align}
     g(E(Y \cond X = x)) = \tbeta_0 + \sum_{j=1}^p \tbeta_j x_j \quad 
-    \text{for all } x \in \im(X) \subset \RR^p.
+    \text{for all } x \in \im(X) \subset \RR^p,
 \end{align}
 where $E(Y \cond X = x)$ is the expected value of $Y$ given $X = x$ \cite{glm72}. We can express the 
 \textit{linear predictor} $\sum_{j=1}^p \tbeta_j x_j$ in terms of the Euclidean scalar product 
@@ -459,7 +459,7 @@ With these augmentations, $L$ is no longer a log likelihood, so we call it a \te
 
 Fitting a Gauss or logistic model to the data means minimizing $L$ with respect to 
 $(\beta_0, \beta)$ and coming up with a minimizer $(\hbeta_0, \hbeta)$, which is our estimate for 
-$(\tbeta_0, \tbeta)$. Subsection \ref{subsec:elastic-net} will deal with the question how we can 
+$(\tbeta_0, \tbeta)$. Subsection \ref{subsec:elastic-net} will deal with the question of how we can 
 make $(\hbeta_0, \hbeta)$ a \textit{unique} minimizer.
 
 We want to show a use case the zero-sum constraint where only part of the features suffer from 
@@ -484,7 +484,7 @@ In this situation, the linear predictor
 \end{align}
 does not depend on the sample-wise shifts $s_i$. If $J$ consists of 
 exactly the features holding gene-expression levels, we can transfer our model to other protocols 
-and only need to re-calibrate the intercept, as shown in Eq. \eqref{eq:inter-tech}. Moreover, we 
+and only need to re-calibrate the intercept, as shown in Eq.\ \eqref{eq:inter-tech}. Moreover, we 
 can switch off the zero-sum constraint for all features by setting $u_j = 0$ for all 
 $j = 1, \ldots, p$. The zero-sum constraint is cheap in terms of model complexity: it only removes 
 one degree of freedom; but it is expensive in terms of computational complexity: enforcing it in
@@ -870,7 +870,7 @@ constituent trees is an embarrassingly parallel problem. We can
 also validate random forests very efficiently by facilitating \textit{out-of-bag (OOB)} samples: 
 for each sample $(\mathbf{x}_i, y_i)$, we construct its \textit{OOB prediction} by averaging only 
 those $T_b(\mathbf{x}_i)$ for which $(\mathbf{x}_i, y_i)$ was not part of the bootstrapped training 
-sample -- no need for a time consuming cross validation. For random forests, we use OOB predictions 
+sample -- no need for a time-consuming cross validation. For random forests, we use OOB predictions 
 as validated predictions.
 
 \subsection{Nested models}\label{subsec:nested-models}
@@ -1008,7 +1008,7 @@ and closely related problems. We ran all code in the statistical-computing envir
 \cite{r-language}.
 
 \subsection{The R package \texttt{patroklos}}
-The R package \texttt{patroklos} holds all of the highly reusable code of this thesis. It brings 
+The R package \texttt{patroklos} holds all the highly reusable code of this thesis. It brings 
 all the methods described in this chapter to life and is available on GitHub \cite{patroklos-gh} 
 together with a 
 \href{https://lgessl.github.io/patroklos/}{website}\footnote{\url{https://lgessl.github.io/patroklos}}. 
@@ -1054,7 +1054,7 @@ data.
 
 \paragraph{Meta analysis} 
 \texttt{patroklos} provides tools to analyze how the validated error depends on the test error and 
-allows to highlight subgroups of model architectures to unveil systematic flaws in validation 
+allows highlighting subgroups of model architectures to unveil systematic flaws in validation 
 and test performance.
 
 \subsection{\texttt{patroklos} in action}

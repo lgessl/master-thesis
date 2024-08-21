@@ -136,7 +136,7 @@ We train and validate a model for every combination of these hyperparameters.
 Not taking into account the values of the regularization strength $\lambda$ -- which are hard to 
 foresee due to early stopping --, this adds up to \num{88} models.
 
-Looking at the models with top validated performance (cf. projection upon validation error in Fig.\
+Looking at the models with top validated performance (cf. projection upon validation error in Fig.\ 
 \ref{fig:intra-val-test-geo}), for the following, we narrow down $T$ to one or 
 two values -- usually at or slightly below two years -- and set $\alpha$ to $1$ as the more complex 
 models trained for $\alpha = \num{0.1}$ cannot clearly outperform the sparse LASSO-regularized 
@@ -151,13 +151,13 @@ and $n_\text{combi} \in \{1, 2, 3, 4 \}$, we add combinations of categorical fea
 predictor. 
 We both include and exclude gene-expression levels in the predictor.
 As all of these models need to deal with features on different scales, we always 
-standardize the predictor. We regularize all GLMs with the LASSO because we may end up up adding 
+standardize the predictor. We regularize all GLMs with the LASSO because we may end up adding 
 several hundred combined categorical features to the predictor. For random forests, we let 
 $n_\text{min}$ and $m$ around their default values \num{1} and $\floor{\sqrt{p}}$, respectively, and 
 set $B = \num{600}$.
 
 \paragraph{Nested models}
-We nest models according to Alg. \ref{alg:nested-pcv}, where the early model $f_1$ is the best 
+We nest models according to Alg.\ \ref{alg:nested-pcv}, where the early model $f_1$ is the best 
 validated model among the gene-expression-only models. If the late model $f$ is not a random 
 forest, but a GLM, we regularize it with the LASSO. We select features a priori as in the previous 
 paragraph.
@@ -173,7 +173,7 @@ Both $\mtc{Schmitz}$ and $\mtc{Reddy}$ are a nested
 model as in Alg. \ref{alg:nested-pcv} with the early model $f_1$, a Gauss model, predicting from 
 the gene-expression levels and the late model $f$ being a Cox model. They only differ in their 
 features: concerning the IPI-related features, for $\mtc{Schmitz}$, the predictor holds them in
-all of the above-mentioned formats as opposed to only the five IPI features in their thresholded 
+all the above-mentioned formats as opposed to only the five IPI features in their thresholded 
 format for 
 $\mtc{Reddy}$. We have $n_\text{combi} = 2$ for $\mtc{Schmitz}$ as opposed to $n_\text{combi} = 3$ 
 for $\mtc{Reddy}$.
@@ -226,7 +226,7 @@ below the \num{-36.4}\% negative precision of the tIPI, the test errors all are 
 In all cases, the test error is at least 10 points higher than the validated error.  
 
 \paragraph{Schmitz and Reddy}
-Also for the Schmitz and Reddy data, the dependence between validated and test error is far from 
+For the Schmitz and Reddy data, the dependence between validated and test error is far from 
 being monotonic; in plots A and B in Fig.\ \ref{fig:intra-val-test-geo}, the
 correlation between validated and test 
 error is negative such that the model with the lowest validated error has the highest 
@@ -256,11 +256,11 @@ considering all candidate models, validation and test error for these two data s
 stay out of touch. Partitioning according to the model architecture reveals some patterns. 
 
 Models 
-nesting a Gauss model into a GLM as in Alg. \ref{alg:nested-pcv} all have low validated errors; on 
+nesting a Gauss model into a GLM as in Alg.\ \ref{alg:nested-pcv} all have low validated errors; on 
 the Reddy data, their validated errors are lower than those of all other models. The test error is 
-always higher than the validated error and usually it is \textit{much} higher. Alg. \ref{alg:nested-pcv} 
+always higher than the validated error. Alg.\ \ref{alg:nested-pcv} 
 yields way too optimistic validated errors if the late model is a GLM, prompting us to no longer 
-fit such models in the following experiments. Discarding Alg. \ref{alg:nested-pcv} once and for all
+fit such models in the following experiments. Discarding Alg.\ \ref{alg:nested-pcv} once and for all
 might go too far: when nesting a Gauss model into a random forest, we get validated errors more in 
 line with test errors, especially on the Schmitz data. On both data sets, OOB predictions for 
 models consisting of a random forest alone very well estimate the test error. In all but one case 
@@ -273,7 +273,7 @@ gene-expression data are all close to or underneath the identity line; this mean
 errors 
 catch the test errors well, their test errors are less widespread and on average lower than those 
 of the remaining models. This does not mean that gene-expression levels do not provide important 
-information: all of the models that do not use the gene-expression levels directly from our data 
+information: all the models that do not use the gene-expression levels directly from our data 
 do so indirectly by means of the LAMIS and cell of origin. 
 
 \paragraph{Staiger}
@@ -428,7 +428,7 @@ the Schmitz and Reddy to the Staiger data, so we cannot expect the validation-te
 to perfectly align at the identity line. Indeed, Fig.\ 
 \ref{fig:inter-val-test} shows test errors that are clearly more correlated with their validation 
 errors than in the intra-trial experiments. As a result, the model with minimal validation error in all 
-cases is close to being the one with minimal test error. In more detail, with the exception of 
+cases is close to being the one with minimal test error. In more detail, except for
 the models trained on the Staiger and tested on the Reddy data, the tested precision of the best 
 validated model and that of the best tested model deviate by no more than \num{2} points. In 
 three of the six cases, the best validated and tested model coincide. 
@@ -484,8 +484,8 @@ threshold $m^*_i$ for all $i$ and test cohorts as long as the prevalence is in $
 cohort of $n$ samples, a GLM with a non-zero coefficient $\beta_j$ for a continuous feature almost 
 surely outputs $n$ different scores. This leads to $n$ possible thresholds if we demand that at 
 least one sample be in the positive group. Indeed, all 
-plots reveal a clearly decreasing overall trend for prevalences $\geq \num{17}\%$. With the 
-exception of plot C.2, this overall trend is never seriously compromised over smaller 
+plots reveal a clearly decreasing overall trend for prevalences $\geq \num{17}\%$. 
+Except for plot C.2, this overall trend is never seriously compromised over smaller 
 prevalence intervals. This means, the \num{17}\%-quantile of the model output is a near optimal 
 choice in all six cases -- as expected.
 
