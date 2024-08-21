@@ -539,10 +539,11 @@ where $S(t) = 1 - F_T(t)$ is the survival function, and $h(t)$ is well-defined a
 The Cox model, proposed in \cite{cox72}, wants to get a hand on \textit{conditional} hazards.
 Intuitively, it is clear that the population with one value of $X$ can have a vastly different 
 hazard function than the population with another value of $X$ if $X$ has predictive power for $T$.
-Formally, however, it is hard to define a conditional hazard function: $X$ may very well follow a 
-density-defined distribution, hence we condition on an event of probability $0$ when we write 
-$P(t \leq T < t + \Delta t \cond T \geq t, X = x)$ -- it is hard to define this in a natural
-and straightforward way. In practice, the measurements in $X$ often fluctuate around their true 
+Formally, however, it is hard to define a conditional hazard function: we often have $P(X = x) = 0$, 
+e.g., if $X$ follows a density-defined distribution, hence we condition on an event of probability 
+$0$ when we write 
+$P(t \leq T < t + \Delta t \cond T \geq t, X = x)$ -- it is hard to define this in a 
+straightforward way. In practice, the measurements in $X$ often fluctuate around their true 
 values anyway, so it is sensible to condition on a small neighborhood of $x$, say an $\epsilon$-ball 
 around $x$ with respect to the Euclidean norm $|\cdot|_2$ for some small $\epsilon > 0$. This 
 amounts to
@@ -940,20 +941,6 @@ of being overestimated, cf.\ subsection \ref{subsec:train-val}. We therefore set
 strategy: we first tune $h_1 \in H_{0, 1}$, yielding a best validated hyperparameter tuple 
 $\hat{h}_1$, and then go on to tune $h_2 \in H_{0, 2}$. This means $H_0 = \{ \hat{h}_1 \} 
 \times H_{0, 1}$.
-
-% $f_1$ often deals with high-dimensional input. E.g., $f_1$ is a Gauss model 
-% predicting from 
-% several thousand gene-expression levels. Hence, we undoubtedly need elastic-net 
-% regularization in its training and need to tune the regularization strength $\lambda$. 
-% With this alone, we quickly end up with several hundred hyperparameters to be tuned for $f_1$. 
-% With $H_{0,1}$ being so big, good validated performances have one thing in common: their
-% corresponding cross-validated predictions are too accurate compared to predictions on independent 
-% test data. This means, we still 
-% have not gotten entirely rid of the problem that $f$ puts too much trust into $f_1$'s output 
-% misled by too optimistic values in the training. This problem will propagate into another
-% problem: too optimistic cross-validated predictions for $g$ and an overestimated 
-% cross-validated performance of $g$. It is hard to quantify the effect, so we will have a close 
-% eye on models nested according to Alg.\ \ref{alg:nested-pcv} in chapter \ref{chap:results}. 
 
 \subsubsection{Nested models and inter-technical variability}
 
