@@ -1,18 +1,17 @@
 \begin{figure}
     \centering
     \includegraphics[width=1.0\textwidth]{../../results/intra_val_test_more.pdf}
-    \caption{Validation versus test error in intra-trial experiments for models predicting from the 
-        full range of a priori selected features for all three data sets in the rows. The dashed 
+    \caption{Validation versus test error in intra-trial experiments for all candidate models on 
+        all three data sets in the rows. The dashed 
         gray line is the identity line. The notation 
         $c_1$-$c_2$ encodes a model of class $c_1$ as the early model $f_1$ nested into a model of 
         class $c_2$ as the late model $f$ according to Alg. \ref{alg:nested-pcv}.
         ``GE'' is an acronym for gene expression and refers to the presence of all available 
         gene-expression levels in the predictor, while ``no GE'' refers to the absence of all of 
         them. Both columns show 
-        the same points, but highlight different groupings. The elastic-net 
-        regularization strength $\lambda$, training survival cutoff $T$, $n_\text{combi}$ and the 
-        random-forest hyperparameters $B$, $m$ and $n_\text{min}$ have already been tuned. The 
-        validation error for the $\text{tIPI}$ is in fact also a test error on independent data, 
-        namely our training cohort.}
+        the same points, but highlight different groupings. The training survival cutoff $T$, 
+        $n_\text{combi}$, elastic-net regularization strength $\lambda$ (for GLMs), 
+        $B$, $m$ and $n_\text{min}$ (for RFs) have already been optimized with respect to the 
+        validation error. }
     \label{fig:intra-val-test-more}
 \end{figure}

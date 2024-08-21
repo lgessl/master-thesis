@@ -2,9 +2,10 @@
     \centering
     \includegraphics[width=1.0\textwidth]{../../results/inter_val_test.pdf}
     \caption{Validation versus test error in inter-trial experiments. The dashed gray line is the 
-        identity line. The elastic-net regularization strength $\lambda$, training survival cutoff 
-        $T$, $n_\text{combi}$ and the random-forest hyperparameters $m$ and $n_\text{combi}$ 
-        have already been tuned in the validation. The validation error for the $\text{tIPI}$ is in 
+        identity line. The training survival cutoff $T$, 
+        $n_\text{combi}$, elastic-net regularization strength $\lambda$ (for GLMs), 
+        $B$, $m$ and $n_\text{min}$ (for RFs) have already been optimized with respect to the 
+        validation error. The validation error for the $\text{tIPI}$ is in 
         fact also a test error on independent data, namely our training cohort.}
     \label{fig:inter-val-test}
 \end{figure}

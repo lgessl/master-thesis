@@ -941,19 +941,19 @@ strategy: we first tune $h_1 \in H_{0, 1}$, yielding a best validated hyperparam
 $\hat{h}_1$, and then go on to tune $h_2 \in H_{0, 2}$. This means $H_0 = \{ \hat{h}_1 \} 
 \times H_{0, 1}$.
 
-$f_1$ often deals with high-dimensional input. E.g., $f_1$ is a Gauss model 
-predicting from 
-several thousand gene-expression levels. Hence, we undoubtedly need elastic-net 
-regularization in its training and need to tune the regularization strength $\lambda$. 
-With this alone, we quickly end up with several hundred hyperparameters to be tuned for $f_1$. 
-With $H_{0,1}$ being so big, good validated performances have one thing in common: their
-corresponding cross-validated predictions are too accurate compared to predictions on independent 
-test data. This means, we still 
-have not gotten entirely rid of the problem that $f$ puts too much trust into $f_1$'s output 
-misled by too optimistic values in the training. This problem will propagate into another
-problem: too optimistic cross-validated predictions for $g$ and an overestimated 
-cross-validated performance of $g$. It is hard to quantify the effect, so we will have a close 
-eye on models nested according to Alg.\ \ref{alg:nested-pcv} in chapter \ref{chap:results}. 
+% $f_1$ often deals with high-dimensional input. E.g., $f_1$ is a Gauss model 
+% predicting from 
+% several thousand gene-expression levels. Hence, we undoubtedly need elastic-net 
+% regularization in its training and need to tune the regularization strength $\lambda$. 
+% With this alone, we quickly end up with several hundred hyperparameters to be tuned for $f_1$. 
+% With $H_{0,1}$ being so big, good validated performances have one thing in common: their
+% corresponding cross-validated predictions are too accurate compared to predictions on independent 
+% test data. This means, we still 
+% have not gotten entirely rid of the problem that $f$ puts too much trust into $f_1$'s output 
+% misled by too optimistic values in the training. This problem will propagate into another
+% problem: too optimistic cross-validated predictions for $g$ and an overestimated 
+% cross-validated performance of $g$. It is hard to quantify the effect, so we will have a close 
+% eye on models nested according to Alg.\ \ref{alg:nested-pcv} in chapter \ref{chap:results}. 
 
 \subsubsection{Nested models and inter-technical variability}
 
