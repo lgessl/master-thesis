@@ -117,7 +117,7 @@ performance of the tIPI can noticeably differ between the whole data set and the
 \subsection{Model architectures}
 
 We want to give a brief summary of the models we send into the race and take a closer look at the 
-best validated one, $m^*$, on every data set.
+one with minimal validation error on every data set.
 
 \subsubsection{Candidates}
 
@@ -164,32 +164,38 @@ paragraph.
 
 \subsubsection{Best validated models}
 
+We denote the model with minimal validation error on the training cohort of the respective data set 
+by $\mtc{i}$ for $i \in \{\text{Schitz}, \text{Reddy}, \text{Staiger}\}$.  Here, ``tc'' is an 
+acronym for ``training cohort''. Table \ref{table:intra-trial} shows the performance of these models.
+
 \paragraph{Schmitz and Reddy}
-For both the Schmitz and Reddy data, the best model $m^*$ according to the validation error is a nested 
+Both $\mtc{Schmitz}$ and $\mtc{Reddy}$ are a nested 
 model as in Alg. \ref{alg:nested-pcv} with the early model $f_1$, a Gauss model, predicting from 
 the gene-expression levels and the late model $f$ being a Cox model. They only differ in their 
-features: For the Schmitz data, the predictor holds IPI-related features in all of the 
-above-mentioned formats as opposed to only the five IPI features in their thresholded format for the 
-Reddy data. We have $n_\text{combi} = 2$ for Schmitz as opposed to $n_\text{combi} = 3$ for Reddy.
+features: concerning the IPI-related features, for $\mtc{Schmitz}$, the predictor holds them in
+all of the above-mentioned formats as opposed to only the five IPI features in their thresholded 
+format for 
+$\mtc{Reddy}$. We have $n_\text{combi} = 2$ for $\mtc{Schmitz}$ as opposed to $n_\text{combi} = 3$ 
+for $\mtc{Reddy}$.
 
-On the Schmitz data, $m^*$'s validated precision of \num{89.3}\% drops by more than \num{20} points 
-to \num{68.4}\% on the test set. In an even bigger drop, $m^*$'s validated precision of \num{78.6}\% 
-declines to \num{55.6}\% on the Reddy test set. We will investigate these discrepancies between 
+The validated precision of $\mtc{Schmitz}$, \num{89.3}\%, drops by more than \num{20} points 
+to \num{68.4}\% on the test set. In an even bigger drop, validated precision of $\mtc{Reddy}$,
+\num{78.6}\%, declines to \num{55.6}\%. We will investigate these discrepancies between 
 validation and testing in subsection \ref{subsec:results-intra-meta}.
 
 \paragraph{Staiger}
-On the Staiger data, $m^*$ is a very simple model: a logistic model that neither uses 
+$\mtc{Staiger}$ is a very simple model: a logistic model that neither uses 
 gene-expression levels nor combinations of discrete features ($n_\text{combi} = 1$). Of note, the 
-model incorporates the LAMIS score and group with non-zero coefficient. Here, $m^*$'s 
+model incorporates the LAMIS score and group with non-zero coefficient. $\mtc{Staiger}$'s 
 validated precision of \num{58.2}\% is more in line with the \num{45.9}\% precision on the test set.
 
 \paragraph{Logrank test}
 The last row of Table \ref{table:intra-trial} holds two-sided p-values for the logrank test
 statistic as proposed by Mandel \cite{mantel66}, which is calculated under the null hypothesis 
-that the positive and negative group according to $m^*$ have the same hazard. While $m^*$ for all 
-three data sets fails to beat the precision of the tIPI significantly, all logrank test statistics 
-are highly significant. In fact, all models picked as the winner in a validation in this chapter 
-achieve a highly significant logrank test with a p-value far below the commonly used \num{0.05}. 
+that the positive and negative group according to $\mtc{i}$ have the same hazard function. While 
+$\mtc{i}$ for all three data sets fails to beat the precision of the tIPI significantly, all logrank 
+test statistics are highly significant. In fact, all models picked as the winner in a validation in this 
+chapter achieve a highly significant logrank test with a p-value far below the commonly used \num{0.05}. 
 This suggests that significantly beating the IPI's precision is much harder than classifying patients 
 into two groups with clearly different hazard. 
 

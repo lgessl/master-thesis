@@ -8,19 +8,19 @@
         \textbf{high risk [\%]} & \num{37.0} & \num{31.6} & \num{24.3} \\
         \textbf{$\text{prev}(\text{tIPI})$, $\text{prec}(\text{tIPI})$ [\%]} & \num{17.0}, 
             \num{50.0} & \num{19.2}, \num{42.1} & \num{39.2}, \num{38.7} \\
-            \textbf{$\text{prev}(m^*)$, $\text{prec}(m^*)$ [\%]} & \num{35.1}, \num{68.4} & 
+            \textbf{$\text{prev}(\mtc{i})$, $\text{prec}(\mtc{i})$ [\%]} & \num{35.1}, \num{68.4} & 
             \num{23.0}, \num{55.6} & \num{34.6}, \num{45.9} \\
-        \textbf{precision \num{95}\%-CI $m^*$ [\%]} & $[\num{43.5}, \num{87.4}]$ & 
+        \textbf{precision \num{95}\%-CI $\mtc{i}$ [\%]} & $[\num{43.5}, \num{87.4}]$ & 
             $[\num{35.3}, \num{74.5}]$ & $[\num{29.5}, \num{63.1}]$ \\
-        \textbf{HR $m^*$} & \num{1.00} & \num{1.04} & \num{13.6} \\
-        \textbf{HR \num{95}\%-CI $m^*$} & $[\num{1.00}, \num{1.00}]$ & 
+        \textbf{HR $\mtc{i}$} & \num{1.00} & \num{1.04} & \num{13.6} \\
+        \textbf{HR \num{95}\%-CI $\mtc{i}$} & $[\num{1.00}, \num{1.00}]$ & 
             $[\num{1.02}, \num{1.06}]$ & $[\num{1.99}, \num{93.2}]$ \\
-        \textbf{logrank p $m^*$} & \num[scientific-notation=true]{3.69e-4} & 
+        \textbf{logrank p $\mtc{i}$} & \num[scientific-notation=true]{3.69e-4} & 
             \num[scientific-notation=true]{1.82e-3} & 
             \num[scientific-notation=true]{9.38e-4} \\
         \hline
     \end{tabular}
-    \caption{Statistics of intra-trial experiments on respective test cohort. $m^*$ denotes the 
-        best model trained and validated model on the respective training cohort.}
+    \caption{Statistics of intra-trial experiments on respective test cohort. $\mtc{i}$ denotes the 
+        model with minimal validation error on the respective training cohort.}
     \label{table:intra-trial}
 \end{table}
