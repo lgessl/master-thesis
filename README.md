@@ -71,6 +71,8 @@ classical train-validate-test split.
 - Install the latest version of [`patroklos`](https://github.com/lgessl/patroklos) from GitHub 
   (see there for more). Installing it will make sure you have installed almost all depending R 
   packages already as well.
+- Preprocessing needs the [`biomaRt`](https://bioconductor.org/packages/release/bioc/html/biomaRt.html) 
+  package, version >= 2.60.0, from Bioconductor to map all gene names to HGNC symbols.
 - If you want to use the Fira Sans font by Mozilla 
   in plots, install it [from GitHub](https://github.com/mozilla/Fira/tree/master/ttf) and install 
   the sysfonts package from CRAN (we used version 0.8.9) in plots. Otherwise set 
