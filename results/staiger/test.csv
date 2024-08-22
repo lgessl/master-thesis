@@ -1,0 +1,3 @@
+# Staiger et al. (2019) | pfs_years < 2
+model,cohort,precision,prevalence,precision_ci_ll,precision_ci_ul,hr,hr_ci_ll,hr_ci_ul,hr_p,auc,logrank,accuracy,threshold,n_samples,perc_true
+log ei with all IPI no expr,test,0.45946,0.34579,0.29487,0.63078,13.60577,1.98618,93.20236,0.00784,0.67521,2e-5,0.72897,0.24877,107,0.24299

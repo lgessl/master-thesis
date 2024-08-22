@@ -1,2 +1,6 @@
 *.csv
 *.pdf
+!feature_selection.txt
+!*test.csv
+!*val.csv
+!all/*_on_*.csv

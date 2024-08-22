@@ -1,0 +1,170 @@
+************************************* Intra-trial experiments ************************************** 
+
+Schmitz ******************************************************************************************** 
+
+gauss-cox with all IPI 
+
+36 x 1 sparse Matrix of class "dgCMatrix"
+                                                                     
+                                                           1.68070759
+age++                                                      0.04047988
+ldh_ratio++                                                0.09978988
+ecog_performance_status++                                  0.30569660
+lamis_score++                                              0.79751569
+gender_M++                                                -0.66808987
+gender_M&genetic_subtype_EZB++                             1.34855498
+gender_M&lamis_high_1++                                   -0.09534210
+gender_M&age>60_1++                                       -0.61023635
+gender_M&ldh_ratio>1_1++                                   1.27181742
+gender_M&n_extranodal_sites>1_1++                          0.35001661
+gender_M&ann_arbor_stage>2_1++                             1.14007673
+ipi_group_Intermediate&gene_expression_subgroup_Unclass++ -0.84741225
+ipi_group_Intermediate&ecog_performance_status>1_1++      -0.83153026
+ipi_group_Low&ldh_ratio>1_1++                              0.64143656
+gene_expression_subgroup_GCB&genetic_subtype_EZB++        -0.57365047
+gene_expression_subgroup_GCB&genetic_subtype_Other++       0.56815649
+gene_expression_subgroup_GCB&ldh_ratio>1_1++              -0.36580002
+gene_expression_subgroup_GCB&n_extranodal_sites>1_1++     -0.97082938
+gene_expression_subgroup_GCB&ann_arbor_stage>2_1++         0.10966550
+gene_expression_subgroup_Unclass&age>60_1++                0.13128886
+gene_expression_subgroup_Unclass&ann_arbor_stage>2_1++    -0.01238290
+genetic_subtype_EZB&ldh_ratio>1_1++                       -0.82503988
+genetic_subtype_MCD&age>60_1++                             1.67900732
+genetic_subtype_Other&ann_arbor_stage>2_1++                0.35578802
+lamis_high_1++                                            -0.29077002
+lamis_high_1&age>60_1++                                   -0.52448689
+lamis_high_1&ldh_ratio>1_1++                              -0.87162912
+lamis_high_1&ecog_performance_status>1_1++                 1.98882397
+age>60_1&ldh_ratio>1_1++                                   0.09879414
+age>60_1&ecog_performance_status>1_1++                     0.03548911
+ldh_ratio>1_1++                                            0.34334007
+ldh_ratio>1_1&ecog_performance_status>1_1++                0.70075674
+ldh_ratio>1_1&n_extranodal_sites>1_1++                     1.17687697
+ecog_performance_status>1_1&n_extranodal_sites>1_1++      -0.56537837
+ecog_performance_status>1_1&ann_arbor_stage>2_1++         -0.50892751
+
+n_combi: 2 
+T: 1.5 
+
+Reddy ********************************************************************************************** 
+
+gauss-cox with disc IPI, rest 
+
+28 x 1 sparse Matrix of class "dgCMatrix"
+                                                                                        
+                                                                             1.469532270
+lamis_score++                                                                0.030096811
+gender_M&bcl6_high_expr_1&n_extranodal_sites>1_1++                           0.703004320
+b_symptoms_at_diagnosis_yes&bcl2_high_expr_1++                               0.018406074
+b_symptoms_at_diagnosis_yes&bcl6_translocation_seq_1++                       0.020659616
+b_symptoms_at_diagnosis_yes&ann_arbor_stage>2_1++                            0.063703399
+b_symptoms_at_diagnosis_yes&myc_high_expr_1&bcl2_high_expr_1++               0.090633060
+b_symptoms_at_diagnosis_yes&bcl6_high_expr_1&ldh_ratio>1_1++                -0.192565667
+b_symptoms_at_diagnosis_yes&gene_expression_subgroup_GCB&ldh_ratio>1_1++    -0.505516247
+testicular_involvement_no&myc_high_expr_1&ldh_ratio>1_1++                    0.136423858
+testicular_involvement_no&bcl2_high_expr_1&ldh_ratio>1_1++                   0.225648835
+testicular_involvement_no&lamis_high_1&ann_arbor_stage>2_1++                 0.086184328
+testicular_involvement_no&age>60_1&ldh_ratio>1_1++                           0.133119484
+myc_high_expr_1&bcl2_high_expr_1&lamis_high_1++                              0.037794784
+bcl2_high_expr_1&bcl6_high_expr_1&age>60_1++                                -0.197681744
+bcl2_high_expr_1&lamis_high_1&ldh_ratio>1_1++                                0.008060549
+bcl2_high_expr_1&ldh_ratio>1_1&ecog_performance_status>1_1++                 0.022141463
+bcl6_high_expr_1&gene_expression_subgroup_GCB&ecog_performance_status>1_1++  0.120915972
+bcl6_translocation_seq_1&age>60_1&ldh_ratio>1_1++                            0.214149612
+gene_expression_subgroup_Unclassified&n_extranodal_sites>1_1++               0.303918570
+lamis_high_1++                                                               0.090246269
+age>60_1++                                                                   0.019498225
+age>60_1&ldh_ratio>1_1++                                                     0.286596615
+age>60_1&ecog_performance_status>1_1++                                       0.046915816
+age>60_1&ann_arbor_stage>2_1++                                               0.061495052
+age>60_1&ldh_ratio>1_1&ann_arbor_stage>2_1++                                 0.074958244
+ecog_performance_status>1_1++                                                0.704105075
+ann_arbor_stage>2_1++                                                        0.056129996
+
+n_combi: 3 
+T: Inf 
+
+Lamis test ***************************************************************************************** 
+
+log ei with all IPI no expr 
+
+13 x 1 sparse Matrix of class "dgCMatrix"
+                                                  
+intercept                               -1.9358519
+ipi++                                    0.0625208
+lamis_score++                            0.3175013
+gender_1++                              -0.2300075
+ipi_group_intermediate++                 0.1666848
+ipi_group_low++                         -0.6950946
+gene_expression_subgroup_unclassified++ -0.2689886
+bm_1++                                   0.2710937
+lamis_high_1++                           0.7039779
+ldh_ratio>1_1++                          0.5001624
+ecog_performance_status>1_1++            0.4313425
+n_extranodal_sites>1_1++                -0.1499634
+ann_arbor_stage>2_1++                    0.2173841
+
+n_combi: 1 
+T: Inf 
+
+
+**************************************Inter-trial experiments*************************************** 
+
+Trained on Schmitz ********************************************************************************* 
+
+cox ei lamis high, rest, no expr 
+
+8 x 1 sparse Matrix of class "dgCMatrix"
+                                                                     
+gender_m&ldh_ratio>1_1++                                   0.40065742
+gender_m&ldh_ratio>1_1&n_extranodal_sites>1_1++            0.40910848
+gene_expression_subgroup_gcb++                            -0.66943750
+age>60_1&ldh_ratio>1_1&ecog_performance_status>1_1++       0.95667321
+ldh_ratio>1_1++                                            0.09410143
+ecog_performance_status>1_1&lamis_high_1++                 0.52004823
+n_extranodal_sites>1_1&ann_arbor_stage>2_1&lamis_high_1++  0.05118243
+ann_arbor_stage>2_1&lamis_high_1++                         0.21866528
+
+n_combi: 3 
+T: 1.4 
+
+Trained on Reddy *********************************************************************************** 
+
+log ei lamis score, rest, no expr 
+
+14 x 1 sparse Matrix of class "dgCMatrix"
+                                                                               
+intercept                                                           -2.13918478
+lamis_score++                                                        0.53149681
+ipi_group_intermediate&age>60_1++                                    0.14442741
+ipi_group_low++                                                     -0.26561393
+ipi_group_low&gender_m++                                            -0.69535437
+ipi_group_low&gene_expression_subgroup_unclassified++               -0.03305230
+ipi_group_low&ann_arbor_stage>2_1++                                  1.59584481
+gender_m&n_extranodal_sites>1_1++                                    0.45589106
+gene_expression_subgroup_unclassified&ecog_performance_status>1_1++  0.23617596
+age>60_1++                                                           0.37949913
+age>60_1&ldh_ratio>1_1++                                             0.25206567
+age>60_1&ecog_performance_status>1_1++                               0.04224885
+ldh_ratio>1_1++                                                      0.13045908
+ecog_performance_status>1_1++                                        0.90426474
+
+n_combi: 2 
+T: 2.3 
+
+Trained on Lamis test ****************************************************************************** 
+
+cox ei lamis score, rest, no expr 
+
+6 x 1 sparse Matrix of class "dgCMatrix"
+                                                   
+lamis_score++                            0.31292460
+ipi_group_low++                         -0.68106847
+gender_m++                               0.29730377
+gene_expression_subgroup_unclassified++ -0.01204182
+ldh_ratio>1_1++                          0.66313288
+ecog_performance_status>1_1++            0.42802766
+
+n_combi: 1 
+T: 1.4 
+

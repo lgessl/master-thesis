@@ -1,0 +1,4 @@
+# Schmitz & Reddy & Lamis | survival_years < 2
+model,cohort,precision,prevalence,precision_ci_ll,precision_ci_ul,hr,hr_ci_ll,hr_ci_ul,hr_p,auc,logrank,accuracy,threshold,n_samples,perc_true
+"log ei lamis score, rest, no expr",schmitz,0.71053,0.1784,0.54097,0.84575,53.36496,18.72536,152.08357,0,0.76752,0,0.70892,0.45413,213,0.3662
+ipi,schmitz,0.65217,0.12921,0.42734,0.83624,1.61886,1.36966,1.91339,0,0.70102,7e-5,0.67416,4,178,0.36517

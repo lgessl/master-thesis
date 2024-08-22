@@ -1,0 +1,4 @@
+# Schmitz & Reddy & Lamis | survival_years < 2
+model,cohort,precision,prevalence,precision_ci_ll,precision_ci_ul,hr,hr_ci_ll,hr_ci_ul,hr_p,auc,logrank,accuracy,threshold,n_samples,perc_true
+"cox ei lamis score, rest, no expr",schmitz,0.75676,0.17371,0.58801,0.88227,1.45607,1.3224,1.60325,0,0.7716,0,0.723,4.23931,213,0.3662
+ipi,schmitz,0.65217,0.12921,0.42734,0.83624,1.61886,1.36966,1.91339,0,0.70102,7e-5,0.67416,4,178,0.36517
