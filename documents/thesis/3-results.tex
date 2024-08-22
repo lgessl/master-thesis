@@ -443,7 +443,7 @@ close and fortunate with regard to testing all predict from gene-expression feat
 
 For all $i$, the best validated model $m_i^*$ outputs a continuous score and we need to threshold 
 these scores to obtain a binary classifier. As a reminder, the errors 
-we presented so far are all optimized on the respective cohort: the maximum precision under the 
+we presented so far are all optimized on the respective cohort: the minimum negative precision under the 
 constraint to have a prevalence of at least \num{17}\% for our models and of at least \num{10}\% 
 for the tIPI. When given a new data set with blinded outcome, we suggested to threshold a model at 
 the \num{17}\%-quantile of its continuous output on this data set. This, by definition, leads to 
@@ -454,7 +454,7 @@ If we rank patients by the scores a good model assigns them, high-risk patients 
 top of the ranking and low-risk patients at the bottom. As a result, as we decrease the threshold, 
 the group of patients with a score above a threshold tends to comprise a lower and lower proportion 
 of high-risk patients. Stated differently, for good models the precision tends to drop as the 
-threshold drops and the relationship between prevalence and precision is roughly monotonic. In the 
+output threshold drops and the relationship between prevalence and precision is roughly monotonic. In the 
 case of a perfectly monotonic dependence between prevalence and precision, the $\alpha$-quantile 
 is an optimal threshold with a prevalence of at least $\alpha$. 
 In the case of a somewhat violated monotonicity, we still have reason to hope that the 
@@ -479,5 +479,5 @@ close one for $m^*_\text{Staiger}$.
 This makes $m^*_\text{Reddy}$ a transferable model that is 
 able to perform in both a representative and high-risk environment for predicting PFS despite being 
 trained to predict OS. Vice versa, for $m^*_\text{Schmitz}$ and $m^*_\text{Staiger}$, the Reddy data 
-stays challenging and the only data set where a best validated model $m^*_i$ fails to significantly 
+stays challenging and the only test cohort where a best validated model $m^*_i$ fails to significantly 
 surpass the precision of the tIPI.

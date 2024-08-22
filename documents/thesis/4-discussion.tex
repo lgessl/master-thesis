@@ -108,7 +108,7 @@ and pharmaceutical companies to pay attention to the high-risk group identified 
 A further increase in precision will not just spur more interest of the above people and 
 companies, but will also convince more patients to let the MMML-Predictor guide their treatment and 
 will avoid both unnecessary and failed therapies. This thesis does not suggest that model performance 
-has already saturated, so we can hope for more in the future.
+has already saturated, so we can strive for more in the future.
 
 \subsection{Combining data sets}
 
@@ -159,13 +159,13 @@ error. In addition to resorting to signatures that \textit{other} people trained
 our \textit{own} signatures on other data. The project would then consist of two training data 
 sets. On the first one, we train and validate gene-expression signatures tailored for our problem.
 We then take the best validated gene-expression signature and write its output as a new feature into the 
-second training data set. We might not just do this for the very best gene-expression signature 
+second training set. We might not just do this for the very best gene-expression signature 
 from the first training set, but for the top $k$ validated gene-expression signatures. On the second 
-training data set, we fit and validate the final models.
+training set, we fit and validate the final models.
 
 \subsection{Choice of the error function}
 
-Validation always depends on decisions we cannot uniquely derive from the problem at hand. 
+Machine-learning projects always depend on decisions we cannot uniquely derive from the problem at hand. 
 While we strive to make them as natural as possible, they remain arbitrary to a certain degree. 
 The most important example for this in this thesis is the error function $\text{err}$ we use for 
 validation and testing.
@@ -178,7 +178,7 @@ Defining $\text{err}$ as the average negative precision for prevalences in $[a, 
 $a = \num{0.10}$ and $b = \num{0.17}$, takes more information from the prevalence-versus-precision 
 curve into account and, in particular, better catches this phenomenon.
 
-Still, with our choice of $\text{err}$, validated and test errors were well in line in 
+Still, with our choice of $\text{err}$, validation and test errors were well in line in 
 section \ref{sec:inter-trial}. This underscores that, under the conditions we described in 
 section \ref{sec:discussion-learning}, our choice of $\text{err}$ already is a good one.
 
@@ -196,7 +196,3 @@ $q = \num{24.3}$, which renders our classification problem imbalanced. Setting $
 high-risk and $w_i = 1/(1-q)$ for low-risk samples perfectly balances the classification task in 
 the sense that the sum of sample weights belonging to high-risk samples equals the sum of sample 
 weights belonging to low-risk samples.
-
-\subsection*{}
-Looking at this thesis, we can say with confidence: the state of MMML-Predict is strong and 
-it is getting stronger.
