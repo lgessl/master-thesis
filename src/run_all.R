@@ -2,10 +2,10 @@
 # ones due to randomness in train-test splitting, fitting and validation)
 
 # Preprocess
-# source("src/prepro/schmitz.R")
-# source("src/prepro/reddy.R")
-# source("src/prepro/staiger.R")
-# source("src/prepro/all.R")
+source("src/prepro/schmitz.R")
+source("src/prepro/reddy.R")
+source("src/prepro/staiger.R")
+source("src/prepro/all.R")
 
 # Train
 source("src/train/schmitz.R")
