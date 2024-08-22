@@ -124,7 +124,7 @@ one with minimal validation error on every data set.
 \paragraph{Gene-expression levels only}
 Models trained in a leave-one-out cross-validation only on the gene-expression levels include the 
 Gauss, logistic and Cox model. Regarding noteworthy hyperparameter decisions, we both apply and 
-do not apply standardization of the predictor; we do not demand the zero-sum constraint, i.e., all 
+do not apply standardization of the predictor; we switch off the zero-sum constraint, i.e., all 
 zero-sum weights are \num{0},
 because, at this point, we do not want to transfer our models to other data sets;
 we regularize with elastic-net penalty factor $\alpha \in \{ \num{0.1}, 1 \}$. We choose the 
@@ -152,7 +152,7 @@ predictor.
 We both include and exclude gene-expression levels in the predictor.
 As all of these models need to deal with features on different scales, we always 
 standardize the predictor. We regularize all GLMs with the LASSO because, even without 
-gene-expression levels, we may end up adding 
+gene-expression levels, we can end up adding 
 several hundred combined categorical features to the predictor. For random forests, we let 
 $n_\text{min}$ and $m$ fluctuate around their default values \num{1} and $\floor{\sqrt{p}}$, 
 respectively, and set $B = \num{600}$.
@@ -194,7 +194,8 @@ validated precision of \num{58.2}\% is more in line with the \num{45.9}\% precis
 The last row of Table \ref{table:intra-trial} holds two-sided p-values for the logrank test
 statistic as proposed by Mandel \cite{mantel66}, which is calculated under the null hypothesis 
 that the positive and negative group according to $\mtc{i}$ have the same hazard function. While 
-$\mtc{i}$ for all three data sets fails to beat the precision of the tIPI significantly, all logrank 
+$\mtc{i}$ for all three data sets fails to beat the precision of the tIPI on the respective test 
+set significantly, all logrank 
 test statistics are highly significant. In fact, all models picked as the winner in a validation in this 
 chapter achieve a highly significant logrank test with a p-value far below \num{0.05}. 
 This suggests that our problem is harder than classifying patients into two groups with clearly 
@@ -210,8 +211,8 @@ phenomenon qualitatively. We use several methods to calculate validated predicti
 validation, \textsc{NestedPseudoValidation} and OOB predictions -- and, for different model 
 architectures, we tune different hyperparameter tuples and a different 
 number of them. Both validation error and test error of a model are random 
-variables and it is hard to infer statistical properties of them based on a single realization of 
-these random variables. By grouping the models according to their hyperparameters, we gain 
+variables and it is hard to infer statistical properties of them based on a single realization. 
+By grouping the models according to their hyperparameters, we gain 
 statistical power and can look for patterns in the validation and test error as well as 
 discrepancies between them.
 
@@ -372,7 +373,7 @@ On the Staiger data, $m^*_\text{Reddy}$ posts a precision of \num{53.2} that is 
 points higher than that of $m^*_\text{Schmitz}$ and by \num{15} points higher than that of the tIPI. 
 Consequently, the lower limit of the \num{95}\%-confidence interval of its precision, at 
 \num{41.5}\%, is 
-clearly above the precision of the tIPI and the hazard ratio rises to \num{23.9}
+clearly above the precision of the tIPI and the hazard ratio is at \num{23.9}
 (\num{95}\%-CI \num{9.9}--\num{57.6}). Even more than $m^*_\text{Schmitz}$, $m^*_\text{Reddy}$ 
 defies systematic differences between data sets: comparing the Reddy to the Staiger data, we 
 notice the contrasts non-prospective versus prospective trial, 
@@ -387,7 +388,7 @@ $m^*_\text{Schmitz}$.
 
 On the Reddy data, our model's precision, at \num{50.7}\%, stays below that of the tIPI at \num{54.1}\%. 
 Speaking for the whole thesis, this renders the Reddy data a challenging test cohort with a 
-hard-to-beat IPI, but -- as we have just seen -- a very helpful training cohort.
+hard-to-beat IPI, but -- as we have just seen -- a useful training cohort.
 
 Meanwhile, on the Schmitz data, the precision of $m^*_\text{Staiger}$ of \num{75.7}\% exceeds that 
 of the tIPI by more than \num{10}\%, but falls short of outrivaling the tIPI significantly. Still, 
@@ -409,7 +410,7 @@ participating in the inter-trial experiments. Note that several hyperparameters 
 been optimized in the validation, cf.\ caption of Fig.\ \ref{fig:inter-val-test}. 
 
 We have emphasized that the risk profiles of the three data sets differ, especially when comparing 
-the Schmitz and Reddy to the Staiger data, so we cannot expect the validation-test-error tuples 
+the Schmitz and Reddy data to the Staiger data, so we cannot expect the validation-test-error tuples 
 to perfectly align at the identity line. Fig.\ 
 \ref{fig:inter-val-test} shows test errors that are clearly more correlated with their validation 
 errors than in the intra-trial experiments. As a result, the model with minimal validation error in all 

@@ -1,7 +1,7 @@
 \chapter{Methods} \label{chap:methods}
 
 To solve our problem, we will have to fit multiple models to our data and demonstrate the 
-performance of the chosen one convincingly. Section \ref{sec:train-val-test} will lay out the 
+performance of the chosen model convincingly. Section \ref{sec:train-val-test} will lay out the 
 state-of-the-art train-validate-test paradigm for this. In section \ref{sec:candidate-models}, we 
 will introduce the candidate models and the hyperparameters governing their fitting process. We will 
 start with model-agnostic hyperparameters before we go on to present well-known model classes and 
@@ -9,7 +9,7 @@ finally introduce a method that lets us train compositions of multiple models.
 
 \section{Training, validation and testing}\label{sec:train-val-test}
 
-The design of MMML-Predict with its train and test cohort, where the developers of the predictor 
+The design of MMML-Predict with its training and test cohort, where the developers of the predictor 
 never get to see the test cohort, sets the scene for the standard three-step approach in 
 supervised-learning tasks: We use the training cohort to learn multiple models (training). Among the 
 learned models, we choose the model that we are convinced performs best on new data (validation). We 
@@ -139,10 +139,10 @@ in the positive class, in our case being high-risk. This continuous score needs
 threshold} of the model. Choosing $t_i = \hat{y}_{\text{test}, i}$, $i = 1, \ldots, |I_\text{test}|$, 
 thresholds the model output on the test cohort in all relevant ways (assigning all samples to the 
 positive class is \textit{not} relevant).
-As we increase $i$ and thereby decrease the prevalence, the obtained 
-adjacent precision values differ more and more; differences of up to \num{0.5}
-are possible. But requiring a prevalence of at least 17\% caps the differences of precision 
-values dating from adjacent values of $t_i$ at
+As we increase $t_i$ and thereby decrease the prevalence, the obtained 
+precision values belonging to two adjacent output thresholds $t_i$, $t_j$ differ more and more; 
+differences of up to \num{0.5} are possible. But requiring a prevalence of at least 17\% caps the 
+differences of precision values dating from two adjacent $t_i$, $t_j$ at
 \begin{align}
     \frac{1}{\ceil*{\num{0.17} \cdot |I_\text{test}|}},
 \end{align}
@@ -217,8 +217,8 @@ The fourth summand is constant across all samples and can be absorbed by the int
 
 Under these assumptions,
 going from one protocol to another just leads to a constant shift of the model 
-output. All one needs to do to obtain a final classification for data measured under another 
-protocol is calibrating the threshold for the output scores. However, this 
+output. To obtain a binary classification for data measured under another 
+protocol, we need to re-calibrate the output threshold of the linear model. However, this 
 also demonstrates that while linear models can cope with inter-technical variability 
 pretty well, there is no point in using the same output threshold across all protocols.
 
@@ -287,7 +287,7 @@ Second, features may exist in multiple formats.
         output or threshold it. For the IPI, we can include its output as a single continuous feature. We can also 
         include the so-called IPI group, a partitioning of the IPI output into three groups, which 
         one obtains by thresholding it at \num{1.5} and \num{3.5} \cite{ipi93}. As another example, 
-        cell-of-origin signatures, whose output is continuous to begin with, is thresholded into 
+        cell-of-origin signatures, whose output is continuous to begin with, are thresholded into 
         ABC, GCB and unclassified subtypes \cite{abc-gcb00}. Data sets often only provide this 
         grouping and not the raw, continuous output. 
 \end{itemize}
@@ -390,7 +390,7 @@ invertible \textit{link function}
 $g: \RR \to \RR$ and parameters $(\tbeta_0, \tbeta) \in \RR^{p+1}$ such that
 \begin{align}
     g(E(Y \cond X = x)) = \tbeta_0 + \sum_{j=1}^p \tbeta_j x_j \quad 
-    \text{for all } x \in \im(X) \subset \RR^p,
+    \text{for all } x \in \RR^p,
 \end{align}
 where $E(Y \cond X = x)$ is the expected value of $Y$ given $X = x$ \cite{glm72}. We can express the 
 \textit{linear predictor} $\sum_{j=1}^p \tbeta_j x_j$ in terms of the Euclidean scalar product 
@@ -504,7 +504,7 @@ to introduce a model that is closely related to GLMs.
 \subsubsection{Cox proportional-hazards model}\label{subsubsec:cox}
 
 For the Cox proportional-hazards model -- in short: Cox model -- the response variable $Y$ 
-measures the time \textit{until} the event of interest occurs (``event'') or the time 
+measures the time \textit{at} which the event of interest occurs (``event'') or the time 
 \textit{after} which the event occurs (``censoring''). Another binary random variable 
 $\delta: \Omega \to \RR$ encodes 
 which of these two options is the case: $\delta(\omega) = 1$ for the event, $\delta(\omega) = 0$ 
@@ -810,7 +810,9 @@ the pair of sub-rectangles
 \begin{align}
     R^{(1)}_{j, s} = \{r \in R: r_j \leq s\} \text{ and } R^{(2)}_{j, s} = \{r \in R: r_j > s\}.
 \end{align}
-With respect to the impurity measure, there are only $p \cdot n(R)$ split points of interest. 
+With respect to the impurity measure, there are only $n(R) - 1$ split points per feature of 
+interest. Therefore, when splitting $R$, we need to consider no more than $p \cdot n(R)$ split 
+points.
 All of this allows us to compactly describe a procedure to grow a 
 tree in Alg.\ \ref{alg:tree}, cf.\ \cite{breiman84}.
 \input{algos/tree.tex}
@@ -930,17 +932,17 @@ architectures of the involved core models and the hierarchy that nests them into
 
 For a given architecture of a nested model, we need to tune the hyperparameter tuple $h = (h_1, h_2)$ 
 of 
-Alg.\ \ref{alg:nested-pcv}, i.e., we repeatedly call \textsc{NestedPseudoCV} as we vary $h \in H_0$
+Alg.\ \ref{alg:nested-pcv}, i.e., we repeatedly call \textsc{NestedPseudoValidation} as we vary $h \in H_0$
 with $H_0$ being the set of tried out hyperparameter tuples for this model architecture. What 
 should $H_0$ look like? We have candidate 
 hyperparameter tuples $H_{0, 1}$ for $f_1$ and $H_{0, 2}$ for $f$. An unprejudiced strategy is to 
-set $H = H_{0, 1} \times H_{0, 2}$. Compared to non-nested models, we try out a considerably 
+set $H_0 = H_{0, 1} \times H_{0, 2}$. Compared to non-nested models, we try out a considerably 
 higher number of hyperparamter tuples -- roughly a factor of $|H_{0, 1}| \approx |H_{0, 2}|$ -- and 
 the validated errors of nested models have a higher chance 
 of being overestimated, cf.\ subsection \ref{subsec:train-val}. We therefore settle on a greedier 
 strategy: we first tune $h_1 \in H_{0, 1}$, yielding a best validated hyperparameter tuple 
 $\hat{h}_1$, and then go on to tune $h_2 \in H_{0, 2}$. This means $H_0 = \{ \hat{h}_1 \} 
-\times H_{0, 1}$.
+\times H_{0, 2}$.
 
 \subsubsection{Nested models and inter-technical variability}
 
@@ -975,12 +977,12 @@ monotonic the $g(\mathbf{z}_i)$ are in $g(\mathbf{x}_i)$. We do not elaborate on
 any further and instead let practice speak in chapter \ref{chap:results}.
 
 While $f_1$ is always a GLM in this thesis, one might consider a random forest for $f$. Random 
-forests, which predict solely by thresholding single features, are highly sensitive to shifts in 
+forests, which, at the core, predict by thresholding single features, are highly sensitive to shifts in 
 the output of $f_1$. In this situation, we should rather make $f_1$ agnostic to inter-technical 
 variability once and 
 for all by thresholding its output on the respective batch of samples, but this risks losing the 
 nuanced information a continuous output provides. These considerations turn the simplicity of GLMs 
-into an asset against more complicated models: for GLMs we can better foresee how they will react 
+into an asset against more complicated models: for GLMs, we can better foresee how they will react 
 to inter-technical variability.
 
 \section{Software}
