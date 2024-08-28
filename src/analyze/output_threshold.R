@@ -8,7 +8,7 @@ library(patroklos)
 library(ggplot2)
 library(patchwork)
 
-source("src/assess/ass.R")
+source("src/assess/config.R")
 
 generate_pdf <- function(
     data,

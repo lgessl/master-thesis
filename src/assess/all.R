@@ -8,7 +8,7 @@
 
 library(patroklos)
 
-source("src/assess/ass.R")
+source("src/assess/config.R")
 
 data <- readRDS("data/all/data.rds")
 

@@ -6,7 +6,7 @@
 
 library(patroklos)
 
-source("src/assess/ass.R") # For pan_ass_scalar
+source("src/assess/config.R") # For pan_ass_scalar
 data <- readRDS("data/staiger/data.rds")
 source("src/models/staiger.R")
 

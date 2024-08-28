@@ -61,7 +61,7 @@ generate_plot_list <- function(
     return(plt_list)
 }
 
-source("src/assess/ass.R")
+source("src/assess/config.R")
 
 # Intra-trial experiments
 

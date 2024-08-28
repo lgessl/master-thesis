@@ -1,4 +1,4 @@
-rscripts = figs/plots.R figs/tables.R ../../src/assess/ass.R\
+rscripts = figs/plots.R figs/tables.R ../../src/assess/config.R\
 	../../src/train/models.R
 csvs = ../../results/schmitz/auc.csv ../../results/schmitz/ei_auc.csv
 

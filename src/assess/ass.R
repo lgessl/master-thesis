@@ -4,7 +4,7 @@
 loadNamespace("ranger")
 loadNamespace("zeroSum")
 
-use_fira_sans <- TRUE
+use_fira_sans <- FALSE
 
 # Useful colors
 metropolis_colors <- c("#1c2d30", "#33b8ff", "#14B03D", "#604c38")

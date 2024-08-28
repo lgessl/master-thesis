@@ -74,9 +74,10 @@ classical train-validate-test split.
 - Preprocessing needs the [`biomaRt`](https://bioconductor.org/packages/release/bioc/html/biomaRt.html) 
   package, version >= 2.60.0, from Bioconductor to map all gene names to HGNC symbols.
 - If you want to use the Fira Sans font by Mozilla 
-  in plots, install it [from GitHub](https://github.com/mozilla/Fira/tree/master/ttf) and install 
+  in plots, set `use_fira_sans <- TRUE` in [`src/assess/config.R`](src/assess/config.R), install the font
+  [from GitHub](https://github.com/mozilla/Fira/tree/master/ttf) and install 
   the sysfonts package from CRAN (we used version 0.8.9) in plots. Otherwise set 
-  `use_fira_sans <- FALSE` in `src/assess/ass.R`.
+  `use_fira_sans <- FALSE` in `src/assess/config.R`.
 
 #### Data
 

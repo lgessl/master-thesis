@@ -4,7 +4,7 @@ library(patroklos)
 
 data <- readRDS("../../data/schmitz/data.rds")
 source("../../src/train/models.R") # logistic@1.75
-source("../../src/assess/ass.R") # prec_ci_ass2d, rpp_prec_ass2d, logrank_ass2d
+source("../../src/assess/config.R") # prec_ci_ass2d, rpp_prec_ass2d, logrank_ass2d
 
 dir <- "figs"
 
