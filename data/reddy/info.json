@@ -1,0 +1,77 @@
+{
+  "publication": {
+    "title": "Genetic and Functional Drivers of Diffuse Large B Cell Lymphoma",
+    "author": "Reddy et al.",
+    "year": 2017,
+    "doi": "10.1016/j.cell.2017.09.027",
+    "pubmed id": 28985567
+  },
+  "data": {
+    "disease type": "DLBCL",
+    "number of samples": 604,
+    "pheno data": {
+      "included in survival analysis": 604,
+      "pivot time cutoff": 2.5,
+      "number high risk": 147,
+      "number low risk": 320,
+      "unknown": 137,
+      "proportion high risk": 0.3148
+    },
+    "expression data": {
+      "technology": "bulk RNA-seq",
+      "platform": "Illumina HiSeq 2500",
+      "read length": "unknown",
+      "number of genes": 13302,
+      "gene symbols": "ENS",
+      "primary processing": "",
+      "normalization": "fpkm, quantile-normalized, log2-transformed"
+    },
+    "benchmark": {
+      "name": "ipi",
+      "reference": "",
+      "performance": {
+        "all": {
+          "ipi >=": [5, 4, 3, 2, 1, 0],
+          "rpp": [0.0611, 0.2163, 0.4682, 0.7023, 0.8957, 1],
+          "prec": [0.5833, 0.5412, 0.4348, 0.3913, 0.3381, 0.3028]
+        },
+        "train": {
+          "ipi >=": [5, 4, 3, 2, 1, 0],
+          "rpp": [0.0612, 0.2245, 0.4898, 0.7007, 0.9048, 1],
+          "prec": [0.6667, 0.5758, 0.4375, 0.3981, 0.3421, 0.3095]
+        },
+        "test": {
+          "ipi >=": [5, 4, 3, 2, 1, 0],
+          "rpp": [0.0606, 0.1919, 0.404, 0.7071, 0.8687, 1],
+          "prec": [0.3333, 0.4211, 0.425, 0.3714, 0.3256, 0.2828]
+        }
+      }
+    },
+    "risk stats": {
+      "all": {
+        "included in survival analysis": 604,
+        "pivot time cutoff": 2.5,
+        "number high risk": 147,
+        "number low risk": 320,
+        "unknown": 137,
+        "proportion high risk": 0.3148
+      },
+      "train": {
+        "included in survival analysis": 453,
+        "pivot time cutoff": 2.5,
+        "number high risk": 110,
+        "number low risk": 240,
+        "unknown": 103,
+        "proportion high risk": 0.3143
+      },
+      "test": {
+        "included in survival analysis": 151,
+        "pivot time cutoff": 2.5,
+        "number high risk": 37,
+        "number low risk": 80,
+        "unknown": 34,
+        "proportion high risk": 0.3162
+      }
+    }
+  }
+}
