@@ -1,0 +1,179 @@
+\documentclass[10pt, aspectratio=169]{beamer}
+
+\usetheme{metropolis}
+\definecolor{alertc}{HTML}{008cd9}
+\definecolor{myDarkTeal}{HTML}{1c2d30}
+\setbeamercolor{alerted text}{fg=alertc}
+\setbeamercolor{normal text}{fg=myDarkTeal,bg=white}
+\metroset{block=fill}
+\usepackage{appendixnumberbeamer}
+
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+\usepackage{array}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}m{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}m{#1}}
+
+\usepackage{siunitx}
+
+\usepackage{xspace}
+\newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
+
+\usepackage{amsmath}
+\def\RR{\mathbb{R}}
+\def\Pr{\mathrm{Pr}}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\usepackage{natbib}
+\bibliographystyle{abbrvnat}
+\setcitestyle{numbers,square}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\definecolor{mDarkTeal}{HTML}{23373b}
+\definecolor{mLightBrown}{HTML}{EB811B}
+\definecolor{mDarkBrown}{HTML}{B85002}
+\definecolor{mLightGreen}{HTML}{14B03D}
+\setbeamertemplate{itemize/enumerate subbody begin}{\normalsize}
+
+\title{Computational detection of a high-risk DLBCL group}
+\subtitle{A summary of my master thesis}
+\date{October 15th, 2024}
+\author{Lukas Geßl}
+\institute{Chair of Statistical Bioinformatics, University of Regensburg}
+
+\begin{document}
+
+\maketitle
+
+\section{The goals of my thesis}
+
+\begin{frame}{}
+  Develop a binary classifier that predicts the risk of DLBCL patients: high (PFS < 2 years) or low 
+  (PFS $\geq$ 2 years). 
+
+  In more detail:
+  \begin{itemize}
+    \item \textbf{Performance}: rate of positive predictions $\geq \num{0.10}$ and precision significantly 
+      (\num{95}\%-CI) above the precision of the IPI on an independent, prospective data set. Make 
+      the model transferable from one data set to another.
+    \item \textbf{Heuristics and recommendations for the future}: Which model classes for which 
+      hyperparameters are worth training and validating? Which models can we validate reliably and 
+      perform strongly on new data? What are the requirements for the training and test data?
+  \end{itemize}
+\end{frame}
+
+\section{A quick dive into the methods}
+
+\begin{frame}{The big picture}
+  I did the well-known train-validate-test approach.
+  \begin{itemize}
+    \item \textbf{Training and validation} on the training data. Fit several candidate models, 
+      validate them (cross validation, out-of-bag predictions) and choose a single model, the best 
+      one according to validation.
+    \item \textbf{Testing} on the test data. Evaluate the performance of the chosen model.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{The smaller picture: candidate models}
+  \begin{itemize}
+    \item All fit models are Gauss, logistic, Cox models or random forests or compositions thereof 
+      (late integration of IPI, already-existent and own signatures).
+    \item For training, I tuned the time cutoff that separates high- and low-risk patients.
+    \item A-priori feature selection: Include gene-expression levels? Format of certain features?
+    \item Loss-function-based feature selection: elastic-net, usually LASSO regularization.
+    \item Enforce zero-sum constraint for gene-expression levels to gain cross-platform 
+      transferability \cite{zerosum16,transplatform17}.
+    \item Add combinations of at most $n_\text{combi}$ categorical features to the predictor if 
+      sufficiently prevalent.
+  \end{itemize}
+\end{frame}
+
+
+\section{The results}
+
+\begin{frame}{Meet the data}
+  \input{tables/data_sets.tex}
+\end{frame}
+
+\begin{frame}{}
+  Use one of the three cohorts as training data, the respective remaining two cohorts as test data.
+
+  \input{tables/inter_trial_prec.tex}
+\end{frame}
+
+\begin{frame}{Dito for lower limit of 95\%-CI of precision}
+  \input{tables/inter_trial_prec_ci.tex}
+  
+  In the following, we focus on the best model trained and validated on the Reddy cohort, denoted 
+  $m_\text{Reddy}^*$.
+\end{frame}
+
+\begin{frame}{What does $m_\text{Reddy}^*$ look like?}
+  A logistic model, trained with LASSO regularization, the time cutoff separating into low- and 
+  high-risk patients is \num{2.3} (versus \num{2.5}).
+
+  Features:
+  \begin{itemize}
+    \item No gene-expression levels a-priori directly included.
+    \item Single continuous feature included a priori: LAMIS score.
+    \item Categorical features: gender, LDH ratio > 1, number of extranodal sites > 1, Ann Arbor 
+      stage > 1, age > 60, ECOG > 1, IPI group, and combinations of two of them.
+    \item Sparse model: \num{13} features have non-zero coefficients.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{How reliable is the validation for the models trained on the Reddy data?}
+  \begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figs/inter_val_test_reddy.pdf}
+    \caption{Validation versus test error. The dashed gray line is the 
+        identity line. The training survival cutoff $T$, 
+        $n_\text{combi}$, elastic-net regularization strength $\lambda$ (for GLMs), 
+        feature subsample size $m$ and minimal node size $n_\text{min}$ (for RFs) have already been 
+        optimized with respect to the validation error.}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{On thresholding the continuous output of $m_\text{Reddy}^*$}
+  \begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figs/inter_output_prec_reddy.pdf}
+    \caption{Prevalence versus precision for all possible ways to threshold $m^*_\text{Reddy}$ for 
+      a prevalence in $[\num{0.10}, \num{0.50}]$.  The dashed gray line marks the precision of the 
+      $\text{tIPI}$ on the respective cohort.}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{Dito for the lower limit of the 95\%-CI of the precision}
+  \begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figs/inter_output_prec_ci_reddy.pdf}
+    \caption{Prevalence versus lower limit of the \num{95}\%-CI of the precision for all possible 
+      ways to threshold $m^*_\text{Reddy}$ for a prevalence in $[\num{0.10}, \num{0.50}]$. The 
+      dashed gray line marks the precision of the $\text{tIPI}$ on the respective cohort.}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{}
+  Find the details on \url{https://github.com/lgessl/master-thesis}.
+\end{frame}
+
+\begin{frame}[standout]
+      \centering
+      Thank you! Questions?
+\end{frame}
+
+\appendix
+
+\begin{frame}[allowframebreaks]{References}
+  \small
+  \bibliography{../lit.bib}
+\end{frame}
+
+\end{document}

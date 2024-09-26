@@ -9,3 +9,26 @@
 *.code-workspace
 *update.R
 results/**/*.txt
+
+# Below documents
+documents/**/*.aux
+documents/**/*.bbl
+documents/**/*.bcf
+documents/**/*.blg
+documents/**/*.log
+documents/**/*.out
+documents/**/*.run.xml
+documents/**/*.snm
+documents/**/*.nav
+documents/**/*.toc
+documents/**/*.vrb
+documents/**/*fdb_latexmk
+documents/**/*.fls
+documents/**/*.xdv
+documents/**/*synctex.gz
+documents/progress-report/figs/auc_table.tex
+documents/progress-report/figs/ipi_schmitz.tex
+# Keep TeX output pdfs once they are frozen
+!documents/final-talk/main.pdf
+!documents/progress-report/main.pdf
+!documents/thesis/main.pdf
