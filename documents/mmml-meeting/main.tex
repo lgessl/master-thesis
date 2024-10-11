@@ -59,12 +59,12 @@
 
   In more detail:
   \begin{itemize}
-    \item \textbf{Performance}: rate of positive predictions $\geq \num{0.10}$ and precision significantly 
-      (\num{95}\%-CI) above the precision of the IPI on an independent, prospective data set. Make 
-      the model transferable from one data set to another.
+    \item \textbf{Performance}: rate of positive predictions (or prevalence) $\geq \num{0.10}$ and 
+      precision significantly (\num{95}\%-CI) above the precision of the IPI on an independent, 
+      prospective data set. Make the model transferable from one data set to another.
     \item \textbf{Heuristics and recommendations for the future}: Which model classes for which 
-      hyperparameters are worth training and validating? Which models can we validate reliably and 
-      perform strongly on new data? What are the requirements for the training and test data?
+      hyperparameters are worth training and validating? Which models can we validate reliably? 
+      Which perform strongly on new data? What are the requirements for the training and test data?
   \end{itemize}
 \end{frame}
 
@@ -83,7 +83,7 @@
 \begin{frame}{The smaller picture: candidate models}
   \begin{itemize}
     \item All fit models are Gauss, logistic, Cox models or random forests or compositions thereof 
-      (late integration of IPI, already-existent and own signatures).
+      (late integration of IPI, LAMIS, other already-existent and own signatures).
     \item For training, I tuned the time cutoff that separates high- and low-risk patients.
     \item A-priori feature selection: Include gene-expression levels? Format of certain features?
     \item Loss-function-based feature selection: elastic-net, usually LASSO regularization.
@@ -102,7 +102,8 @@
 \end{frame}
 
 \begin{frame}{}
-  Use one of the three cohorts as training data, the respective remaining two cohorts as test data.
+  For every of the three data sets: use it as training data, the respective remaining two data sets 
+  as test data.
 
   \input{tables/inter_trial_prec.tex}
 \end{frame}
